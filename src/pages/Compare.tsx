@@ -2,27 +2,31 @@ import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
 import { Check, Scale, X } from "lucide-react"
 import { useTrip } from "../context/TripContext"
-import { packages } from "../data/packages"
-import { suppliers } from "../data/suppliers"
+import { useCatalog } from "../context/CatalogContext"
+import type { Package, Supplier } from "../data/types"
 import { SmartImage } from "../components/SmartImage"
 import { RatingStars } from "../components/RatingStars"
 import { formatPrice } from "../lib/utils"
 
-const rows: { label: string; render: (p: (typeof packages)[number]) => ReactNode }[] = [
-  { label: "Price / person", render: (p) => <span className="font-display text-lg font-bold text-ocean-950">{formatPrice(p.price)}</span> },
-  { label: "Duration", render: (p) => `${p.days}D / ${p.nights}N` },
-  { label: "Rating", render: (p) => <RatingStars rating={p.rating} /> },
-  { label: "Hotel Rating", render: (p) => `${p.hotelRating}-star` },
-  { label: "Meal Plan", render: (p) => p.mealPlan },
-  { label: "Group Size", render: (p) => `Up to ${p.groupSizeMax}` },
-  { label: "Difficulty", render: (p) => p.difficulty },
-  { label: "Flexible Dates", render: (p) => (p.flexible ? <Check size={16} className="text-ocean-500" /> : <X size={16} className="text-sunset-500" />) },
-  { label: "Supplier", render: (p) => suppliers.find((s) => s.id === p.supplierId)?.name ?? "—" },
-]
+function buildRows(suppliers: Supplier[]): { label: string; render: (p: Package) => ReactNode }[] {
+  return [
+    { label: "Price / person", render: (p) => <span className="font-display text-lg font-bold text-ocean-950">{formatPrice(p.price)}</span> },
+    { label: "Duration", render: (p) => `${p.days}D / ${p.nights}N` },
+    { label: "Rating", render: (p) => <RatingStars rating={p.rating} /> },
+    { label: "Hotel Rating", render: (p) => `${p.hotelRating}-star` },
+    { label: "Meal Plan", render: (p) => p.mealPlan },
+    { label: "Group Size", render: (p) => `Up to ${p.groupSizeMax}` },
+    { label: "Difficulty", render: (p) => p.difficulty },
+    { label: "Flexible Dates", render: (p) => (p.flexible ? <Check size={16} className="text-ocean-500" /> : <X size={16} className="text-sunset-500" />) },
+    { label: "Supplier", render: (p) => suppliers.find((s) => s.id === p.supplierId)?.name ?? "—" },
+  ]
+}
 
 export default function Compare() {
   const { compareList, toggleCompare } = useTrip()
-  const items = compareList.map((id) => packages.find((p) => p.id === id)).filter(Boolean) as typeof packages
+  const { packages, suppliers } = useCatalog()
+  const rows = buildRows(suppliers)
+  const items = compareList.map((id) => packages.find((p) => p.id === id)).filter(Boolean) as Package[]
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">

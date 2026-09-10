@@ -1,27 +1,42 @@
 import { useState, type FormEvent } from "react"
 import { BadgeCheck, Building2, Globe, Handshake, MapPin, Star } from "lucide-react"
-import { suppliers } from "../data/suppliers"
+import { useCatalog } from "../context/CatalogContext"
 import { cn } from "../lib/utils"
 import { useToast } from "../context/ToastContext"
 
 const filters = ["All", "online", "offline"] as const
 
 export default function Suppliers() {
+  const { suppliers } = useCatalog()
   const [filter, setFilter] = useState<(typeof filters)[number]>("All")
   const [form, setForm] = useState({ business: "", contact: "", email: "", city: "", type: "offline", message: "" })
   const [sent, setSent] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const { showToast } = useToast()
 
   const filtered = filter === "All" ? suppliers : suppliers.filter((s) => s.type === filter)
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
     if (!form.business || !form.contact || !form.email) {
       showToast("Please fill in business name, contact and email", "info")
       return
     }
-    setSent(true)
-    showToast("Partner application received! Our team will reach out within 2 business days.")
+    setSubmitting(true)
+    try {
+      const res = await fetch("/api/supplier-applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error()
+      setSent(true)
+      showToast("Partner application received! Our team will reach out within 2 business days.")
+    } catch {
+      showToast("Could not submit your application — please try again", "info")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -163,8 +178,12 @@ export default function Suppliers() {
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 className="w-full rounded-lg border border-sand-200 px-4 py-2.5 text-sm outline-none focus:border-ocean-400"
               />
-              <button type="submit" className="w-full rounded-full bg-ocean-600 py-3 text-sm font-bold text-white hover:bg-ocean-700">
-                Submit Application
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-full bg-ocean-600 py-3 text-sm font-bold text-white hover:bg-ocean-700 disabled:opacity-60"
+              >
+                {submitting ? "Submitting..." : "Submit Application"}
               </button>
             </form>
           )}

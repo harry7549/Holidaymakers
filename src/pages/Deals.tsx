@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom"
 import { Copy, Tag } from "lucide-react"
-import { deals } from "../data/testimonials"
-import { packages } from "../data/packages"
+import { useCatalog } from "../context/CatalogContext"
 import { SmartImage } from "../components/SmartImage"
 import { CountdownTimer } from "../components/CountdownTimer"
 import { formatPrice } from "../lib/utils"
@@ -9,6 +8,7 @@ import { useToast } from "../context/ToastContext"
 
 export default function Deals() {
   const { showToast } = useToast()
+  const { deals, packages } = useCatalog()
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

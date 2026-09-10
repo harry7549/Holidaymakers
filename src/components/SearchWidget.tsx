@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Calendar, MapPin, Search, Users } from "lucide-react"
-import { destinations } from "../data/destinations"
+import { useCatalog } from "../context/CatalogContext"
 import { cn } from "../lib/utils"
 
 export function SearchWidget({ className }: { className?: string }) {
   const navigate = useNavigate()
+  const { destinations } = useCatalog()
   const [query, setQuery] = useState("")
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [travelers, setTravelers] = useState(2)
@@ -15,7 +16,7 @@ export function SearchWidget({ className }: { className?: string }) {
     if (!query.trim()) return destinations.slice(0, 6)
     const q = query.toLowerCase()
     return destinations.filter((d) => d.name.toLowerCase().includes(q) || d.country.toLowerCase().includes(q)).slice(0, 6)
-  }, [query])
+  }, [query, destinations])
 
   const submit = (destinationName?: string) => {
     const params = new URLSearchParams()

@@ -14,15 +14,29 @@ export default function Contact() {
   const { showToast } = useToast()
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" })
   const [openFaq, setOpenFaq] = useState<number | null>(0)
+  const [sending, setSending] = useState(false)
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
     if (!form.name || !form.email || !form.message) {
       showToast("Please fill in all required fields", "info")
       return
     }
-    showToast("Message sent! Our team will respond within 24 hours.")
-    setForm({ name: "", email: "", subject: "", message: "" })
+    setSending(true)
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error()
+      showToast("Message sent! Our team will respond within 24 hours.")
+      setForm({ name: "", email: "", subject: "", message: "" })
+    } catch {
+      showToast("Could not send your message — please try again", "info")
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -103,8 +117,12 @@ export default function Contact() {
             onChange={(e) => setForm({ ...form, message: e.target.value })}
             className="w-full rounded-lg border border-sand-200 px-4 py-2.5 text-sm outline-none focus:border-ocean-400"
           />
-          <button type="submit" className="w-full rounded-full bg-ocean-600 py-3 text-sm font-bold text-white hover:bg-ocean-700">
-            Send Message
+          <button
+            type="submit"
+            disabled={sending}
+            className="w-full rounded-full bg-ocean-600 py-3 text-sm font-bold text-white hover:bg-ocean-700 disabled:opacity-60"
+          >
+            {sending ? "Sending..." : "Send Message"}
           </button>
         </form>
       </div>

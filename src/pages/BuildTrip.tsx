@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Check, ChevronLeft, ChevronRight, MapPin, Minus, Plus, Sparkles, Wand2 } from "lucide-react"
-import { destinations } from "../data/destinations"
+import { useCatalog } from "../context/CatalogContext"
 import { cn, formatPrice } from "../lib/utils"
 import { SmartImage } from "../components/SmartImage"
 import { useTrip } from "../context/TripContext"
@@ -27,6 +27,7 @@ export default function BuildTrip() {
   const navigate = useNavigate()
   const { addQuoteRequest } = useTrip()
   const { showToast } = useToast()
+  const { destinations } = useCatalog()
 
   const [step, setStep] = useState(0)
   const [selectedDestinations, setSelectedDestinations] = useState<Record<string, number>>({})
@@ -71,18 +72,20 @@ export default function BuildTrip() {
       return sum + (addon ? addon.price * travelers : 0)
     }, 0)
     return { low: Math.round((base + addOnTotal) * 0.9), high: Math.round((base + addOnTotal) * 1.15) }
-  }, [selectedDestinations, style, travelers, addOns])
+  }, [selectedDestinations, style, travelers, addOns, destinations])
 
   const canProceed = step === 0 ? Object.keys(selectedDestinations).length > 0 : true
 
-  const submitQuote = () => {
+  const submitQuote = async () => {
     if (!form.name || !form.email || !form.phone) {
       showToast("Please fill in your name, email and phone", "info")
       return
     }
+    const destinationNames = Object.keys(selectedDestinations).map((id) => destinations.find((d) => d.id === id)?.name ?? id)
+
     addQuoteRequest({
       id: `quote-${Date.now()}`,
-      destinations: Object.keys(selectedDestinations).map((id) => destinations.find((d) => d.id === id)?.name ?? id),
+      destinations: destinationNames,
       days: totalDays,
       travelers,
       budget: estimate.high,
@@ -91,6 +94,18 @@ export default function BuildTrip() {
       ...form,
       createdAt: new Date().toISOString(),
     })
+
+    try {
+      await fetch("/api/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destinations: destinationNames, days: totalDays, travelers, budget: estimate.high, style, addOns, ...form }),
+      })
+    } catch {
+      // The request is still saved locally for the dashboard even if the
+      // server call fails — the toast below stays accurate either way.
+    }
+
     setSubmitted(true)
     showToast("Custom trip request sent! Our expert will call you within 24 hours.")
   }

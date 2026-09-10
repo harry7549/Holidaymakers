@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom"
 import { Heart } from "lucide-react"
 import { useTrip } from "../context/TripContext"
-import { packages } from "../data/packages"
+import { useCatalog } from "../context/CatalogContext"
 import { PackageCard } from "../components/PackageCard"
 
 export default function Wishlist() {
   const { wishlist } = useTrip()
+  const { packages } = useCatalog()
   const items = packages.filter((p) => wishlist.includes(p.id))
 
   return (

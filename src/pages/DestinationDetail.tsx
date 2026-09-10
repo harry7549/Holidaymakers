@@ -1,15 +1,16 @@
 import { Link, Navigate, useParams } from "react-router-dom"
 import { Calendar, MapPin, Star } from "lucide-react"
-import { destinations } from "../data/destinations"
-import { getPackagesByDestination } from "../data/packages"
+import { getPackagesByDestination } from "../lib/catalogHelpers"
+import { useCatalog } from "../context/CatalogContext"
 import { SmartImage } from "../components/SmartImage"
 import { PackageCard } from "../components/PackageCard"
 import { formatPrice } from "../lib/utils"
 
 export default function DestinationDetail() {
   const { id } = useParams()
+  const { destinations, packages } = useCatalog()
   const destination = destinations.find((d) => d.id === id)
-  const relatedPackages = id ? getPackagesByDestination(id) : []
+  const relatedPackages = id ? getPackagesByDestination(packages, id) : []
 
   if (!destination) return <Navigate to="/destinations" replace />
 

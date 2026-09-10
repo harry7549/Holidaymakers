@@ -1,12 +1,13 @@
 import { Link, useLocation } from "react-router-dom"
 import { Scale, X } from "lucide-react"
 import { useTrip } from "../context/TripContext"
-import { packages } from "../data/packages"
+import { useCatalog } from "../context/CatalogContext"
 import { SmartImage } from "./SmartImage"
 import { shouldShowCompareBar } from "../lib/bottomBars"
 
 export function CompareBar() {
   const { compareList, toggleCompare, clearCompare } = useTrip()
+  const { packages } = useCatalog()
   const location = useLocation()
 
   if (!shouldShowCompareBar(location.pathname, compareList.length)) return null

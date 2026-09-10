@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import { LayoutGrid, List, SlidersHorizontal, X } from "lucide-react"
-import { packages, destinations } from "../data"
 import type { Category } from "../data/types"
+import { useCatalog } from "../context/CatalogContext"
 import { PackageCard } from "../components/PackageCard"
 import { cn, formatPrice } from "../lib/utils"
 
@@ -36,6 +36,7 @@ const sortOptions = [
 const MAX_PRICE = 140000
 
 export default function Explore() {
+  const { packages, destinations } = useCatalog()
   const [searchParams, setSearchParams] = useSearchParams()
   const [view, setView] = useState<"grid" | "list">("grid")
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -101,7 +102,7 @@ export default function Explore() {
         list = [...list].sort((a, b) => Number(b.trending) - Number(a.trending) || Number(b.bestSeller) - Number(a.bestSeller))
     }
     return list
-  }, [q, activeCategories, activeDestinations, priceMax, minRating, duration, sort])
+  }, [q, activeCategories, activeDestinations, priceMax, minRating, duration, sort, packages])
 
   const activeFilterCount =
     activeCategories.length + activeDestinations.length + (minRating ? 1 : 0) + (duration !== "any" ? 1 : 0) + (priceMax < MAX_PRICE ? 1 : 0)

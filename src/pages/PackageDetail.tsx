@@ -13,8 +13,8 @@ import {
   Utensils,
   X,
 } from "lucide-react"
-import { getPackageBySlug, getRelatedPackages } from "../data/packages"
-import { suppliers } from "../data/suppliers"
+import { getPackageBySlug, getRelatedPackages } from "../lib/catalogHelpers"
+import { useCatalog } from "../context/CatalogContext"
 import { cn, discountPercent, formatDate, formatPrice } from "../lib/utils"
 import { RatingStars } from "../components/RatingStars"
 import { SmartImage } from "../components/SmartImage"
@@ -28,7 +28,8 @@ export default function PackageDetail() {
   const { slug } = useParams()
   const navigate = useNavigate()
   const { showToast } = useToast()
-  const pkg = slug ? getPackageBySlug(slug) : undefined
+  const { packages, suppliers } = useCatalog()
+  const pkg = slug ? getPackageBySlug(packages, slug) : undefined
 
   const [activeImage, setActiveImage] = useState(0)
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Overview")
@@ -36,7 +37,7 @@ export default function PackageDetail() {
   const [selectedDate, setSelectedDate] = useState<string>(pkg?.startDates[0] ?? "")
   const [openFaq, setOpenFaq] = useState<number | null>(0)
 
-  const related = useMemo(() => (pkg ? getRelatedPackages(pkg) : []), [pkg])
+  const related = useMemo(() => (pkg ? getRelatedPackages(packages, pkg) : []), [pkg, packages])
 
   if (!pkg) return <Navigate to="/explore" replace />
 

@@ -1,5 +1,7 @@
 import { Route, Routes } from "react-router-dom"
 import { Layout } from "./components/Layout"
+import { AdminLayout } from "./components/AdminLayout"
+import { AdminGuard } from "./components/AdminGuard"
 import { ScrollToTop } from "./components/ScrollToTop"
 import Home from "./pages/Home"
 import Explore from "./pages/Explore"
@@ -19,13 +21,23 @@ import Dashboard from "./pages/Dashboard"
 import Wishlist from "./pages/Wishlist"
 import Compare from "./pages/Compare"
 import NotFound from "./pages/NotFound"
+import AdminLogin from "./pages/admin/AdminLogin"
+import AdminOverview from "./pages/admin/AdminOverview"
+import AdminPackages from "./pages/admin/AdminPackages"
+import AdminDestinations from "./pages/admin/AdminDestinations"
+import AdminSuppliers from "./pages/admin/AdminSuppliers"
+import AdminDeals from "./pages/admin/AdminDeals"
+import AdminBookings from "./pages/admin/AdminBookings"
+import AdminQuotes from "./pages/admin/AdminQuotes"
+import AdminMessages from "./pages/admin/AdminMessages"
+import AdminSupplierApplications from "./pages/admin/AdminSupplierApplications"
 
 export default function App() {
   return (
     <>
       <ScrollToTop />
-      <Layout>
-        <Routes>
+      <Routes>
+        <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/package/:slug" element={<PackageDetail />} />
@@ -44,8 +56,28 @@ export default function App() {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Layout>
+        </Route>
+
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminGuard>
+              <AdminLayout />
+            </AdminGuard>
+          }
+        >
+          <Route index element={<AdminOverview />} />
+          <Route path="packages" element={<AdminPackages />} />
+          <Route path="destinations" element={<AdminDestinations />} />
+          <Route path="suppliers" element={<AdminSuppliers />} />
+          <Route path="deals" element={<AdminDeals />} />
+          <Route path="bookings" element={<AdminBookings />} />
+          <Route path="quotes" element={<AdminQuotes />} />
+          <Route path="messages" element={<AdminMessages />} />
+          <Route path="supplier-applications" element={<AdminSupplierApplications />} />
+        </Route>
+      </Routes>
     </>
   )
 }

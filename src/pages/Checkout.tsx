@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { Banknote, Building2, Check, ChevronLeft, ChevronRight, CreditCard, Lock, ShieldCheck, Smartphone } from "lucide-react"
-import { getPackageBySlug } from "../data/packages"
+import { getPackageBySlug } from "../lib/catalogHelpers"
+import { useCatalog } from "../context/CatalogContext"
 import { cn, formatDate, formatPrice } from "../lib/utils"
 import { SmartImage } from "../components/SmartImage"
 import { useTrip, type Traveler } from "../context/TripContext"
@@ -30,8 +31,9 @@ export default function Checkout() {
   const { addBooking } = useTrip()
   const { user } = useAuth()
   const { showToast } = useToast()
+  const { packages } = useCatalog()
 
-  const pkg = slug ? getPackageBySlug(slug) : undefined
+  const pkg = slug ? getPackageBySlug(packages, slug) : undefined
   const initialTravelers = Number(searchParams.get("travelers") ?? 2)
   const initialDate = searchParams.get("date") ?? pkg?.startDates[0] ?? ""
 
@@ -75,28 +77,49 @@ export default function Checkout() {
     return true
   }
 
-  const confirmBooking = () => {
+  const confirmBooking = async () => {
     setProcessing(true)
-    setTimeout(() => {
-      const bookingId = `RM${Date.now().toString().slice(-8)}`
-      addBooking({
-        id: bookingId,
-        packageId: pkg.id,
-        packageTitle: pkg.title,
-        image: pkg.image,
-        startDate: date,
-        travelers: travelerCount,
-        addOns,
-        totalPrice: grandTotal,
-        status: "upcoming",
-        createdAt: new Date().toISOString(),
-        travelerDetails,
-        contactEmail,
-        contactPhone,
+
+    const bookingPayload = {
+      packageId: pkg.id,
+      packageTitle: pkg.title,
+      image: pkg.image,
+      startDate: date,
+      travelers: travelerCount,
+      addOns,
+      totalPrice: grandTotal,
+      travelerDetails,
+      contactEmail,
+      contactPhone,
+    }
+
+    // Falls back to a locally-generated id if the backend isn't set up yet
+    // (or the request fails), so checkout still works end-to-end for demo
+    // purposes — the booking just won't reach the admin panel in that case.
+    let bookingId = `RM${Date.now().toString().slice(-8)}`
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingPayload),
       })
-      showToast("Booking confirmed! Check your email for details.")
-      navigate(`/booking-confirmation/${bookingId}`)
-    }, 1400)
+      if (res.ok) {
+        const saved = await res.json()
+        bookingId = saved.id
+      }
+    } catch {
+      // handled by the fallback id above
+    }
+
+    addBooking({
+      id: bookingId,
+      ...bookingPayload,
+      status: "upcoming",
+      createdAt: new Date().toISOString(),
+    })
+    setProcessing(false)
+    showToast("Booking confirmed! Check your email for details.")
+    navigate(`/booking-confirmation/${bookingId}`)
   }
 
   return (

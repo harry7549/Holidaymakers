@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { Search, Star } from "lucide-react"
-import { destinations } from "../data/destinations"
+import { useCatalog } from "../context/CatalogContext"
 import { SmartImage } from "../components/SmartImage"
 import { formatPrice, cn } from "../lib/utils"
 
 const regions = ["All", "Domestic", "International"] as const
 
 export default function Destinations() {
+  const { destinations } = useCatalog()
   const [query, setQuery] = useState("")
   const [region, setRegion] = useState<(typeof regions)[number]>("All")
 
@@ -17,7 +18,7 @@ export default function Destinations() {
       if (query && !`${d.name} ${d.country}`.toLowerCase().includes(query.toLowerCase())) return false
       return true
     })
-  }, [query, region])
+  }, [query, region, destinations])
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

@@ -12,7 +12,8 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react"
-import { destinations, packages, testimonials, deals, suppliers } from "../data"
+import { testimonials } from "../data"
+import { useCatalog } from "../context/CatalogContext"
 import { SearchWidget } from "../components/SearchWidget"
 import { PackageCard } from "../components/PackageCard"
 import { RatingStars } from "../components/RatingStars"
@@ -60,13 +61,14 @@ const whyUs = [
 ]
 
 export default function Home() {
+  const { packages, destinations, suppliers, deals } = useCatalog()
   const [activeCategory, setActiveCategory] = useState<(typeof categoryChips)[number]>("All")
 
   const featured = useMemo(() => {
     const base = packages.filter((p) => p.featured)
     if (activeCategory === "All") return base.slice(0, 8)
     return packages.filter((p) => p.category.includes(activeCategory)).slice(0, 8)
-  }, [activeCategory])
+  }, [activeCategory, packages])
 
   const trending = destinations.filter((d) => d.rating >= 4.6).slice(0, 10)
 

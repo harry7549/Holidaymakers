@@ -872,16 +872,3 @@ export const packages: Package[] = [
   },
 ]
 
-export function getPackageBySlug(slug: string) {
-  return packages.find((p) => p.slug === slug)
-}
-
-export function getPackagesByDestination(destinationId: string) {
-  return packages.filter((p) => p.destinationId === destinationId)
-}
-
-export function getRelatedPackages(pkg: Package, count = 4) {
-  return packages
-    .filter((p) => p.id !== pkg.id && (p.destinationId === pkg.destinationId || p.category.some((c) => pkg.category.includes(c))))
-    .slice(0, count)
-}

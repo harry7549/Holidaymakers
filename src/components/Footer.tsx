@@ -128,6 +128,9 @@ export function Footer() {
             </span>
           </div>
           <p>© {new Date().getFullYear()} Roamly Holidays. All rights reserved.</p>
+          <Link to="/admin/login" className="text-sand-100/40 transition-colors hover:text-white">
+            Admin
+          </Link>
         </div>
       </div>
     </footer>
