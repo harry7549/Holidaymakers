@@ -103,7 +103,7 @@ export default function PackageDetail() {
               )}
             </div>
             <div className="flex items-start justify-between gap-4">
-              <h1 className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">{pkg.title}</h1>
+              <h1 className="min-w-0 font-display text-2xl font-bold text-ocean-950 sm:text-3xl">{pkg.title}</h1>
               <div className="flex shrink-0 gap-2">
                 <WishlistButton packageId={pkg.id} className="static border border-sand-200" />
                 <button

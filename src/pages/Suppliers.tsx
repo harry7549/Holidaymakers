@@ -58,7 +58,7 @@ export default function Suppliers() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-center gap-2">
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
           {filters.map((f) => (
             <button
               key={f}
