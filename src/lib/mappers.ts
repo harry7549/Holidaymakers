@@ -1,4 +1,4 @@
-import type { Deal, Destination, Package, Supplier } from "../data/types"
+import type { Deal, Destination, Package, PageBlock, PageMeta, Supplier } from "../data/types"
 
 // Rows come straight from Supabase's untyped client — the mappers below are
 // the single place that translates the DB's snake_case columns into the
@@ -88,5 +88,25 @@ export function mapDealRow(row: Row): Deal {
     expiresAt: row.expires_at,
     image: row.image,
     packageId: row.package_id,
+  }
+}
+
+export function mapPageBlockRow(row: Row): PageBlock {
+  return {
+    id: row.id,
+    page: row.page,
+    type: row.type,
+    position: row.position,
+    visible: row.visible,
+    content: row.content ?? {},
+  }
+}
+
+export function mapPageMetaRow(row: Row): PageMeta {
+  return {
+    page: row.id,
+    title: row.title ?? "",
+    description: row.description ?? "",
+    ogImage: row.og_image ?? "",
   }
 }

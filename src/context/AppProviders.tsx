@@ -4,6 +4,7 @@ import { TripProvider } from "./TripContext"
 import { AuthProvider } from "./AuthContext"
 import { CatalogProvider } from "./CatalogContext"
 import { AdminAuthProvider } from "./AdminAuthContext"
+import { PageContentProvider } from "./PageContentContext"
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
@@ -11,7 +12,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <AuthProvider>
         <AdminAuthProvider>
           <TripProvider>
-            <CatalogProvider>{children}</CatalogProvider>
+            <CatalogProvider>
+              <PageContentProvider>{children}</PageContentProvider>
+            </CatalogProvider>
           </TripProvider>
         </AdminAuthProvider>
       </AuthProvider>

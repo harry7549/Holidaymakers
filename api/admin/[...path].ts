@@ -16,6 +16,8 @@ const RESOURCES: Record<string, ResourceConfig> = {
   destinations: { table: "destinations", writable: true },
   suppliers: { table: "suppliers", writable: true },
   deals: { table: "deals", writable: true },
+  "page-blocks": { table: "page_blocks", writable: true },
+  "page-meta": { table: "page_meta", writable: true },
   bookings: { table: "bookings", writable: false },
   quotes: { table: "quote_requests", writable: false },
   messages: { table: "contact_messages", writable: false },
@@ -39,6 +41,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { table, writable } = config
 
   try {
+    // Bulk reorder: POST /api/admin/page-blocks/reorder { ids: string[] } —
+    // assigns position = index in the given order.
+    if (resourceName === "page-blocks" && id === "reorder" && req.method === "POST") {
+      const ids: string[] = req.body?.ids ?? []
+      for (let i = 0; i < ids.length; i++) {
+        const { error } = await supabaseAdmin.from(table).update({ position: i }).eq("id", ids[i])
+        if (error) throw error
+      }
+      res.status(200).json({ ok: true })
+      return
+    }
+
     switch (req.method) {
       case "GET": {
         const { data, error } = await supabaseAdmin.from(table).select("*").order("created_at", { ascending: false })

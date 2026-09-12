@@ -118,3 +118,22 @@ export interface Deal {
   image: string
   packageId: string
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type BlockContent = Record<string, any>
+
+export interface PageBlock {
+  id: string
+  page: string
+  type: string
+  position: number
+  visible: boolean
+  content: BlockContent
+}
+
+export interface PageMeta {
+  page: string
+  title: string
+  description: string
+  ogImage: string
+}

@@ -46,3 +46,13 @@ export async function adminDelete(resource: string, id: string): Promise<void> {
   const res = await fetch(`/api/admin/${resource}/${id}`, { method: "DELETE", headers })
   await parseErrorOr<void>(res, `Failed to delete ${resource}`)
 }
+
+export async function adminReorder(resource: string, ids: string[]): Promise<void> {
+  const headers = await authHeaders()
+  const res = await fetch(`/api/admin/${resource}/reorder`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify({ ids }),
+  })
+  await parseErrorOr<void>(res, `Failed to reorder ${resource}`)
+}

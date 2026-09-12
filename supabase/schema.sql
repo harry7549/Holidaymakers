@@ -88,6 +88,31 @@ create table if not exists deals (
 );
 
 -- ============================================================
+-- Page content (CMS blocks + per-page SEO meta) — public read,
+-- admin-only write via /api/admin, same pattern as the catalogue tables.
+-- ============================================================
+
+create table if not exists page_blocks (
+  id text primary key,
+  page text not null,
+  type text not null,
+  position integer not null default 0,
+  visible boolean not null default true,
+  content jsonb not null default '{}',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists page_blocks_page_idx on page_blocks (page, position);
+
+create table if not exists page_meta (
+  id text primary key,
+  title text not null default '',
+  description text not null default '',
+  og_image text not null default '',
+  created_at timestamptz not null default now()
+);
+
+-- ============================================================
 -- Inbound tables (public can insert, only admin can read/update)
 -- ============================================================
 
@@ -158,6 +183,8 @@ alter table destinations enable row level security;
 alter table suppliers enable row level security;
 alter table packages enable row level security;
 alter table deals enable row level security;
+alter table page_blocks enable row level security;
+alter table page_meta enable row level security;
 alter table bookings enable row level security;
 alter table quote_requests enable row level security;
 alter table contact_messages enable row level security;
@@ -174,6 +201,12 @@ create policy "public read packages" on packages for select using (true);
 
 drop policy if exists "public read deals" on deals;
 create policy "public read deals" on deals for select using (true);
+
+drop policy if exists "public read page_blocks" on page_blocks;
+create policy "public read page_blocks" on page_blocks for select using (true);
+
+drop policy if exists "public read page_meta" on page_meta;
+create policy "public read page_meta" on page_meta for select using (true);
 
 -- No policies are created for bookings / quote_requests / contact_messages /
 -- supplier_applications: with RLS enabled and zero policies, anon and

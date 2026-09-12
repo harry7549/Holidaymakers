@@ -4,6 +4,7 @@ import {
   Calendar,
   Compass,
   Globe2,
+  Layers,
   LayoutDashboard,
   LogOut,
   Mail,
@@ -21,6 +22,7 @@ import { cn } from "../lib/utils"
 
 const navItems = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, end: true },
+  { to: "/admin/pages", label: "Pages", icon: Layers },
   { to: "/admin/packages", label: "Packages", icon: PackageIcon },
   { to: "/admin/destinations", label: "Destinations", icon: MapPin },
   { to: "/admin/suppliers", label: "Suppliers", icon: Globe2 },

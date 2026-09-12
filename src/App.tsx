@@ -23,6 +23,7 @@ import Compare from "./pages/Compare"
 import NotFound from "./pages/NotFound"
 import AdminLogin from "./pages/admin/AdminLogin"
 import AdminOverview from "./pages/admin/AdminOverview"
+import AdminPages from "./pages/admin/AdminPages"
 import AdminPackages from "./pages/admin/AdminPackages"
 import AdminDestinations from "./pages/admin/AdminDestinations"
 import AdminSuppliers from "./pages/admin/AdminSuppliers"
@@ -68,6 +69,7 @@ export default function App() {
           }
         >
           <Route index element={<AdminOverview />} />
+          <Route path="pages" element={<AdminPages />} />
           <Route path="packages" element={<AdminPackages />} />
           <Route path="destinations" element={<AdminDestinations />} />
           <Route path="suppliers" element={<AdminSuppliers />} />

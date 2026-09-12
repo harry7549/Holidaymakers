@@ -12,6 +12,7 @@ import { destinations } from "../src/data/destinations"
 import { packages } from "../src/data/packages"
 import { suppliers } from "../src/data/suppliers"
 import { deals } from "../src/data/testimonials"
+import { defaultBlocksByPage, defaultMetaByPage } from "../src/data/pageBlocks"
 
 const url = process.env.SUPABASE_URL
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -118,7 +119,33 @@ async function run() {
   )
   if (dealErr) throw dealErr
 
-  console.log("Done! Your Supabase project now has the full demo catalogue.")
+  const allBlocks = Object.values(defaultBlocksByPage).flat()
+  console.log(`Seeding ${allBlocks.length} page content blocks...`)
+  const { error: blockErr } = await supabase.from("page_blocks").upsert(
+    allBlocks.map((b) => ({
+      id: b.id,
+      page: b.page,
+      type: b.type,
+      position: b.position,
+      visible: b.visible,
+      content: b.content,
+    })),
+  )
+  if (blockErr) throw blockErr
+
+  const allMeta = Object.values(defaultMetaByPage)
+  console.log(`Seeding ${allMeta.length} page meta rows...`)
+  const { error: metaErr } = await supabase.from("page_meta").upsert(
+    allMeta.map((m) => ({
+      id: m.page,
+      title: m.title,
+      description: m.description,
+      og_image: m.ogImage,
+    })),
+  )
+  if (metaErr) throw metaErr
+
+  console.log("Done! Your Supabase project now has the full demo catalogue and default page content.")
 }
 
 run().catch((err) => {
