@@ -3,6 +3,7 @@ import { Copy, Tag } from "lucide-react"
 import { useCatalog } from "../context/CatalogContext"
 import { SmartImage } from "../components/SmartImage"
 import { CountdownTimer } from "../components/CountdownTimer"
+import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 import { formatPrice } from "../lib/utils"
 import { useToast } from "../context/ToastContext"
 
@@ -12,7 +13,7 @@ export default function Deals() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 text-center">
+      <Reveal className="mb-8 text-center">
         <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-sunset-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-sunset-600">
           <Tag size={13} /> Limited Time
         </span>
@@ -20,13 +21,14 @@ export default function Deals() {
         <p className="mx-auto mt-2 max-w-lg text-sm text-ocean-950/60">
           Hand-picked discounts from our supplier network — book before the timer runs out.
         </p>
-      </div>
+      </Reveal>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {deals.map((deal) => {
-          const pkg = packages.find((p) => p.id === deal.packageId)!
+          const pkg = packages.find((p) => p.id === deal.packageId)
+          if (!pkg) return null
           return (
-            <div key={deal.id} className="overflow-hidden rounded-2xl border border-sand-200 bg-white shadow-card">
+            <StaggerItem key={deal.id} className="overflow-hidden rounded-2xl border border-sand-200 bg-white shadow-card">
               <div className="relative">
                 <SmartImage src={deal.image} alt={deal.title} className="aspect-video w-full" />
                 <span className="absolute left-3 top-3 rounded-full bg-sunset-500 px-2.5 py-1 text-xs font-bold text-white">
@@ -59,10 +61,10 @@ export default function Deals() {
                   Claim This Deal
                 </Link>
               </div>
-            </div>
+            </StaggerItem>
           )
         })}
-      </div>
+      </StaggerGroup>
     </div>
   )
 }

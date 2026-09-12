@@ -4,6 +4,7 @@ import { Check, ChevronLeft, ChevronRight, MapPin, Minus, Plus, Sparkles, Wand2 
 import { useCatalog } from "../context/CatalogContext"
 import { cn, formatPrice } from "../lib/utils"
 import { SmartImage } from "../components/SmartImage"
+import { Reveal } from "../components/Reveal"
 import { useTrip } from "../context/TripContext"
 import { useToast } from "../context/ToastContext"
 
@@ -135,7 +136,7 @@ export default function BuildTrip() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8 text-center">
+      <Reveal className="mb-8 text-center">
         <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-sunset-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-sunset-600">
           <Wand2 size={13} /> Trip Builder
         </span>
@@ -143,7 +144,7 @@ export default function BuildTrip() {
         <p className="mx-auto mt-2 max-w-lg text-sm text-ocean-950/60">
           Mix destinations, set your pace, and get a live estimate — completely flexible, completely yours.
         </p>
-      </div>
+      </Reveal>
 
       {/* Stepper */}
       <div className="mx-auto mb-10 flex max-w-2xl items-center justify-between">

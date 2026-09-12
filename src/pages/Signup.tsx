@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Compass, Mail, Phone, User } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
+import { Reveal } from "../components/Reveal"
 
 export default function Signup() {
   const { login } = useAuth()
@@ -16,7 +17,7 @@ export default function Signup() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-12 sm:px-6">
+    <Reveal as="div" className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-12 sm:px-6">
       <div className="mb-8 text-center">
         <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-ocean-600 text-white">
           <Compass size={22} />
@@ -85,6 +86,6 @@ export default function Signup() {
           Sign in
         </Link>
       </p>
-    </div>
+    </Reveal>
   )
 }

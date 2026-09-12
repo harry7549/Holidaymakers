@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import { Compass, Globe2, Heart, ShieldCheck, Sparkles, Users } from "lucide-react"
 import { SmartImage } from "../components/SmartImage"
+import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 
 const values = [
   { icon: ShieldCheck, title: "Trust First", body: "Every supplier is verified. Every price is transparent. No surprise fees, ever." },
@@ -21,7 +22,7 @@ export default function About() {
     <div>
       <section className="relative overflow-hidden bg-ocean-950 py-20">
         <div className="absolute inset-0 bg-gradient-to-br from-ocean-950 via-ocean-900 to-ocean-800" />
-        <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
+        <Reveal className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
           <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
             <Compass size={13} /> About Roamly
           </span>
@@ -34,17 +35,19 @@ export default function About() {
             brings together the best offline travel expertise and online convenience — fully flexible, fully
             transparent.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          <SmartImage
-            src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=900&q=80"
-            alt="Team planning travel"
-            className="aspect-[4/3] rounded-2xl"
-          />
-          <div>
+          <Reveal>
+            <SmartImage
+              src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=900&q=80"
+              alt="Team planning travel"
+              className="aspect-[4/3] rounded-2xl"
+            />
+          </Reveal>
+          <Reveal delay={0.1}>
             <h2 className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">Our Mission</h2>
             <p className="mt-3 text-sm text-ocean-950/70 sm:text-base">
               To make every kind of holiday — beach, mountain, heritage, adventure, or once-in-a-lifetime
@@ -58,40 +61,44 @@ export default function About() {
                 of 200+ verified suppliers.
               </p>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-10 text-center font-display text-2xl font-bold text-ocean-950 sm:text-3xl">What We Stand For</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal>
+            <h2 className="mb-10 text-center font-display text-2xl font-bold text-ocean-950 sm:text-3xl">What We Stand For</h2>
+          </Reveal>
+          <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v) => (
-              <div key={v.title} className="text-center">
+              <StaggerItem key={v.title} className="text-center">
                 <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-sunset-50 text-sunset-500">
                   <v.icon size={22} />
                 </span>
                 <h3 className="mb-1.5 font-display text-base font-bold text-ocean-950">{v.title}</h3>
                 <p className="text-sm text-ocean-950/60">{v.body}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerGroup>
         </div>
       </section>
 
       <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-        <h2 className="mb-10 text-center font-display text-2xl font-bold text-ocean-950 sm:text-3xl">Our Journey</h2>
-        <div className="space-y-6">
+        <Reveal>
+          <h2 className="mb-10 text-center font-display text-2xl font-bold text-ocean-950 sm:text-3xl">Our Journey</h2>
+        </Reveal>
+        <StaggerGroup className="space-y-6">
           {milestones.map((m) => (
-            <div key={m.year} className="flex gap-5">
+            <StaggerItem key={m.year} className="flex gap-5">
               <span className="w-16 shrink-0 font-display text-lg font-bold text-ocean-600">{m.year}</span>
               <p className="border-l-2 border-sand-200 pl-5 text-sm text-ocean-950/70">{m.text}</p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+      <Reveal as="section" className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <div className="rounded-3xl bg-ocean-950 px-6 py-12 text-center sm:px-12">
           <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">Want to plan your next trip with us?</h2>
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
@@ -103,7 +110,7 @@ export default function About() {
             </Link>
           </div>
         </div>
-      </section>
+      </Reveal>
     </div>
   )
 }

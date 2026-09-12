@@ -20,6 +20,7 @@ import { RatingStars } from "../components/RatingStars"
 import { SmartImage } from "../components/SmartImage"
 import { WishlistButton } from "../components/WishlistButton"
 import { PackageCard } from "../components/PackageCard"
+import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 import { useToast } from "../context/ToastContext"
 
 const tabs = ["Overview", "Itinerary", "Inclusions", "Reviews", "Supplier", "FAQs"] as const
@@ -69,7 +70,7 @@ export default function PackageDetail() {
       </div>
 
       {/* Gallery */}
-      <div className="mb-6 grid gap-2 sm:grid-cols-[2fr_1fr]">
+      <Reveal className="mb-6 grid gap-2 sm:grid-cols-[2fr_1fr]">
         <SmartImage src={pkg.gallery[activeImage] ?? pkg.image} alt={pkg.title} className="aspect-[16/10] w-full rounded-2xl sm:aspect-[4/3]" />
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-2">
           {pkg.gallery.slice(0, 4).map((img, i) => (
@@ -85,7 +86,7 @@ export default function PackageDetail() {
             </button>
           ))}
         </div>
-      </div>
+      </Reveal>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div>
@@ -448,12 +449,16 @@ export default function PackageDetail() {
       {/* Related */}
       {related.length > 0 && (
         <div className="mt-14">
-          <h2 className="mb-5 font-display text-2xl font-bold text-ocean-950">You Might Also Like</h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal>
+            <h2 className="mb-5 font-display text-2xl font-bold text-ocean-950">You Might Also Like</h2>
+          </Reveal>
+          <StaggerGroup className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {related.map((p) => (
-              <PackageCard key={p.id} pkg={p} />
+              <StaggerItem key={p.id}>
+                <PackageCard pkg={p} />
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerGroup>
         </div>
       )}
 

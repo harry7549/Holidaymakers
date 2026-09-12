@@ -4,6 +4,7 @@ import { useTrip } from "../context/TripContext"
 import { formatDate, formatPrice } from "../lib/utils"
 import { SmartImage } from "../components/SmartImage"
 import { useToast } from "../context/ToastContext"
+import { Reveal } from "../components/Reveal"
 
 export default function BookingConfirmation() {
   const { bookingId } = useParams()
@@ -14,7 +15,7 @@ export default function BookingConfirmation() {
   if (!booking) return <Navigate to="/dashboard" replace />
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+    <Reveal as="div" className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       <div className="mb-8 text-center">
         <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-ocean-50 text-ocean-600">
           <Check size={30} />
@@ -81,6 +82,6 @@ export default function BookingConfirmation() {
       <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-ocean-950/50">
         <MapPin size={13} /> Need changes? Reach us anytime on WhatsApp or via your dashboard.
       </p>
-    </div>
+    </Reveal>
   )
 }

@@ -3,6 +3,7 @@ import { Heart } from "lucide-react"
 import { useTrip } from "../context/TripContext"
 import { useCatalog } from "../context/CatalogContext"
 import { PackageCard } from "../components/PackageCard"
+import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 
 export default function Wishlist() {
   const { wishlist } = useTrip()
@@ -11,10 +12,10 @@ export default function Wishlist() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 text-center">
+      <Reveal className="mb-8 text-center">
         <h1 className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">Your Wishlist</h1>
         <p className="mt-1 text-sm text-ocean-950/60">{items.length} package(s) saved</p>
-      </div>
+      </Reveal>
 
       {items.length === 0 ? (
         <div className="mx-auto max-w-md rounded-2xl border border-dashed border-sand-300 py-16 text-center">
@@ -26,11 +27,13 @@ export default function Wishlist() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <StaggerGroup className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((p) => (
-            <PackageCard key={p.id} pkg={p} />
+            <StaggerItem key={p.id}>
+              <PackageCard pkg={p} />
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       )}
     </div>
   )

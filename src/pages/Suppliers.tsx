@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react"
 import { BadgeCheck, Building2, Globe, Handshake, MapPin, Star } from "lucide-react"
 import { useCatalog } from "../context/CatalogContext"
+import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 import { cn } from "../lib/utils"
 import { useToast } from "../context/ToastContext"
 
@@ -42,7 +43,7 @@ export default function Suppliers() {
   return (
     <div>
       <section className="bg-ocean-950 py-16">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
+        <Reveal className="mx-auto max-w-4xl px-4 text-center sm:px-6">
           <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
             <Handshake size={13} /> Supplier Network
           </span>
@@ -53,7 +54,7 @@ export default function Suppliers() {
             Roamly partners with established local travel agencies and trusted online operators alike — every one
             vetted for licensing, service quality, and traveller satisfaction.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -72,9 +73,9 @@ export default function Suppliers() {
           ))}
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <StaggerGroup className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((s) => (
-            <div key={s.id} className="rounded-2xl border border-sand-200 bg-white p-5">
+            <StaggerItem key={s.id} className="rounded-2xl border border-sand-200 bg-white p-5">
               <div className="mb-3 flex items-center gap-3">
                 <span
                   className={cn(
@@ -107,14 +108,14 @@ export default function Suppliers() {
                   {s.type}
                 </span>
               </div>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </section>
 
       <section className="bg-sand-100 py-16">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-          <div>
+          <Reveal>
             <h2 className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">Become a Roamly Partner</h2>
             <p className="mt-3 text-sm text-ocean-950/60 sm:text-base">
               Whether you run a local travel agency or an online tour operation, list your packages on Roamly and
@@ -126,7 +127,7 @@ export default function Suppliers() {
               <li>✓ Marketing support across our traveller base</li>
               <li>✓ Fast, reliable payouts</li>
             </ul>
-          </div>
+          </Reveal>
 
           {sent ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-sand-200 bg-white p-8 text-center">

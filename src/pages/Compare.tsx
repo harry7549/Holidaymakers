@@ -6,6 +6,7 @@ import { useCatalog } from "../context/CatalogContext"
 import type { Package, Supplier } from "../data/types"
 import { SmartImage } from "../components/SmartImage"
 import { RatingStars } from "../components/RatingStars"
+import { Reveal } from "../components/Reveal"
 import { formatPrice } from "../lib/utils"
 
 function buildRows(suppliers: Supplier[]): { label: string; render: (p: Package) => ReactNode }[] {
@@ -30,13 +31,13 @@ export default function Compare() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 text-center">
+      <Reveal className="mb-8 text-center">
         <span className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-ocean-50 text-ocean-600">
           <Scale size={18} />
         </span>
         <h1 className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">Compare Packages</h1>
         <p className="mt-1 text-sm text-ocean-950/60">Compare up to 3 packages side by side</p>
-      </div>
+      </Reveal>
 
       {items.length === 0 ? (
         <div className="mx-auto max-w-md rounded-2xl border border-dashed border-sand-300 py-16 text-center">

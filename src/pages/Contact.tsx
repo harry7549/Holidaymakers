@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react"
 import { ChevronDown, Mail, MapPin, MessageCircle, Phone } from "lucide-react"
 import { useToast } from "../context/ToastContext"
+import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 import { cn } from "../lib/utils"
 
 const faqs = [
@@ -41,15 +42,16 @@ export default function Contact() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-10 text-center">
+      <Reveal className="mb-10 text-center">
         <h1 className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">Get in Touch</h1>
         <p className="mx-auto mt-2 max-w-lg text-sm text-ocean-950/60">
           Questions about a booking, a custom trip, or becoming a supplier? We're here to help.
         </p>
-      </div>
+      </Reveal>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
-        <div className="space-y-4">
+        <StaggerGroup className="space-y-4">
+          <StaggerItem>
           <a href="tel:+919876543210" className="flex items-center gap-4 rounded-2xl border border-sand-200 bg-white p-5 hover:border-ocean-300">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ocean-50 text-ocean-600">
               <Phone size={19} />
@@ -59,6 +61,8 @@ export default function Contact() {
               <p className="text-sm text-ocean-950/60">+91 98765 43210</p>
             </div>
           </a>
+          </StaggerItem>
+          <StaggerItem>
           <a href="mailto:hello@roamly.travel" className="flex items-center gap-4 rounded-2xl border border-sand-200 bg-white p-5 hover:border-ocean-300">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ocean-50 text-ocean-600">
               <Mail size={19} />
@@ -68,6 +72,8 @@ export default function Contact() {
               <p className="text-sm text-ocean-950/60">hello@roamly.travel</p>
             </div>
           </a>
+          </StaggerItem>
+          <StaggerItem>
           <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="flex items-center gap-4 rounded-2xl border border-sand-200 bg-white p-5 hover:border-ocean-300">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ocean-50 text-ocean-600">
               <MessageCircle size={19} />
@@ -77,6 +83,8 @@ export default function Contact() {
               <p className="text-sm text-ocean-950/60">Chat with us instantly</p>
             </div>
           </a>
+          </StaggerItem>
+          <StaggerItem>
           <div className="flex items-center gap-4 rounded-2xl border border-sand-200 bg-white p-5">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ocean-50 text-ocean-600">
               <MapPin size={19} />
@@ -86,7 +94,8 @@ export default function Contact() {
               <p className="text-sm text-ocean-950/60">Bandra Kurla Complex, Mumbai, India</p>
             </div>
           </div>
-        </div>
+          </StaggerItem>
+        </StaggerGroup>
 
         <form onSubmit={submit} className="space-y-3 rounded-2xl border border-sand-200 bg-white p-6">
           <div className="grid gap-3 sm:grid-cols-2">
@@ -127,7 +136,7 @@ export default function Contact() {
         </form>
       </div>
 
-      <div className="mx-auto mt-16 max-w-3xl">
+      <Reveal className="mx-auto mt-16 max-w-3xl">
         <h2 className="mb-6 text-center font-display text-xl font-bold text-ocean-950">Frequently Asked Questions</h2>
         <div className="space-y-2">
           {faqs.map((faq, i) => (
@@ -143,7 +152,7 @@ export default function Contact() {
             </div>
           ))}
         </div>
-      </div>
+      </Reveal>
     </div>
   )
 }

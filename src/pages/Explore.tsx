@@ -4,6 +4,7 @@ import { LayoutGrid, List, SlidersHorizontal, X } from "lucide-react"
 import type { Category } from "../data/types"
 import { useCatalog } from "../context/CatalogContext"
 import { PackageCard } from "../components/PackageCard"
+import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 import { cn, formatPrice } from "../lib/utils"
 
 const allCategories: Category[] = [
@@ -212,12 +213,12 @@ export default function Explore() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6">
+      <Reveal className="mb-6">
         <h1 className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">
           {q ? `Packages for "${q}"` : "Explore All Packages"}
         </h1>
         <p className="mt-1 text-sm text-ocean-950/60">{results.length} packages found</p>
-      </div>
+      </Reveal>
 
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <aside className="hidden lg:block">
@@ -272,11 +273,13 @@ export default function Explore() {
               </button>
             </div>
           ) : (
-            <div className={cn("grid gap-5", view === "grid" ? "sm:grid-cols-2 xl:grid-cols-3" : "grid-cols-1")}>
+            <StaggerGroup className={cn("grid gap-5", view === "grid" ? "sm:grid-cols-2 xl:grid-cols-3" : "grid-cols-1")}>
               {results.map((pkg) => (
-                <PackageCard key={pkg.id} pkg={pkg} layout={view} />
+                <StaggerItem key={pkg.id}>
+                  <PackageCard pkg={pkg} layout={view} />
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerGroup>
           )}
         </div>
       </div>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { Search, Star } from "lucide-react"
 import { useCatalog } from "../context/CatalogContext"
 import { SmartImage } from "../components/SmartImage"
+import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 import { formatPrice, cn } from "../lib/utils"
 
 const regions = ["All", "Domestic", "International"] as const
@@ -22,12 +23,12 @@ export default function Destinations() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 text-center">
+      <Reveal className="mb-8 text-center">
         <h1 className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">Explore Destinations</h1>
         <p className="mx-auto mt-2 max-w-lg text-sm text-ocean-950/60">
           From tropical islands to ancient forts — discover where your next holiday could take you.
         </p>
-      </div>
+      </Reveal>
 
       <div className="mb-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
         <div className="relative w-full max-w-sm">
@@ -55,9 +56,10 @@ export default function Destinations() {
         </div>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((d) => (
-          <Link key={d.id} to={`/destinations/${d.id}`} className="group overflow-hidden rounded-2xl border border-sand-200 bg-white shadow-card transition-shadow hover:shadow-lift">
+          <StaggerItem key={d.id}>
+          <Link to={`/destinations/${d.id}`} className="group block overflow-hidden rounded-2xl border border-sand-200 bg-white shadow-card transition-shadow hover:shadow-lift">
             <div className="relative">
               <SmartImage src={d.image} alt={d.name} className="aspect-[4/3] w-full" imgClassName="transition-transform duration-500 group-hover:scale-110" />
               <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-ocean-950 backdrop-blur">
@@ -79,8 +81,9 @@ export default function Destinations() {
               <p className="mt-2 font-display text-base font-bold text-ocean-950">From {formatPrice(d.fromPrice)}</p>
             </div>
           </Link>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerGroup>
     </div>
   )
 }
