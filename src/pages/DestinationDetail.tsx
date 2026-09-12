@@ -30,7 +30,7 @@ export default function DestinationDetail() {
       </ParallaxBanner>
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
           <div>
             <Reveal>
               <p className="mb-6 text-base text-ocean-950/70">{destination.description}</p>

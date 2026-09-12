@@ -314,7 +314,7 @@ export default function Home() {
 
       {/* SUPPLIER NETWORK */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
           <Reveal>
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-ocean-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-ocean-700">
               Our Network

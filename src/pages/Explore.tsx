@@ -220,7 +220,7 @@ export default function Explore() {
         <p className="mt-1 text-sm text-ocean-950/60">{results.length} packages found</p>
       </Reveal>
 
-      <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
         <aside className="hidden lg:block">
           <div className="sticky top-20 rounded-2xl border border-sand-200 bg-white p-5">{FilterPanel}</div>
         </aside>

@@ -146,7 +146,7 @@ export default function Checkout() {
         ))}
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         <div className="rounded-2xl border border-sand-200 bg-white p-5 sm:p-7">
           {step === 0 && (
             <div>

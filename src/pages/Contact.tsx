@@ -49,7 +49,7 @@ export default function Contact() {
         </p>
       </Reveal>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.2fr]">
         <StaggerGroup className="space-y-4">
           <StaggerItem>
           <a href="tel:+919876543210" className="flex items-center gap-4 rounded-2xl border border-sand-200 bg-white p-5 hover:border-ocean-300">
