@@ -38,14 +38,18 @@ const colorOptions = [
 export const REGISTRY: Record<string, BlockSchema> = {
   hero: {
     type: "hero",
-    label: "Hero (parallax)",
-    description: "Full-height scroll-driven hero, used once at the top of the homepage.",
+    label: "Hero banner",
+    description: "Full-bleed poster hero used once at the top of the homepage.",
     fields: [
-      { key: "eyebrow", label: "Eyebrow badge text", type: "text" },
+      { key: "eyebrow", label: "Trust badge text", type: "text" },
       { key: "heading", label: "Heading", type: "text" },
       { key: "highlight", label: "Word inside heading to highlight in gold (optional)", type: "text" },
       { key: "subtext", label: "Subtext", type: "textarea" },
       { key: "image", label: "Background image URL", type: "image" },
+      { key: "buttonLabel", label: "Primary button label", type: "text" },
+      { key: "buttonHref", label: "Primary button link", type: "text" },
+      { key: "buttonLabel2", label: "Secondary button label", type: "text" },
+      { key: "buttonHref2", label: "Secondary button link", type: "text" },
     ],
     defaultContent: () => ({
       eyebrow: "200+ verified suppliers · Book with confidence",
@@ -54,6 +58,10 @@ export const REGISTRY: Record<string, BlockSchema> = {
       subtext:
         "Compare ready-made packages or build a fully custom itinerary — from beach escapes to mountain adventures, all in one flexible, transparent platform.",
       image: "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=2000&q=80",
+      buttonLabel: "Explore Packages",
+      buttonHref: "/explore",
+      buttonLabel2: "Build Your Trip",
+      buttonHref2: "/build-trip",
     }),
   },
 

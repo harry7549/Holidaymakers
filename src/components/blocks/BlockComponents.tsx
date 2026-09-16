@@ -38,6 +38,10 @@ export function HeroBlock({ content }: BlockProps) {
       eyebrow={content.eyebrow}
       heading={renderHeading(content.heading, content.highlight)}
       subtext={content.subtext}
+      buttonLabel={content.buttonLabel}
+      buttonHref={content.buttonHref}
+      buttonLabel2={content.buttonLabel2}
+      buttonHref2={content.buttonHref2}
     />
   )
 }
