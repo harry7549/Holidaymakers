@@ -29,8 +29,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const admin = await requireAdmin(req, res)
     if (!admin) return
 
-    const pathParam = req.query.path
-    const segments = Array.isArray(pathParam) ? pathParam : pathParam ? [pathParam] : []
+    // Parse the resource/id straight off the raw request URL instead of
+    // relying on req.query.path — that only reflects Vercel's dynamic-route
+    // query population, which has proven unreliable for this catch-all
+    // route under the Node ESM runtime.
+    const pathname = (req.url ?? "").split("?")[0]
+    const afterAdmin = pathname.split("/api/admin/")[1] ?? ""
+    const segments = afterAdmin.split("/").filter(Boolean).map((s) => decodeURIComponent(s))
     const [resourceName, id] = segments
 
     const config = resourceName ? RESOURCES[resourceName] : undefined
