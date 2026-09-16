@@ -53,7 +53,7 @@ export const REGISTRY: Record<string, BlockSchema> = {
       highlight: "exactly",
       subtext:
         "Compare ready-made packages or build a fully custom itinerary — from beach escapes to mountain adventures, all in one flexible, transparent platform.",
-      image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=2000&q=80",
+      image: "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=2000&q=80",
     }),
   },
 

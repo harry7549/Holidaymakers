@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 import { SmartImage } from "./SmartImage"
@@ -19,34 +19,61 @@ interface ParallaxHeroProps {
  * normal scrolling. Height of the outer wrapper controls how much scroll
  * distance the effect takes.
  *
- * The small card's size is computed from the actual window size (not a
- * fixed percentage) so it reads as a proper landscape card on a narrow
- * phone screen instead of a tall sliver, and it grows from the bottom of
- * the frame (not the center) so it never collides with the headline above
- * it regardless of how many lines the text wraps to.
+ * The small card's size is measured against the text block's actual
+ * rendered height (via ResizeObserver), not a guessed percentage — so on
+ * short/wide viewports where the heading text takes up more vertical room,
+ * the card starts smaller and lower instead of overlapping the text.
  */
 export function ParallaxHero({ image, imageAlt, eyebrow, heading, subtext }: ParallaxHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const stickyRef = useRef<HTMLDivElement>(null)
+  const textRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] })
 
-  const [smallSize, setSmallSize] = useState({ widthPct: 36, heightPct: 42 })
+  const [layout, setLayout] = useState({ widthPct: 36, heightPct: 30, bottomPct: 10 })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const update = () => {
+      const stickyEl = stickyRef.current
+      const textEl = textRef.current
+      if (!stickyEl || !textEl) return
+
       const w = window.innerWidth
-      const h = window.innerHeight
-      const cardWidthPx = Math.min(w * 0.82, 460)
-      const cardHeightPx = cardWidthPx * 0.66
-      setSmallSize({ widthPct: (cardWidthPx / w) * 100, heightPct: (cardHeightPx / h) * 100 })
+      const stickyH = stickyEl.offsetHeight
+      const textBottomPx = textEl.getBoundingClientRect().bottom - stickyEl.getBoundingClientRect().top
+      const gapPx = 28
+      const bottomMarginPx = 48
+
+      let cardWidthPx = Math.min(w * 0.82, 460)
+      let cardHeightPx = cardWidthPx * 0.66
+
+      const availableH = stickyH - textBottomPx - gapPx - bottomMarginPx
+      if (cardHeightPx > availableH) {
+        cardHeightPx = Math.max(90, availableH)
+        cardWidthPx = Math.min(cardHeightPx / 0.66, w * 0.82, 460)
+        cardHeightPx = cardWidthPx * 0.66
+      }
+
+      setLayout({
+        widthPct: (cardWidthPx / w) * 100,
+        heightPct: (cardHeightPx / stickyH) * 100,
+        bottomPct: (bottomMarginPx / stickyH) * 100,
+      })
     }
+
     update()
     window.addEventListener("resize", update)
-    return () => window.removeEventListener("resize", update)
+    const ro = new ResizeObserver(update)
+    if (textRef.current) ro.observe(textRef.current)
+    return () => {
+      window.removeEventListener("resize", update)
+      ro.disconnect()
+    }
   }, [])
 
-  const imageWidth = useTransform(scrollYProgress, [0, 0.62], [`${smallSize.widthPct}%`, "100%"])
-  const imageHeight = useTransform(scrollYProgress, [0, 0.62], [`${smallSize.heightPct}%`, "100%"])
-  const imageBottom = useTransform(scrollYProgress, [0, 0.62], ["6%", "0%"])
+  const imageWidth = useTransform(scrollYProgress, [0, 0.62], [`${layout.widthPct}%`, "100%"])
+  const imageHeight = useTransform(scrollYProgress, [0, 0.62], [`${layout.heightPct}%`, "100%"])
+  const imageBottom = useTransform(scrollYProgress, [0, 0.62], [`${layout.bottomPct}%`, "0%"])
   const imageRadius = useTransform(scrollYProgress, [0, 0.62], [32, 0])
   const overlayOpacity = useTransform(scrollYProgress, [0, 0.62], [0.3, 0.55])
 
@@ -57,7 +84,7 @@ export function ParallaxHero({ image, imageAlt, eyebrow, heading, subtext }: Par
 
   return (
     <div ref={containerRef} className="relative h-[260vh]">
-      <div className="sticky top-16 h-[calc(100vh-4rem)] w-full overflow-hidden bg-ocean-950">
+      <div ref={stickyRef} className="sticky top-16 h-[calc(100vh-4rem)] w-full overflow-hidden bg-ocean-950">
         <div className="absolute inset-0 bg-gradient-to-b from-ocean-950 via-ocean-950 to-ocean-900" />
 
         <motion.div
@@ -70,6 +97,7 @@ export function ParallaxHero({ image, imageAlt, eyebrow, heading, subtext }: Par
 
         <motion.div style={{ opacity: textOpacity, y: textY }} className="pointer-events-none absolute inset-x-0 top-16 z-10 flex justify-center px-4 sm:top-24">
           <motion.div
+            ref={textRef}
             initial={{ opacity: 0, y: 26 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: EASE }}
