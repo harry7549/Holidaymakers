@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from "react"
-import { AlertTriangle, Inbox } from "lucide-react"
+import { AlertTriangle, Inbox, Search } from "lucide-react"
 import { cn } from "../../lib/utils"
 
 /** Icon badge + title + subtitle + optional action, used at the top of every admin page. */
@@ -69,6 +69,32 @@ export function AdminErrorNotice({ resource, message }: { resource: string; mess
           <code className="rounded bg-white/60 px-1 py-0.5 font-mono">SUPABASE_SERVICE_ROLE_KEY</code> is set in Vercel's environment variables.
         </p>
       </div>
+    </div>
+  )
+}
+
+/** A search box for filtering a resource list client-side, with a live result count. */
+export function AdminSearchBar({
+  value,
+  onChange,
+  placeholder,
+  resultCount,
+}: {
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  resultCount?: number
+}) {
+  return (
+    <div className="mb-4 flex items-center gap-2 rounded-2xl border border-sand-200 bg-white px-3 py-2">
+      <Search size={15} className="shrink-0 text-ocean-950/40" />
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder ?? "Search..."}
+        className="w-full bg-transparent text-sm outline-none"
+      />
+      {value && resultCount !== undefined && <span className="shrink-0 text-xs text-ocean-950/40">{resultCount} found</span>}
     </div>
   )
 }

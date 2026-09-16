@@ -7,7 +7,7 @@ import { useCatalog } from "../../context/CatalogContext"
 import { formatDate } from "../../lib/utils"
 import { SmartImage } from "../../components/SmartImage"
 import { ImageUploadField } from "../../components/admin/ImageUploadField"
-import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonGrid } from "../../components/admin/AdminUI"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSearchBar, AdminSkeletonGrid } from "../../components/admin/AdminUI"
 
 interface DealRow {
   id: string
@@ -40,6 +40,9 @@ export default function AdminDeals() {
   const [form, setForm] = useState<ReturnType<typeof emptyForm> | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [search, setSearch] = useState("")
+
+  const filteredItems = items.filter((d) => d.title.toLowerCase().includes(search.trim().toLowerCase()))
 
   const startCreate = () => {
     setEditingId(null)
@@ -178,12 +181,16 @@ export default function AdminDeals() {
         </div>
       )}
 
+      {!loading && !error && items.length > 0 && (
+        <AdminSearchBar value={search} onChange={setSearch} placeholder="Search deals by title..." resultCount={filteredItems.length} />
+      )}
+
       {loading && <AdminSkeletonGrid />}
       {error && <AdminErrorNotice resource="deals" message={error} />}
 
       {!loading && !error && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((d) => (
+          {filteredItems.map((d) => (
             <div
               key={d.id}
               className="group overflow-hidden rounded-2xl border border-sand-200 bg-white transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
@@ -216,6 +223,9 @@ export default function AdminDeals() {
             </div>
           ))}
           {items.length === 0 && <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label="No deals yet — add your first one above." /></div>}
+          {items.length > 0 && filteredItems.length === 0 && (
+            <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label={`No deals match "${search}".`} /></div>
+          )}
         </div>
       )}
     </div>

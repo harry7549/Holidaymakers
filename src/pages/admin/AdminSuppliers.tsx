@@ -5,7 +5,7 @@ import { adminCreate, adminDelete, adminUpdate } from "../../lib/adminApi"
 import { useToast } from "../../context/ToastContext"
 import { useCatalog } from "../../context/CatalogContext"
 import { cn } from "../../lib/utils"
-import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSearchBar, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
 
 const colorGradients: Record<string, string> = {
   ocean: "from-ocean-500 to-ocean-800",
@@ -48,6 +48,9 @@ export default function AdminSuppliers() {
   const [form, setForm] = useState<typeof emptyForm | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [search, setSearch] = useState("")
+
+  const filteredItems = items.filter((s) => s.name.toLowerCase().includes(search.trim().toLowerCase()))
 
   const startCreate = () => {
     setEditingId(null)
@@ -201,12 +204,16 @@ export default function AdminSuppliers() {
         </div>
       )}
 
+      {!loading && !error && items.length > 0 && (
+        <AdminSearchBar value={search} onChange={setSearch} placeholder="Search suppliers by name..." resultCount={filteredItems.length} />
+      )}
+
       {loading && <AdminSkeletonGrid />}
       {error && <AdminErrorNotice resource="suppliers" message={error} />}
 
       {!loading && !error && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((s) => (
+          {filteredItems.map((s) => (
             <div
               key={s.id}
               className="group rounded-2xl border border-sand-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
@@ -247,6 +254,9 @@ export default function AdminSuppliers() {
             </div>
           ))}
           {items.length === 0 && <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label="No suppliers yet — add your first one above." /></div>}
+          {items.length > 0 && filteredItems.length === 0 && (
+            <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label={`No suppliers match "${search}".`} /></div>
+          )}
         </div>
       )}
     </div>

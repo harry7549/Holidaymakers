@@ -9,7 +9,7 @@ import { SmartImage } from "../../components/SmartImage"
 import { ImageUploadField } from "../../components/admin/ImageUploadField"
 import { TagListField } from "../../components/admin/TagListField"
 import { GalleryUploadField } from "../../components/admin/GalleryUploadField"
-import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSearchBar, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
 
 interface PackageRow {
   id: string
@@ -129,6 +129,9 @@ export default function AdminPackages() {
   const [form, setForm] = useState<FormState | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [search, setSearch] = useState("")
+
+  const filteredItems = items.filter((p) => p.title.toLowerCase().includes(search.trim().toLowerCase()))
 
   const startCreate = () => {
     setEditingId(null)
@@ -447,12 +450,16 @@ export default function AdminPackages() {
         </div>
       )}
 
+      {!loading && !error && items.length > 0 && (
+        <AdminSearchBar value={search} onChange={setSearch} placeholder="Search packages by title..." resultCount={filteredItems.length} />
+      )}
+
       {loading && <AdminSkeletonGrid />}
       {error && <AdminErrorNotice resource="packages" message={error} />}
 
       {!loading && !error && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((p) => (
+          {filteredItems.map((p) => (
             <div
               key={p.id}
               className="group overflow-hidden rounded-2xl border border-sand-200 bg-white transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
@@ -515,6 +522,9 @@ export default function AdminPackages() {
             </div>
           ))}
           {items.length === 0 && <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label="No packages yet — add your first one above." /></div>}
+          {items.length > 0 && filteredItems.length === 0 && (
+            <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label={`No packages match "${search}".`} /></div>
+          )}
         </div>
       )}
     </div>
