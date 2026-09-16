@@ -28,13 +28,20 @@ export async function requireAdmin(req: VercelRequest, res: VercelResponse) {
     return null
   }
 
-  const client = createClient(url, anonKey)
-  const { data, error } = await client.auth.getUser(token)
+  try {
+    const client = createClient(url, anonKey)
+    const { data, error } = await client.auth.getUser(token)
 
-  if (error || !data.user) {
-    res.status(401).json({ error: "Invalid or expired session" })
+    if (error || !data.user) {
+      res.status(401).json({ error: "Invalid or expired session" })
+      return null
+    }
+
+    return data.user
+  } catch (err) {
+    console.error(err)
+    const message = err instanceof Error ? err.message : "Failed to verify session"
+    res.status(500).json({ error: message })
     return null
   }
-
-  return data.user
 }
