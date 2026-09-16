@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Award, Flame, Package as PackageIcon, Pencil, Plus, Sparkles, Star, Trash2, X } from "lucide-react"
+import { useState, type ReactNode } from "react"
+import { Award, ExternalLink, Flame, Package as PackageIcon, Pencil, Plus, Sparkles, Star, Trash2, X } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminUpdate } from "../../lib/adminApi"
 import { useToast } from "../../context/ToastContext"
@@ -7,6 +7,7 @@ import { useCatalog } from "../../context/CatalogContext"
 import { formatPrice, slugify } from "../../lib/utils"
 import { SmartImage } from "../../components/SmartImage"
 import { ImageUploadField } from "../../components/admin/ImageUploadField"
+import { TagListField } from "../../components/admin/TagListField"
 import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
 
 interface PackageRow {
@@ -33,7 +34,7 @@ interface PackageRow {
   transport: string[]
   tags: string[]
   highlights: string[]
-  itinerary: unknown[]
+  itinerary: ItineraryForm[]
   inclusions: string[]
   exclusions: string[]
   supplier_id: string
@@ -42,12 +43,30 @@ interface PackageRow {
   trending: boolean
   featured: boolean
   best_seller: boolean
-  reviews: unknown[]
-  faqs: unknown[]
+  reviews: ReviewForm[]
+  faqs: FaqForm[]
 }
 
-const csv = (v: string[] | undefined) => (v || []).join(", ")
-const parseCsv = (v: string) => v.split(",").map((s) => s.trim()).filter(Boolean)
+interface ItineraryForm {
+  day: number
+  title: string
+  description: string
+  activities: string[]
+}
+
+interface ReviewForm {
+  name: string
+  rating: number
+  title: string
+  body: string
+  tripType: string
+  date: string
+}
+
+interface FaqForm {
+  q: string
+  a: string
+}
 
 function emptyForm(destinationId: string, supplierId: string) {
   return {
@@ -59,8 +78,8 @@ function emptyForm(destinationId: string, supplierId: string) {
     country: "",
     region: "Domestic",
     image: "",
-    gallery: "",
-    category: "",
+    gallery: [] as string[],
+    category: [] as string[],
     nights: 3,
     days: 4,
     price: 0,
@@ -71,24 +90,35 @@ function emptyForm(destinationId: string, supplierId: string) {
     difficulty: "Easy",
     hotel_rating: 4,
     meal_plan: "",
-    transport: "",
-    tags: "",
-    highlights: "",
-    inclusions: "",
-    exclusions: "",
+    transport: [] as string[],
+    tags: [] as string[],
+    highlights: [] as string[],
+    inclusions: [] as string[],
+    exclusions: [] as string[],
     supplier_id: supplierId,
-    start_dates: "",
+    start_dates: [] as string[],
     flexible: true,
     trending: false,
     featured: false,
     best_seller: false,
-    itineraryJson: "[]",
-    reviewsJson: "[]",
-    faqsJson: "[]",
+    itinerary: [] as ItineraryForm[],
+    reviews: [] as ReviewForm[],
+    faqs: [] as FaqForm[],
   }
 }
 
 type FormState = ReturnType<typeof emptyForm>
+
+const inputClass = "w-full rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400"
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-semibold text-ocean-950/60">{label}</label>
+      {children}
+    </div>
+  )
+}
 
 export default function AdminPackages() {
   const { items, setItems, loading, error } = useAdminResource<PackageRow>("packages")
@@ -97,12 +127,10 @@ export default function AdminPackages() {
   const [form, setForm] = useState<FormState | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [jsonError, setJsonError] = useState<string | null>(null)
 
   const startCreate = () => {
     setEditingId(null)
     setForm(emptyForm(destinations[0]?.id ?? "", suppliers[0]?.id ?? ""))
-    setJsonError(null)
   }
 
   const startEdit = (p: PackageRow) => {
@@ -116,8 +144,8 @@ export default function AdminPackages() {
       country: p.country,
       region: p.region,
       image: p.image,
-      gallery: csv(p.gallery),
-      category: csv(p.category),
+      gallery: p.gallery ?? [],
+      category: p.category ?? [],
       nights: p.nights,
       days: p.days,
       price: p.price,
@@ -128,22 +156,21 @@ export default function AdminPackages() {
       difficulty: p.difficulty,
       hotel_rating: p.hotel_rating,
       meal_plan: p.meal_plan,
-      transport: csv(p.transport),
-      tags: csv(p.tags),
-      highlights: csv(p.highlights),
-      inclusions: csv(p.inclusions),
-      exclusions: csv(p.exclusions),
+      transport: p.transport ?? [],
+      tags: p.tags ?? [],
+      highlights: p.highlights ?? [],
+      inclusions: p.inclusions ?? [],
+      exclusions: p.exclusions ?? [],
       supplier_id: p.supplier_id,
-      start_dates: csv(p.start_dates),
+      start_dates: p.start_dates ?? [],
       flexible: p.flexible,
       trending: p.trending,
       featured: p.featured,
       best_seller: p.best_seller,
-      itineraryJson: JSON.stringify(p.itinerary ?? [], null, 2),
-      reviewsJson: JSON.stringify(p.reviews ?? [], null, 2),
-      faqsJson: JSON.stringify(p.faqs ?? [], null, 2),
+      itinerary: p.itinerary ?? [],
+      reviews: p.reviews ?? [],
+      faqs: p.faqs ?? [],
     })
-    setJsonError(null)
   }
 
   const applyDestination = (destinationId: string) => {
@@ -165,17 +192,6 @@ export default function AdminPackages() {
       return
     }
 
-    let itinerary: unknown[], reviews: unknown[], faqs: unknown[]
-    try {
-      itinerary = JSON.parse(form.itineraryJson || "[]")
-      reviews = JSON.parse(form.reviewsJson || "[]")
-      faqs = JSON.parse(form.faqsJson || "[]")
-      setJsonError(null)
-    } catch {
-      setJsonError("Itinerary, reviews and FAQs must each be valid JSON arrays.")
-      return
-    }
-
     setSaving(true)
     const payload = {
       id: form.id,
@@ -186,8 +202,8 @@ export default function AdminPackages() {
       country: form.country,
       region: form.region,
       image: form.image,
-      gallery: parseCsv(form.gallery),
-      category: parseCsv(form.category),
+      gallery: form.gallery,
+      category: form.category,
       nights: Number(form.nights) || 1,
       days: Number(form.days) || 2,
       price: Number(form.price) || 0,
@@ -198,20 +214,25 @@ export default function AdminPackages() {
       difficulty: form.difficulty,
       hotel_rating: Number(form.hotel_rating) || 4,
       meal_plan: form.meal_plan,
-      transport: parseCsv(form.transport),
-      tags: parseCsv(form.tags),
-      highlights: parseCsv(form.highlights),
-      inclusions: parseCsv(form.inclusions),
-      exclusions: parseCsv(form.exclusions),
+      transport: form.transport,
+      tags: form.tags,
+      highlights: form.highlights,
+      inclusions: form.inclusions,
+      exclusions: form.exclusions,
       supplier_id: form.supplier_id,
-      start_dates: parseCsv(form.start_dates),
+      start_dates: form.start_dates,
       flexible: form.flexible,
       trending: form.trending,
       featured: form.featured,
       best_seller: form.best_seller,
-      itinerary,
-      reviews,
-      faqs,
+      itinerary: form.itinerary,
+      reviews: form.reviews.map((r, i) => ({
+        id: `rev-${form.id}-${i}`,
+        avatarColor: "ocean",
+        helpful: 0,
+        ...r,
+      })),
+      faqs: form.faqs,
     }
 
     try {
@@ -246,8 +267,6 @@ export default function AdminPackages() {
     }
   }
 
-  const inputClass = "rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400"
-
   return (
     <div>
       <AdminPageHeader
@@ -265,66 +284,131 @@ export default function AdminPackages() {
         <div className="mb-6 rounded-2xl border border-ocean-300 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-base font-bold text-ocean-950">{editingId ? "Edit Package" : "New Package"}</h2>
-            <button onClick={() => setForm(null)}>
-              <X size={18} />
-            </button>
+            <div className="flex items-center gap-3">
+              {editingId && form.slug && (
+                <a
+                  href={`/package/${form.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 rounded-full border border-sand-200 px-3.5 py-1.5 text-xs font-semibold text-ocean-950/70 hover:border-ocean-300 hover:text-ocean-700"
+                >
+                  <ExternalLink size={12} /> Preview live page
+                </a>
+              )}
+              <button onClick={() => setForm(null)}>
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <input placeholder="Id (unique, e.g. pkg-18)" value={form.id} disabled={Boolean(editingId)} onChange={(e) => setForm({ ...form, id: e.target.value })} className={`${inputClass} disabled:bg-sand-100`} />
-            <input placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputClass} />
-            <input placeholder="Slug (auto from title if blank)" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className={inputClass} />
+            <Field label="Id (unique, e.g. pkg-18)">
+              <input value={form.id} disabled={Boolean(editingId)} onChange={(e) => setForm({ ...form, id: e.target.value })} className={`${inputClass} disabled:bg-sand-100`} />
+            </Field>
+            <Field label="Title">
+              <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputClass} />
+            </Field>
+            <Field label="Slug (auto from title if blank)">
+              <input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className={inputClass} />
+            </Field>
 
-            <select value={form.destination_id} onChange={(e) => applyDestination(e.target.value)} className={inputClass}>
-              <option value="">Select destination...</option>
-              {destinations.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-            <select value={form.supplier_id} onChange={(e) => setForm({ ...form, supplier_id: e.target.value })} className={inputClass}>
-              <option value="">Select supplier...</option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value })} className={inputClass}>
-              <option>Easy</option>
-              <option>Moderate</option>
-              <option>Challenging</option>
-            </select>
+            <Field label="Destination">
+              <select value={form.destination_id} onChange={(e) => applyDestination(e.target.value)} className={inputClass}>
+                <option value="">Select destination...</option>
+                {destinations.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Supplier">
+              <select value={form.supplier_id} onChange={(e) => setForm({ ...form, supplier_id: e.target.value })} className={inputClass}>
+                <option value="">Select supplier...</option>
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Difficulty">
+              <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value })} className={inputClass}>
+                <option>Easy</option>
+                <option>Moderate</option>
+                <option>Challenging</option>
+              </select>
+            </Field>
 
             <div className="sm:col-span-2 lg:col-span-3">
-              <ImageUploadField value={form.image} onChange={(v) => setForm({ ...form, image: v })} placeholder="Main image URL, or upload one →" />
+              <Field label="Main image">
+                <ImageUploadField value={form.image} onChange={(v) => setForm({ ...form, image: v })} placeholder="Main image URL, or upload one →" />
+              </Field>
             </div>
-            <input placeholder="Gallery image URLs, comma separated" value={form.gallery} onChange={(e) => setForm({ ...form, gallery: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
+            <div className="sm:col-span-2 lg:col-span-3">
+              <TagListField label="Gallery images (URLs)" values={form.gallery} onChange={(v) => setForm({ ...form, gallery: v })} placeholder="Paste an image URL and press Enter" />
+            </div>
 
-            <input type="number" placeholder="Nights" value={form.nights} onChange={(e) => setForm({ ...form, nights: Number(e.target.value) })} className={inputClass} />
-            <input type="number" placeholder="Days" value={form.days} onChange={(e) => setForm({ ...form, days: Number(e.target.value) })} className={inputClass} />
-            <select value={form.hotel_rating} onChange={(e) => setForm({ ...form, hotel_rating: Number(e.target.value) })} className={inputClass}>
-              <option value={3}>3-star hotels</option>
-              <option value={4}>4-star hotels</option>
-              <option value={5}>5-star hotels</option>
-            </select>
+            <Field label="Nights">
+              <input type="number" value={form.nights} onChange={(e) => setForm({ ...form, nights: Number(e.target.value) })} className={inputClass} />
+            </Field>
+            <Field label="Days">
+              <input type="number" value={form.days} onChange={(e) => setForm({ ...form, days: Number(e.target.value) })} className={inputClass} />
+            </Field>
+            <Field label="Hotel rating">
+              <select value={form.hotel_rating} onChange={(e) => setForm({ ...form, hotel_rating: Number(e.target.value) })} className={inputClass}>
+                <option value={3}>3-star hotels</option>
+                <option value={4}>4-star hotels</option>
+                <option value={5}>5-star hotels</option>
+              </select>
+            </Field>
 
-            <input type="number" placeholder="Price (INR, per person)" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className={inputClass} />
-            <input type="number" placeholder="Original price (for discount %)" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: Number(e.target.value) })} className={inputClass} />
-            <input type="number" placeholder="Max group size" value={form.group_size_max} onChange={(e) => setForm({ ...form, group_size_max: Number(e.target.value) })} className={inputClass} />
+            <Field label="Price (INR, per person)">
+              <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className={inputClass} />
+            </Field>
+            <Field label="Original price (for discount %)">
+              <input type="number" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: Number(e.target.value) })} className={inputClass} />
+            </Field>
+            <Field label="Max group size">
+              <input type="number" value={form.group_size_max} onChange={(e) => setForm({ ...form, group_size_max: Number(e.target.value) })} className={inputClass} />
+            </Field>
 
-            <input type="number" step="0.1" min="0" max="5" placeholder="Rating" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className={inputClass} />
-            <input type="number" placeholder="Reviews count" value={form.reviews_count} onChange={(e) => setForm({ ...form, reviews_count: Number(e.target.value) })} className={inputClass} />
-            <input placeholder="Meal plan" value={form.meal_plan} onChange={(e) => setForm({ ...form, meal_plan: e.target.value })} className={inputClass} />
+            <Field label="Rating (0-5)">
+              <input type="number" step="0.1" min="0" max="5" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className={inputClass} />
+            </Field>
+            <Field label="Reviews count">
+              <input type="number" value={form.reviews_count} onChange={(e) => setForm({ ...form, reviews_count: Number(e.target.value) })} className={inputClass} />
+            </Field>
+            <Field label="Meal plan (e.g. Daily Breakfast)">
+              <input value={form.meal_plan} onChange={(e) => setForm({ ...form, meal_plan: e.target.value })} className={inputClass} />
+            </Field>
 
-            <input placeholder="Category, comma separated (Beach, Family...)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
-            <input placeholder="Transport, comma separated" value={form.transport} onChange={(e) => setForm({ ...form, transport: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
-            <input placeholder="Tags, comma separated" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
-            <input placeholder="Highlights, comma separated" value={form.highlights} onChange={(e) => setForm({ ...form, highlights: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
-            <input placeholder="Inclusions, comma separated" value={form.inclusions} onChange={(e) => setForm({ ...form, inclusions: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
-            <input placeholder="Exclusions, comma separated" value={form.exclusions} onChange={(e) => setForm({ ...form, exclusions: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
-            <input placeholder="Start dates, comma separated (YYYY-MM-DD)" value={form.start_dates} onChange={(e) => setForm({ ...form, start_dates: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
+            <div className="sm:col-span-2 lg:col-span-3">
+              <TagListField label="Category (e.g. Beach, Family)" values={form.category} onChange={(v) => setForm({ ...form, category: v })} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <TagListField label="Transport" values={form.transport} onChange={(v) => setForm({ ...form, transport: v })} placeholder="e.g. Return flights" />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <TagListField label="Tags" values={form.tags} onChange={(v) => setForm({ ...form, tags: v })} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <TagListField label="Highlights" values={form.highlights} onChange={(v) => setForm({ ...form, highlights: v })} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <TagListField label="Inclusions" values={form.inclusions} onChange={(v) => setForm({ ...form, inclusions: v })} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <TagListField label="Exclusions" values={form.exclusions} onChange={(v) => setForm({ ...form, exclusions: v })} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <TagListField
+                label="Start dates"
+                values={form.start_dates}
+                onChange={(v) => setForm({ ...form, start_dates: v })}
+                placeholder="YYYY-MM-DD, press Enter to add"
+              />
+            </div>
 
             <label className="flex items-center gap-2 text-sm text-ocean-950/80">
               <input type="checkbox" checked={form.flexible} onChange={(e) => setForm({ ...form, flexible: e.target.checked })} className="accent-ocean-600" /> Flexible dates
@@ -340,31 +424,22 @@ export default function AdminPackages() {
             </label>
           </div>
 
-          <details className="mt-4 rounded-lg border border-sand-200 p-3">
-            <summary className="cursor-pointer text-sm font-semibold text-ocean-950">Advanced: itinerary, reviews & FAQs (JSON)</summary>
-            <div className="mt-3 space-y-3">
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-ocean-950/60">
-                  Itinerary — array of {`{ day, title, description, activities: [] }`}
-                </label>
-                <textarea rows={4} value={form.itineraryJson} onChange={(e) => setForm({ ...form, itineraryJson: e.target.value })} className={`${inputClass} w-full font-mono text-xs`} />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-ocean-950/60">
-                  Reviews — array of {`{ name, rating, title, body, tripType, date }`}
-                </label>
-                <textarea rows={4} value={form.reviewsJson} onChange={(e) => setForm({ ...form, reviewsJson: e.target.value })} className={`${inputClass} w-full font-mono text-xs`} />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-ocean-950/60">FAQs — array of {`{ q, a }`}</label>
-                <textarea rows={3} value={form.faqsJson} onChange={(e) => setForm({ ...form, faqsJson: e.target.value })} className={`${inputClass} w-full font-mono text-xs`} />
-              </div>
+          <div className="mt-5 space-y-5 border-t border-sand-200 pt-4">
+            <div>
+              <p className="mb-2 text-sm font-bold text-ocean-950">Day-by-day itinerary</p>
+              <ItineraryEditor items={form.itinerary} onChange={(itinerary) => setForm({ ...form, itinerary })} />
             </div>
-          </details>
+            <div>
+              <p className="mb-2 text-sm font-bold text-ocean-950">Traveller reviews</p>
+              <ReviewsEditor items={form.reviews} onChange={(reviews) => setForm({ ...form, reviews })} />
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-bold text-ocean-950">FAQs</p>
+              <FaqsEditor items={form.faqs} onChange={(faqs) => setForm({ ...form, faqs })} />
+            </div>
+          </div>
 
-          {jsonError && <p className="mt-3 text-sm text-sunset-600">{jsonError}</p>}
-
-          <button onClick={save} disabled={saving} className="mt-4 rounded-full bg-ocean-600 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">
+          <button onClick={save} disabled={saving} className="mt-5 rounded-full bg-ocean-600 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">
             {saving ? "Saving..." : "Save Package"}
           </button>
         </div>
@@ -406,6 +481,15 @@ export default function AdminPackages() {
                   )}
                 </div>
                 <div className="absolute right-1.5 top-1.5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <a
+                    href={`/package/${p.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Preview live page"
+                    className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700"
+                  >
+                    <ExternalLink size={13} />
+                  </a>
                   <button onClick={() => startEdit(p)} className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700">
                     <Pencil size={13} />
                   </button>
@@ -431,6 +515,138 @@ export default function AdminPackages() {
           {items.length === 0 && <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label="No packages yet — add your first one above." /></div>}
         </div>
       )}
+    </div>
+  )
+}
+
+function ItineraryEditor({ items, onChange }: { items: ItineraryForm[]; onChange: (items: ItineraryForm[]) => void }) {
+  const add = () => onChange([...items, { day: items.length + 1, title: "", description: "", activities: [] }])
+  const update = (i: number, patch: Partial<ItineraryForm>) => onChange(items.map((d, idx) => (idx === i ? { ...d, ...patch } : d)))
+  const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
+
+  return (
+    <div className="space-y-3">
+      {items.map((day, i) => (
+        <div key={i} className="rounded-xl border border-sand-200 bg-sand-50 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wide text-ocean-950/50">Day {i + 1}</p>
+            <button type="button" onClick={() => remove(i)} className="text-ocean-950/40 hover:text-sunset-600">
+              <Trash2 size={14} />
+            </button>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Field label="Day number">
+              <input type="number" value={day.day} onChange={(e) => update(i, { day: Number(e.target.value) })} className={inputClass} />
+            </Field>
+            <Field label="Title">
+              <input value={day.title} onChange={(e) => update(i, { title: e.target.value })} className={inputClass} placeholder="e.g. Arrival in Hanoi" />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field label="Description">
+                <textarea rows={2} value={day.description} onChange={(e) => update(i, { description: e.target.value })} className={inputClass} />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <TagListField label="Activities" values={day.activities} onChange={(activities) => update(i, { activities })} placeholder="e.g. Old Quarter walking tour" />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={add}
+        className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-sand-300 py-2.5 text-sm font-semibold text-ocean-950/60 hover:border-ocean-300 hover:text-ocean-700"
+      >
+        <Plus size={14} /> Add day
+      </button>
+    </div>
+  )
+}
+
+function ReviewsEditor({ items, onChange }: { items: ReviewForm[]; onChange: (items: ReviewForm[]) => void }) {
+  const add = () => onChange([...items, { name: "", rating: 5, title: "", body: "", tripType: "", date: new Date().toISOString().slice(0, 10) }])
+  const update = (i: number, patch: Partial<ReviewForm>) => onChange(items.map((r, idx) => (idx === i ? { ...r, ...patch } : r)))
+  const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
+
+  return (
+    <div className="space-y-3">
+      {items.map((r, i) => (
+        <div key={i} className="rounded-xl border border-sand-200 bg-sand-50 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wide text-ocean-950/50">Review {i + 1}</p>
+            <button type="button" onClick={() => remove(i)} className="text-ocean-950/40 hover:text-sunset-600">
+              <Trash2 size={14} />
+            </button>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Field label="Traveller name">
+              <input value={r.name} onChange={(e) => update(i, { name: e.target.value })} className={inputClass} />
+            </Field>
+            <Field label="Rating (1-5)">
+              <input type="number" min={1} max={5} value={r.rating} onChange={(e) => update(i, { rating: Number(e.target.value) })} className={inputClass} />
+            </Field>
+            <Field label="Trip type">
+              <input value={r.tripType} onChange={(e) => update(i, { tripType: e.target.value })} className={inputClass} placeholder="e.g. Honeymoon" />
+            </Field>
+            <Field label="Date">
+              <input type="date" value={r.date} onChange={(e) => update(i, { date: e.target.value })} className={inputClass} />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field label="Review title">
+                <input value={r.title} onChange={(e) => update(i, { title: e.target.value })} className={inputClass} />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label="Review text">
+                <textarea rows={2} value={r.body} onChange={(e) => update(i, { body: e.target.value })} className={inputClass} />
+              </Field>
+            </div>
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={add}
+        className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-sand-300 py-2.5 text-sm font-semibold text-ocean-950/60 hover:border-ocean-300 hover:text-ocean-700"
+      >
+        <Plus size={14} /> Add review
+      </button>
+    </div>
+  )
+}
+
+function FaqsEditor({ items, onChange }: { items: FaqForm[]; onChange: (items: FaqForm[]) => void }) {
+  const add = () => onChange([...items, { q: "", a: "" }])
+  const update = (i: number, patch: Partial<FaqForm>) => onChange(items.map((f, idx) => (idx === i ? { ...f, ...patch } : f)))
+  const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
+
+  return (
+    <div className="space-y-3">
+      {items.map((f, i) => (
+        <div key={i} className="rounded-xl border border-sand-200 bg-sand-50 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wide text-ocean-950/50">FAQ {i + 1}</p>
+            <button type="button" onClick={() => remove(i)} className="text-ocean-950/40 hover:text-sunset-600">
+              <Trash2 size={14} />
+            </button>
+          </div>
+          <div className="space-y-2">
+            <Field label="Question">
+              <input value={f.q} onChange={(e) => update(i, { q: e.target.value })} className={inputClass} />
+            </Field>
+            <Field label="Answer">
+              <textarea rows={2} value={f.a} onChange={(e) => update(i, { a: e.target.value })} className={inputClass} />
+            </Field>
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={add}
+        className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-sand-300 py-2.5 text-sm font-semibold text-ocean-950/60 hover:border-ocean-300 hover:text-ocean-700"
+      >
+        <Plus size={14} /> Add FAQ
+      </button>
     </div>
   )
 }
