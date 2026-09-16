@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Link, NavLink, useNavigate } from "react-router-dom"
 import { Compass, Heart, Menu, Scale, Search, User, X } from "lucide-react"
 import { cn } from "../lib/utils"
@@ -15,25 +15,13 @@ const navLinks = [
 ]
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { wishlist, compareList } = useTrip()
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
-    window.addEventListener("scroll", onScroll)
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
-
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        scrolled ? "bg-white/90 shadow-sm backdrop-blur-md" : "bg-transparent",
-      )}
-    >
+    <header className="sticky top-0 z-50 w-full bg-white/95 shadow-sm backdrop-blur-md">
       <div className="h-[3px] w-full bg-gradient-to-r from-ocean-600 via-sunset-500 to-gold-400" />
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex shrink-0 items-center gap-2.5">
