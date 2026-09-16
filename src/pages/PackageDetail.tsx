@@ -6,6 +6,7 @@ import {
   Check,
   ChevronDown,
   Clock,
+  Download,
   MapPin,
   Share2,
   ShieldCheck,
@@ -428,6 +429,14 @@ export default function PackageDetail() {
               className="block w-full rounded-full border border-sand-200 py-3 text-center text-sm font-semibold text-ocean-950 hover:border-ocean-300"
             >
               Customize This Trip
+            </Link>
+            <Link
+              to={`/itinerary/${pkg.id}?date=${selectedDate}&travelers=${travelers}`}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2.5 flex w-full items-center justify-center gap-1.5 py-2 text-center text-xs font-semibold text-ocean-950/60 hover:text-ocean-700"
+            >
+              <Download size={13} /> Download itinerary (PDF)
             </Link>
 
             {pkg.flexible && (

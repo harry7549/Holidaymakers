@@ -4,6 +4,10 @@ export function getPackageBySlug(list: Package[], slug: string) {
   return list.find((p) => p.slug === slug)
 }
 
+export function getPackageById(list: Package[], id: string) {
+  return list.find((p) => p.id === id)
+}
+
 export function getPackagesByDestination(list: Package[], destinationId: string) {
   return list.filter((p) => p.destinationId === destinationId)
 }

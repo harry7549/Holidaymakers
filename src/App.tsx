@@ -9,6 +9,7 @@ import PackageDetail from "./pages/PackageDetail"
 import BuildTrip from "./pages/BuildTrip"
 import Checkout from "./pages/Checkout"
 import BookingConfirmation from "./pages/BookingConfirmation"
+import ItineraryPrint from "./pages/ItineraryPrint"
 import Destinations from "./pages/Destinations"
 import DestinationDetail from "./pages/DestinationDetail"
 import Deals from "./pages/Deals"
@@ -58,6 +59,8 @@ export default function App() {
           <Route path="/compare" element={<Compare />} />
           <Route path="*" element={<NotFound />} />
         </Route>
+
+        <Route path="/itinerary/:packageId" element={<ItineraryPrint />} />
 
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route

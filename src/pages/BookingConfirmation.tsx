@@ -3,13 +3,11 @@ import { Calendar, Check, Download, Mail, MapPin, Phone, Users } from "lucide-re
 import { useTrip } from "../context/TripContext"
 import { formatDate, formatPrice } from "../lib/utils"
 import { SmartImage } from "../components/SmartImage"
-import { useToast } from "../context/ToastContext"
 import { Reveal } from "../components/Reveal"
 
 export default function BookingConfirmation() {
   const { bookingId } = useParams()
   const { bookings } = useTrip()
-  const { showToast } = useToast()
   const booking = bookings.find((b) => b.id === bookingId)
 
   if (!booking) return <Navigate to="/dashboard" replace />
@@ -65,12 +63,14 @@ export default function BookingConfirmation() {
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <button
-          onClick={() => showToast("Itinerary PDF would download here in production", "info")}
+        <Link
+          to={`/itinerary/${booking.packageId}?date=${booking.startDate}&travelers=${booking.travelers}&bookingId=${booking.id}`}
+          target="_blank"
+          rel="noreferrer"
           className="flex flex-1 items-center justify-center gap-2 rounded-full border border-sand-200 py-3 text-sm font-semibold text-ocean-950 hover:border-ocean-300"
         >
           <Download size={15} /> Download Itinerary
-        </button>
+        </Link>
         <Link
           to="/dashboard"
           className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ocean-600 py-3 text-sm font-semibold text-white hover:bg-ocean-700"

@@ -158,3 +158,9 @@
   background-size: 1400px 100%;
   animation: shimmer 2.2s linear infinite;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
