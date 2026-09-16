@@ -30,7 +30,7 @@ export function ParallaxHero({ image, imageAlt, eyebrow, heading, subtext }: Par
   const cueOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0])
 
   return (
-    <div ref={ref} className="relative h-[100svh] min-h-[560px] w-full overflow-hidden bg-ocean-950">
+    <div ref={ref} className="relative -mt-[67px] h-[100svh] min-h-[560px] w-full overflow-hidden bg-ocean-950">
       <motion.div style={{ y: imageY }} className="absolute inset-x-0 -top-[8%] -bottom-[8%]">
         <SmartImage src={image} alt={imageAlt} className="h-full w-full" imgClassName="animate-hero-zoom" />
       </motion.div>

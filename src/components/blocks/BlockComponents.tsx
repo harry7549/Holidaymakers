@@ -57,14 +57,14 @@ export function PageBannerBlock({ content }: BlockProps) {
 
   if (content.image) {
     return (
-      <ParallaxBanner image={content.image} alt={content.heading} className="flex h-72 items-center sm:h-96">
+      <ParallaxBanner image={content.image} alt={content.heading} className="-mt-[67px] flex h-72 items-center sm:h-96">
         {inner}
       </ParallaxBanner>
     )
   }
 
   return (
-    <section className="relative overflow-hidden bg-ocean-950 py-20">
+    <section className="relative -mt-[67px] overflow-hidden bg-ocean-950 py-20">
       <div className="absolute inset-0 bg-gradient-to-br from-ocean-950 via-ocean-900 to-ocean-800" />
       {inner}
     </section>

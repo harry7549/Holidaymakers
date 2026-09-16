@@ -17,7 +17,7 @@ export default function DestinationDetail() {
 
   return (
     <div>
-      <ParallaxBanner image={destination.image} alt={destination.name} className="h-72 sm:h-96">
+      <ParallaxBanner image={destination.image} alt={destination.name} className="-mt-[67px] h-72 sm:h-96">
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
           <span className="mb-2 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white backdrop-blur">
             {destination.region}
