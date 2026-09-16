@@ -8,8 +8,14 @@ async function authHeaders(): Promise<Record<string, string>> {
 
 async function parseErrorOr<T>(res: Response, fallback: string): Promise<T> {
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.error || fallback)
+    const raw = await res.text().catch(() => "")
+    let detail = ""
+    try {
+      detail = JSON.parse(raw)?.error || ""
+    } catch {
+      detail = raw.trim().slice(0, 200)
+    }
+    throw new Error(detail ? `${fallback}: ${detail}` : `${fallback} (HTTP ${res.status})`)
   }
   if (res.status === 204) return undefined as T
   return res.json()

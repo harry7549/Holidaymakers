@@ -1,12 +1,25 @@
 import { useMemo, useState } from "react"
-import { Eye, EyeOff, ExternalLink, FileText, GripVertical, Layers, Pencil, Plus, Search, Trash2, X } from "lucide-react"
+import {
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  ExternalLink,
+  FileText,
+  GripVertical,
+  Layers,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminReorder, adminUpdate } from "../../lib/adminApi"
 import { useToast } from "../../context/ToastContext"
 import { BLOCK_TYPES, getBlockSchema } from "../../components/blocks/registry"
 import { BlockContentEditor } from "../../components/admin/BlockContentEditor"
 import { ImageUploadField } from "../../components/admin/ImageUploadField"
-import { AdminPageHeader } from "../../components/admin/AdminUI"
+import { AdminPageHeader, Badge } from "../../components/admin/AdminUI"
 import { defaultMetaByPage } from "../../data/pageBlocks"
 import type { BlockContent } from "../../data/types"
 import { cn, humanize, slugify } from "../../lib/utils"
@@ -64,6 +77,8 @@ export default function AdminPages() {
   const { items: metaRows, setItems: setMetaRows, loading: metaLoading } = useAdminResource<MetaRow>("page-meta")
   const { showToast } = useToast()
 
+  const [view, setView] = useState<"list" | "editor">("list")
+  const [search, setSearch] = useState("")
   const [activePage, setActivePage] = useState(CORE_PAGES[0].slug)
   const [tab, setTab] = useState<"blocks" | "seo">("blocks")
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -81,8 +96,21 @@ export default function AdminPages() {
     return [...CORE_PAGES.map((p) => ({ ...p, core: true })), ...custom]
   }, [metaRows])
 
+  const filteredPages = useMemo(
+    () => pages.filter((p) => p.label.toLowerCase().includes(search.trim().toLowerCase())),
+    [pages, search],
+  )
+
   const pageBlocks = blocks.filter((b) => b.page === activePage).sort((a, b) => a.position - b.position)
   const meta = metaRows.find((m) => m.id === activePage)
+  const activeLabel = pages.find((p) => p.slug === activePage)?.label ?? humanize(activePage)
+
+  const openEditor = (slug: string) => {
+    setActivePage(slug)
+    setTab("blocks")
+    setEditingId(null)
+    setView("editor")
+  }
 
   const createPage = async () => {
     const slug = slugify(newPageSlug || newPageLabel)
@@ -101,12 +129,12 @@ export default function AdminPages() {
     try {
       const created = await adminCreate<MetaRow>("page-meta", { id: slug, title: newPageLabel.trim(), description: "", og_image: "" })
       setMetaRows((prev) => [...prev, created])
-      setActivePage(slug)
       setShowNewPage(false)
       setNewPageLabel("")
       setNewPageSlug("")
       setNewPageError(null)
       showToast(`Page "${humanize(slug)}" created — add blocks below`)
+      openEditor(slug)
     } catch (err) {
       setNewPageError(err instanceof Error ? err.message : "Failed to create page")
     }
@@ -120,7 +148,10 @@ export default function AdminPages() {
       await adminDelete("page-meta", slug)
       setBlocks((prev) => prev.filter((b) => b.page !== slug))
       setMetaRows((prev) => prev.filter((m) => m.id !== slug))
-      if (activePage === slug) setActivePage(CORE_PAGES[0].slug)
+      if (activePage === slug) {
+        setActivePage(CORE_PAGES[0].slug)
+        setView("list")
+      }
       showToast("Page deleted")
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to delete page", "info")
@@ -248,61 +279,45 @@ export default function AdminPages() {
     }
   }
 
-  return (
-    <div>
-      <AdminPageHeader icon={Layers} title="Pages" subtitle="Edit the content blocks and SEO details for every page — like a CMS." />
-
-      <div className="mb-2 flex flex-wrap items-center gap-2">
-        {pages.map((p) => (
-          <span key={p.slug} className="group relative inline-flex">
-            <button
-              onClick={() => setActivePage(p.slug)}
-              className={cn(
-                "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
-                activePage === p.slug ? "border-ocean-600 bg-ocean-600 text-white" : "border-sand-200 text-ocean-950/70 hover:border-ocean-300",
-                !p.core && "pr-7",
-              )}
-            >
-              {p.label}
-            </button>
-            {!p.core && (
+  if (view === "list") {
+    return (
+      <div>
+        <AdminPageHeader
+          icon={Layers}
+          title="Pages"
+          subtitle="Edit the content blocks and SEO details for every page — like a CMS."
+          action={
+            !showNewPage && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  deletePage(p.slug)
-                }}
-                title="Delete page"
-                className={cn(
-                  "absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-0.5",
-                  activePage === p.slug ? "text-white/70 hover:text-white" : "text-ocean-950/40 hover:text-sunset-600",
-                )}
+                onClick={() => setShowNewPage(true)}
+                className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-ocean-700"
               >
-                <X size={13} />
+                <Plus size={15} /> Create New
               </button>
-            )}
-          </span>
-        ))}
+            )
+          }
+        />
 
-        {showNewPage ? (
-          <div className="flex flex-wrap items-center gap-1.5 rounded-full border border-ocean-300 bg-white py-1 pl-3 pr-1.5">
+        {showNewPage && (
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-ocean-300 bg-white p-3">
             <input
               autoFocus
               value={newPageLabel}
               onChange={(e) => {
                 setNewPageLabel(e.target.value)
-                if (!newPageSlug) setNewPageError(null)
+                setNewPageError(null)
               }}
               placeholder="Page name"
-              className="w-28 border-0 bg-transparent text-sm outline-none"
+              className="rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400"
             />
             <span className="text-ocean-950/30">/</span>
             <input
               value={newPageSlug}
               onChange={(e) => setNewPageSlug(e.target.value)}
               placeholder={slugify(newPageLabel) || "url-slug"}
-              className="w-28 border-0 bg-transparent text-sm text-ocean-950/60 outline-none"
+              className="w-40 rounded-lg border border-sand-200 px-3 py-2 text-sm text-ocean-950/70 outline-none focus:border-ocean-400"
             />
-            <button onClick={createPage} className="rounded-full bg-ocean-600 px-3 py-1.5 text-xs font-bold text-white">
+            <button onClick={createPage} className="rounded-full bg-ocean-600 px-4 py-2 text-sm font-bold text-white">
               Create
             </button>
             <button
@@ -310,22 +325,129 @@ export default function AdminPages() {
                 setShowNewPage(false)
                 setNewPageError(null)
               }}
-              className="rounded-full p-1.5 text-ocean-950/40 hover:bg-sand-100"
+              className="rounded-full p-2 text-ocean-950/40 hover:bg-sand-100"
             >
-              <X size={14} />
+              <X size={16} />
             </button>
+            {newPageError && <p className="w-full text-xs font-medium text-sunset-600">{newPageError}</p>}
           </div>
-        ) : (
+        )}
+
+        <div className="mb-4 flex items-center gap-2 rounded-2xl border border-sand-200 bg-white px-3 py-2">
+          <Search size={15} className="text-ocean-950/40" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by title..."
+            className="w-full bg-transparent text-sm outline-none"
+          />
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-sand-200 bg-white">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-sand-200 text-xs font-bold uppercase tracking-wide text-ocean-950/40">
+                <th className="px-4 py-3 font-bold">Title</th>
+                <th className="px-4 py-3 font-bold">Slug</th>
+                <th className="px-4 py-3 font-bold">Layout</th>
+                <th className="px-4 py-3 font-bold">SEO title</th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-sand-100">
+              {(blocksLoading || metaLoading) && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-6 text-center text-ocean-950/40">
+                    Loading...
+                  </td>
+                </tr>
+              )}
+              {!blocksLoading &&
+                !metaLoading &&
+                filteredPages.map((p) => {
+                  const pBlocks = blocks.filter((b) => b.page === p.slug).sort((a, b) => a.position - b.position)
+                  const pMeta = metaRows.find((m) => m.id === p.slug)
+                  return (
+                    <tr key={p.slug} className="cursor-pointer transition-colors hover:bg-sand-50" onClick={() => openEditor(p.slug)}>
+                      <td className="px-4 py-3.5">
+                        <span className="font-display text-sm font-bold text-ocean-950 hover:text-ocean-600">{p.label}</span>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-xs text-ocean-950/70">{pagePath(p.slug)}</code>
+                      </td>
+                      <td className="max-w-xs px-4 py-3.5">
+                        {pBlocks.length === 0 ? (
+                          <span className="text-xs text-ocean-950/35">No blocks yet</span>
+                        ) : (
+                          <div className="flex flex-wrap gap-1">
+                            {pBlocks.slice(0, 3).map((b) => (
+                              <Badge key={b.id} tone="neutral">
+                                {getBlockSchema(b.type)?.label ?? b.type}
+                              </Badge>
+                            ))}
+                            {pBlocks.length > 3 && <Badge tone="neutral">+{pBlocks.length - 3} more</Badge>}
+                          </div>
+                        )}
+                      </td>
+                      <td className="max-w-[220px] truncate px-4 py-3.5 text-xs text-ocean-950/50">{pMeta?.title || "—"}</td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                          <a
+                            href={pagePath(p.slug)}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="View live"
+                            className="rounded-lg p-2 text-ocean-950/40 hover:bg-sand-100 hover:text-ocean-700"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
+                          <button onClick={() => openEditor(p.slug)} title="Edit" className="rounded-lg p-2 text-ocean-950/40 hover:bg-sand-100 hover:text-ocean-700">
+                            <Pencil size={14} />
+                          </button>
+                          {!p.core && (
+                            <button onClick={() => deletePage(p.slug)} title="Delete page" className="rounded-lg p-2 text-ocean-950/40 hover:bg-sand-100 hover:text-sunset-600">
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              {!blocksLoading && !metaLoading && filteredPages.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-ocean-950/40">
+                    No pages match "{search}".
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <button
+        onClick={() => setView("list")}
+        className="mb-4 flex items-center gap-1.5 text-sm font-semibold text-ocean-950/60 hover:text-ocean-700"
+      >
+        <ArrowLeft size={15} /> All pages
+      </button>
+
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-2xl font-bold text-ocean-950">{activeLabel}</h1>
+        {!CORE_SLUGS.has(activePage) && (
           <button
-            onClick={() => setShowNewPage(true)}
-            className="flex items-center gap-1 rounded-full border border-dashed border-sand-300 px-4 py-2 text-sm font-semibold text-ocean-950/60 hover:border-ocean-300 hover:text-ocean-700"
+            onClick={() => deletePage(activePage)}
+            className="flex items-center gap-1.5 rounded-full border border-sand-200 px-3.5 py-2 text-xs font-semibold text-ocean-950/60 hover:border-sunset-300 hover:text-sunset-600"
           >
-            <Plus size={15} /> New page
+            <Trash2 size={13} /> Delete page
           </button>
         )}
       </div>
-      {newPageError && <p className="mb-3 text-xs font-medium text-sunset-600">{newPageError}</p>}
-
       <div className="mb-5 flex items-center gap-1.5 text-xs text-ocean-950/50">
         <span>Reference:</span>
         <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-ocean-950/70">{pagePath(activePage)}</code>
@@ -339,126 +461,157 @@ export default function AdminPages() {
         </a>
       </div>
 
-      <div className="mb-5 flex gap-1 border-b border-sand-200">
-        <button
-          onClick={() => setTab("blocks")}
-          className={cn("flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-semibold", tab === "blocks" ? "border-ocean-600 text-ocean-950" : "border-transparent text-ocean-950/50")}
-        >
-          <Layers size={14} /> Content Blocks
-        </button>
-        <button
-          onClick={() => setTab("seo")}
-          className={cn("flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-semibold", tab === "seo" ? "border-ocean-600 text-ocean-950" : "border-transparent text-ocean-950/50")}
-        >
-          <Search size={14} /> SEO / Meta
-        </button>
-      </div>
-
-      {tab === "blocks" ? (
+      <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
         <div>
-          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-sand-200 bg-white p-3">
-            <select value={addingType} onChange={(e) => setAddingType(e.target.value)} className="flex-1 rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400 sm:flex-none">
-              <option value="">Choose a block type to add...</option>
-              {BLOCK_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {getBlockSchema(t)?.label ?? t}
-                </option>
-              ))}
-            </select>
+          <div className="mb-5 flex gap-1 border-b border-sand-200">
             <button
-              onClick={addBlock}
-              disabled={!addingType}
-              className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+              onClick={() => setTab("blocks")}
+              className={cn("flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-semibold", tab === "blocks" ? "border-ocean-600 text-ocean-950" : "border-transparent text-ocean-950/50")}
             >
-              <Plus size={15} /> Add block to {pages.find((p) => p.slug === activePage)?.label}
+              <Layers size={14} /> Content Blocks
+            </button>
+            <button
+              onClick={() => setTab("seo")}
+              className={cn("flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-semibold", tab === "seo" ? "border-ocean-600 text-ocean-950" : "border-transparent text-ocean-950/50")}
+            >
+              <Search size={14} /> SEO / Meta
             </button>
           </div>
 
-          {blocksLoading && <p className="text-sm text-ocean-950/50">Loading...</p>}
-
-          <div className="space-y-2">
-            {pageBlocks.map((b) => {
-              const schema = getBlockSchema(b.type)
-              const isEditing = editingId === b.id
-              return (
-                <div
-                  key={b.id}
-                  draggable
-                  onDragStart={() => setDragId(b.id)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => onDrop(b.id)}
-                  className={cn("rounded-2xl border bg-white transition-colors", isEditing ? "border-ocean-300" : "border-sand-200")}
+          {tab === "blocks" ? (
+            <div>
+              <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-sand-200 bg-white p-3">
+                <select value={addingType} onChange={(e) => setAddingType(e.target.value)} className="flex-1 rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400 sm:flex-none">
+                  <option value="">Choose a block type to add...</option>
+                  {BLOCK_TYPES.map((t) => (
+                    <option key={t} value={t}>
+                      {getBlockSchema(t)?.label ?? t}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={addBlock}
+                  disabled={!addingType}
+                  className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
                 >
-                  <div className="flex items-center gap-2 p-3">
-                    <span className="cursor-grab text-ocean-950/30">
-                      <GripVertical size={16} />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="flex items-center gap-2 text-sm font-semibold text-ocean-950">
-                        <FileText size={14} className="shrink-0 text-ocean-950/40" />
-                        {schema?.label ?? b.type}
-                        {!b.visible && <span className="rounded-full bg-sand-200 px-2 py-0.5 text-[10px] font-bold uppercase text-ocean-950/50">Hidden</span>}
-                        {schema?.liveData && <span className="rounded-full bg-ocean-50 px-2 py-0.5 text-[10px] font-bold uppercase text-ocean-600">Live data</span>}
-                      </p>
-                      <p className="truncate text-xs text-ocean-950/50">{schema?.description}</p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <button onClick={() => toggleVisible(b)} title={b.visible ? "Hide" : "Show"} className="rounded-lg p-2 text-ocean-950/50 hover:bg-sand-100">
-                        {b.visible ? <Eye size={15} /> : <EyeOff size={15} />}
-                      </button>
-                      <button onClick={() => (isEditing ? setEditingId(null) : startEdit(b))} className="rounded-lg p-2 text-ocean-950/50 hover:bg-sand-100">
-                        <Pencil size={15} />
-                      </button>
-                      <select
-                        onChange={(e) => {
-                          if (e.target.value) duplicateToPage(b, e.target.value)
-                          e.target.value = ""
-                        }}
-                        defaultValue=""
-                        title="Copy to another page"
-                        className="rounded-lg border border-sand-200 p-1.5 text-xs text-ocean-950/50"
-                      >
-                        <option value="" disabled>
-                          Copy to...
-                        </option>
-                        {pages.filter((p) => p.slug !== activePage).map((p) => (
-                          <option key={p.slug} value={p.slug}>
-                            {p.label}
-                          </option>
-                        ))}
-                      </select>
-                      <button onClick={() => removeBlock(b.id)} className="rounded-lg p-2 text-ocean-950/50 hover:bg-sand-100 hover:text-sunset-600">
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </div>
+                  <Plus size={15} /> Add block
+                </button>
+              </div>
 
-                  {isEditing && (
-                    <div className="border-t border-sand-100 p-4">
-                      <BlockContentEditor type={b.type} content={draftContent} onChange={setDraftContent} />
-                      <div className="mt-4 flex justify-end gap-2">
-                        <button onClick={() => setEditingId(null)} className="rounded-full border border-sand-200 px-4 py-2 text-sm font-semibold text-ocean-950/70">
-                          Cancel
-                        </button>
-                        <button onClick={saveEdit} className="rounded-full bg-ocean-600 px-4 py-2 text-sm font-bold text-white">
-                          Save
-                        </button>
+              {blocksLoading && <p className="text-sm text-ocean-950/50">Loading...</p>}
+
+              <div className="space-y-2">
+                {pageBlocks.map((b, i) => {
+                  const schema = getBlockSchema(b.type)
+                  const isEditing = editingId === b.id
+                  return (
+                    <div
+                      key={b.id}
+                      draggable
+                      onDragStart={() => setDragId(b.id)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={() => onDrop(b.id)}
+                      className={cn("rounded-2xl border bg-white transition-colors", isEditing ? "border-ocean-300" : "border-sand-200")}
+                    >
+                      <div className="flex items-center gap-2 p-3">
+                        <span className="w-5 shrink-0 text-center text-xs font-bold text-ocean-950/30">{String(i + 1).padStart(2, "0")}</span>
+                        <span className="cursor-grab text-ocean-950/30">
+                          <GripVertical size={16} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="flex items-center gap-2 text-sm font-semibold text-ocean-950">
+                            <FileText size={14} className="shrink-0 text-ocean-950/40" />
+                            {schema?.label ?? b.type}
+                            {!b.visible && <span className="rounded-full bg-sand-200 px-2 py-0.5 text-[10px] font-bold uppercase text-ocean-950/50">Hidden</span>}
+                            {schema?.liveData && <span className="rounded-full bg-ocean-50 px-2 py-0.5 text-[10px] font-bold uppercase text-ocean-600">Live data</span>}
+                          </p>
+                          <p className="truncate text-xs text-ocean-950/50">{schema?.description}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-1">
+                          <button onClick={() => toggleVisible(b)} title={b.visible ? "Hide" : "Show"} className="rounded-lg p-2 text-ocean-950/50 hover:bg-sand-100">
+                            {b.visible ? <Eye size={15} /> : <EyeOff size={15} />}
+                          </button>
+                          <button onClick={() => (isEditing ? setEditingId(null) : startEdit(b))} className="rounded-lg p-2 text-ocean-950/50 hover:bg-sand-100">
+                            <Pencil size={15} />
+                          </button>
+                          <select
+                            onChange={(e) => {
+                              if (e.target.value) duplicateToPage(b, e.target.value)
+                              e.target.value = ""
+                            }}
+                            defaultValue=""
+                            title="Copy to another page"
+                            className="rounded-lg border border-sand-200 p-1.5 text-xs text-ocean-950/50"
+                          >
+                            <option value="" disabled>
+                              Copy to...
+                            </option>
+                            {pages.filter((p) => p.slug !== activePage).map((p) => (
+                              <option key={p.slug} value={p.slug}>
+                                {p.label}
+                              </option>
+                            ))}
+                          </select>
+                          <button onClick={() => removeBlock(b.id)} className="rounded-lg p-2 text-ocean-950/50 hover:bg-sand-100 hover:text-sunset-600">
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
                       </div>
+
+                      {isEditing && (
+                        <div className="border-t border-sand-100 p-4">
+                          <BlockContentEditor type={b.type} content={draftContent} onChange={setDraftContent} />
+                          <div className="mt-4 flex justify-end gap-2">
+                            <button onClick={() => setEditingId(null)} className="rounded-full border border-sand-200 px-4 py-2 text-sm font-semibold text-ocean-950/70">
+                              Cancel
+                            </button>
+                            <button onClick={saveEdit} className="rounded-full bg-ocean-600 px-4 py-2 text-sm font-bold text-white">
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )
-            })}
-            {!blocksLoading && pageBlocks.length === 0 && (
-              <p className="rounded-2xl border border-dashed border-sand-300 p-8 text-center text-sm text-ocean-950/50">
-                No blocks on this page yet — add one above.
-              </p>
-            )}
-          </div>
+                  )
+                })}
+                {!blocksLoading && pageBlocks.length === 0 && (
+                  <p className="rounded-2xl border border-dashed border-sand-300 p-8 text-center text-sm text-ocean-950/50">
+                    No blocks on this page yet — add one above.
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <SeoForm key={activePage} loading={metaLoading} initial={meta} page={activePage} onSave={saveMeta} />
+          )}
         </div>
-      ) : (
-        <SeoForm key={activePage} loading={metaLoading} initial={meta} page={activePage} onSave={saveMeta} />
-      )}
+
+        <div className="h-fit rounded-2xl border border-sand-200 bg-white p-4">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-ocean-950/40">Page info</p>
+          <dl className="space-y-3 text-sm">
+            <div>
+              <dt className="text-xs text-ocean-950/40">Slug</dt>
+              <dd className="font-mono text-ocean-950/80">{activePage}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-ocean-950/40">Blocks</dt>
+              <dd className="text-ocean-950/80">{pageBlocks.length} total, {pageBlocks.filter((b) => b.visible).length} visible</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-ocean-950/40">Type</dt>
+              <dd className="text-ocean-950/80">{CORE_SLUGS.has(activePage) ? "Core page" : "Custom page"}</dd>
+            </div>
+          </dl>
+          <a
+            href={pagePath(activePage)}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-4 flex items-center justify-center gap-1.5 rounded-full border border-sand-200 px-3 py-2 text-xs font-semibold text-ocean-950/70 hover:border-ocean-300 hover:text-ocean-700"
+          >
+            <ExternalLink size={12} /> View live page
+          </a>
+        </div>
+      </div>
     </div>
   )
 }
@@ -484,7 +637,7 @@ function SeoForm({
   if (loading) return <p className="text-sm text-ocean-950/50">Loading...</p>
 
   return (
-    <div className="max-w-2xl space-y-3 rounded-2xl border border-sand-200 bg-white p-5">
+    <div className="space-y-3 rounded-2xl border border-sand-200 bg-white p-5">
       <div>
         <label className="mb-1 block text-xs font-semibold text-ocean-950/60">Page title (browser tab / search results)</label>
         <input
