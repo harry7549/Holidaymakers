@@ -1,13 +1,14 @@
-import { useState } from "react"
-import { Eye, EyeOff, FileText, GripVertical, Layers, Pencil, Plus, Search, Trash2 } from "lucide-react"
+import { useMemo, useState } from "react"
+import { Eye, EyeOff, ExternalLink, FileText, GripVertical, Layers, Pencil, Plus, Search, Trash2, X } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminReorder, adminUpdate } from "../../lib/adminApi"
 import { useToast } from "../../context/ToastContext"
 import { BLOCK_TYPES, getBlockSchema } from "../../components/blocks/registry"
 import { BlockContentEditor } from "../../components/admin/BlockContentEditor"
+import { ImageUploadField } from "../../components/admin/ImageUploadField"
 import { defaultMetaByPage } from "../../data/pageBlocks"
 import type { BlockContent } from "../../data/types"
-import { cn } from "../../lib/utils"
+import { cn, humanize, slugify } from "../../lib/utils"
 
 interface BlockRow {
   id: string
@@ -25,26 +26,105 @@ interface MetaRow {
   og_image: string
 }
 
-const MANAGED_PAGES = [
+const CORE_PAGES = [
   { slug: "home", label: "Home" },
   { slug: "about", label: "About" },
   { slug: "contact", label: "Contact" },
 ]
+const CORE_SLUGS = new Set(CORE_PAGES.map((p) => p.slug))
+
+// Top-level paths already used by real routes elsewhere in the app — a
+// custom page can't reuse one of these or it would just be shadowed.
+const RESERVED_SLUGS = new Set([
+  "explore",
+  "package",
+  "build-trip",
+  "checkout",
+  "booking-confirmation",
+  "destinations",
+  "deals",
+  "suppliers",
+  "login",
+  "signup",
+  "dashboard",
+  "wishlist",
+  "compare",
+  "admin",
+  "itinerary",
+  ...CORE_SLUGS,
+])
+
+function pagePath(slug: string) {
+  return slug === "home" ? "/" : `/${slug}`
+}
 
 export default function AdminPages() {
   const { items: blocks, setItems: setBlocks, loading: blocksLoading } = useAdminResource<BlockRow>("page-blocks")
   const { items: metaRows, setItems: setMetaRows, loading: metaLoading } = useAdminResource<MetaRow>("page-meta")
   const { showToast } = useToast()
 
-  const [activePage, setActivePage] = useState(MANAGED_PAGES[0].slug)
+  const [activePage, setActivePage] = useState(CORE_PAGES[0].slug)
   const [tab, setTab] = useState<"blocks" | "seo">("blocks")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draftContent, setDraftContent] = useState<BlockContent>({})
   const [addingType, setAddingType] = useState("")
   const [dragId, setDragId] = useState<string | null>(null)
+  const [showNewPage, setShowNewPage] = useState(false)
+  const [newPageLabel, setNewPageLabel] = useState("")
+  const [newPageSlug, setNewPageSlug] = useState("")
+  const [newPageError, setNewPageError] = useState<string | null>(null)
+
+  const pages = useMemo(() => {
+    const customSlugs = metaRows.map((m) => m.id).filter((slug) => !CORE_SLUGS.has(slug))
+    const custom = [...new Set(customSlugs)].sort().map((slug) => ({ slug, label: humanize(slug), core: false }))
+    return [...CORE_PAGES.map((p) => ({ ...p, core: true })), ...custom]
+  }, [metaRows])
 
   const pageBlocks = blocks.filter((b) => b.page === activePage).sort((a, b) => a.position - b.position)
   const meta = metaRows.find((m) => m.id === activePage)
+
+  const createPage = async () => {
+    const slug = slugify(newPageSlug || newPageLabel)
+    if (!newPageLabel.trim()) {
+      setNewPageError("Give the page a name")
+      return
+    }
+    if (!slug) {
+      setNewPageError("Enter a valid URL slug")
+      return
+    }
+    if (RESERVED_SLUGS.has(slug) || pages.some((p) => p.slug === slug)) {
+      setNewPageError(`"/${slug}" is already in use — pick a different URL`)
+      return
+    }
+    try {
+      const created = await adminCreate<MetaRow>("page-meta", { id: slug, title: newPageLabel.trim(), description: "", og_image: "" })
+      setMetaRows((prev) => [...prev, created])
+      setActivePage(slug)
+      setShowNewPage(false)
+      setNewPageLabel("")
+      setNewPageSlug("")
+      setNewPageError(null)
+      showToast(`Page "${humanize(slug)}" created — add blocks below`)
+    } catch (err) {
+      setNewPageError(err instanceof Error ? err.message : "Failed to create page")
+    }
+  }
+
+  const deletePage = async (slug: string) => {
+    if (!confirm(`Delete the page "${humanize(slug)}" and all its blocks? This can't be undone.`)) return
+    try {
+      const ids = blocks.filter((b) => b.page === slug).map((b) => b.id)
+      await Promise.all(ids.map((id) => adminDelete("page-blocks", id)))
+      await adminDelete("page-meta", slug)
+      setBlocks((prev) => prev.filter((b) => b.page !== slug))
+      setMetaRows((prev) => prev.filter((m) => m.id !== slug))
+      if (activePage === slug) setActivePage(CORE_PAGES[0].slug)
+      showToast("Page deleted")
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to delete page", "info")
+    }
+  }
 
   const startEdit = (b: BlockRow) => {
     setEditingId(b.id)
@@ -118,7 +198,7 @@ export default function AdminPages() {
         content: b.content,
       })
       setBlocks((prev) => [...prev, created])
-      showToast(`Copied to ${MANAGED_PAGES.find((p) => p.slug === targetPage)?.label ?? targetPage}`)
+      showToast(`Copied to ${pages.find((p) => p.slug === targetPage)?.label ?? targetPage}`)
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to copy block", "info")
     }
@@ -176,19 +256,91 @@ export default function AdminPages() {
         <p className="text-sm text-ocean-950/60">Edit the content blocks and SEO details for every page — like a CMS.</p>
       </div>
 
-      <div className="mb-5 flex flex-wrap gap-2">
-        {MANAGED_PAGES.map((p) => (
-          <button
-            key={p.slug}
-            onClick={() => setActivePage(p.slug)}
-            className={cn(
-              "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
-              activePage === p.slug ? "border-ocean-600 bg-ocean-600 text-white" : "border-sand-200 text-ocean-950/70 hover:border-ocean-300",
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        {pages.map((p) => (
+          <span key={p.slug} className="group relative inline-flex">
+            <button
+              onClick={() => setActivePage(p.slug)}
+              className={cn(
+                "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
+                activePage === p.slug ? "border-ocean-600 bg-ocean-600 text-white" : "border-sand-200 text-ocean-950/70 hover:border-ocean-300",
+                !p.core && "pr-7",
+              )}
+            >
+              {p.label}
+            </button>
+            {!p.core && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  deletePage(p.slug)
+                }}
+                title="Delete page"
+                className={cn(
+                  "absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-0.5",
+                  activePage === p.slug ? "text-white/70 hover:text-white" : "text-ocean-950/40 hover:text-sunset-600",
+                )}
+              >
+                <X size={13} />
+              </button>
             )}
-          >
-            {p.label}
-          </button>
+          </span>
         ))}
+
+        {showNewPage ? (
+          <div className="flex flex-wrap items-center gap-1.5 rounded-full border border-ocean-300 bg-white py-1 pl-3 pr-1.5">
+            <input
+              autoFocus
+              value={newPageLabel}
+              onChange={(e) => {
+                setNewPageLabel(e.target.value)
+                if (!newPageSlug) setNewPageError(null)
+              }}
+              placeholder="Page name"
+              className="w-28 border-0 bg-transparent text-sm outline-none"
+            />
+            <span className="text-ocean-950/30">/</span>
+            <input
+              value={newPageSlug}
+              onChange={(e) => setNewPageSlug(e.target.value)}
+              placeholder={slugify(newPageLabel) || "url-slug"}
+              className="w-28 border-0 bg-transparent text-sm text-ocean-950/60 outline-none"
+            />
+            <button onClick={createPage} className="rounded-full bg-ocean-600 px-3 py-1.5 text-xs font-bold text-white">
+              Create
+            </button>
+            <button
+              onClick={() => {
+                setShowNewPage(false)
+                setNewPageError(null)
+              }}
+              className="rounded-full p-1.5 text-ocean-950/40 hover:bg-sand-100"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowNewPage(true)}
+            className="flex items-center gap-1 rounded-full border border-dashed border-sand-300 px-4 py-2 text-sm font-semibold text-ocean-950/60 hover:border-ocean-300 hover:text-ocean-700"
+          >
+            <Plus size={15} /> New page
+          </button>
+        )}
+      </div>
+      {newPageError && <p className="mb-3 text-xs font-medium text-sunset-600">{newPageError}</p>}
+
+      <div className="mb-5 flex items-center gap-1.5 text-xs text-ocean-950/50">
+        <span>Reference:</span>
+        <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-ocean-950/70">{pagePath(activePage)}</code>
+        <a
+          href={pagePath(activePage)}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-0.5 font-semibold text-ocean-600 hover:text-ocean-700"
+        >
+          View live <ExternalLink size={11} />
+        </a>
       </div>
 
       <div className="mb-5 flex gap-1 border-b border-sand-200">
@@ -222,7 +374,7 @@ export default function AdminPages() {
               disabled={!addingType}
               className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
             >
-              <Plus size={15} /> Add block to {MANAGED_PAGES.find((p) => p.slug === activePage)?.label}
+              <Plus size={15} /> Add block to {pages.find((p) => p.slug === activePage)?.label}
             </button>
           </div>
 
@@ -273,7 +425,7 @@ export default function AdminPages() {
                         <option value="" disabled>
                           Copy to...
                         </option>
-                        {MANAGED_PAGES.filter((p) => p.slug !== activePage).map((p) => (
+                        {pages.filter((p) => p.slug !== activePage).map((p) => (
                           <option key={p.slug} value={p.slug}>
                             {p.label}
                           </option>
@@ -309,7 +461,7 @@ export default function AdminPages() {
           </div>
         </div>
       ) : (
-        <SeoForm loading={metaLoading} initial={meta} page={activePage} onSave={saveMeta} />
+        <SeoForm key={activePage} loading={metaLoading} initial={meta} page={activePage} onSave={saveMeta} />
       )}
     </div>
   )
@@ -355,12 +507,8 @@ function SeoForm({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-semibold text-ocean-950/60">Social share image URL</label>
-        <input
-          value={form.og_image}
-          onChange={(e) => setForm({ ...form, og_image: e.target.value })}
-          className="w-full rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400"
-        />
+        <label className="mb-1 block text-xs font-semibold text-ocean-950/60">Social share image</label>
+        <ImageUploadField value={form.og_image} onChange={(v) => setForm({ ...form, og_image: v })} />
       </div>
       <button onClick={() => onSave(form)} className="rounded-full bg-ocean-600 px-5 py-2.5 text-sm font-bold text-white">
         Save SEO details

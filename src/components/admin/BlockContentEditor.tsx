@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 import { getBlockSchema, type FieldDef } from "../blocks/registry"
 import type { BlockContent } from "../../data/types"
+import { ImageUploadField } from "./ImageUploadField"
 
 interface Props {
   type: string
@@ -64,12 +65,18 @@ function FieldControl({ field, value, onChange }: { field: FieldDef; value: unkn
     )
   }
 
+  if (field.type === "image") {
+    return (
+      <div>
+        <label className="mb-1 block text-xs font-semibold text-ocean-950/60">{field.label}</label>
+        <ImageUploadField value={String(value ?? "")} onChange={onChange} placeholder={field.placeholder} />
+      </div>
+    )
+  }
+
   return (
     <div>
-      <label className="mb-1 block text-xs font-semibold text-ocean-950/60">
-        {field.label}
-        {field.type === "image" && value ? <span className="ml-1 font-normal text-ocean-950/40">(preview below)</span> : null}
-      </label>
+      <label className="mb-1 block text-xs font-semibold text-ocean-950/60">{field.label}</label>
       <input
         type="text"
         placeholder={field.placeholder}
@@ -77,10 +84,6 @@ function FieldControl({ field, value, onChange }: { field: FieldDef; value: unkn
         onChange={(e) => onChange(e.target.value)}
         className={inputClass}
       />
-      {field.type === "image" && typeof value === "string" && value && (
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        <img src={value} alt="" className="mt-2 h-20 w-full rounded-lg object-cover" onError={(e: any) => (e.currentTarget.style.display = "none")} />
-      )}
     </div>
   )
 }

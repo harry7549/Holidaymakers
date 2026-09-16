@@ -16,6 +16,7 @@ import Deals from "./pages/Deals"
 import Suppliers from "./pages/Suppliers"
 import About from "./pages/About"
 import Contact from "./pages/Contact"
+import DynamicPage from "./pages/DynamicPage"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Dashboard from "./pages/Dashboard"
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/compare" element={<Compare />} />
+          <Route path="/:slug" element={<DynamicPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 

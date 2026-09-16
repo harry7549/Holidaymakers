@@ -56,3 +56,13 @@ export async function adminReorder(resource: string, ids: string[]): Promise<voi
   })
   await parseErrorOr<void>(res, `Failed to reorder ${resource}`)
 }
+
+export async function adminUploadImage(payload: { filename: string; contentType: string; dataBase64: string }): Promise<{ url: string }> {
+  const headers = await authHeaders()
+  const res = await fetch(`/api/admin/upload`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify(payload),
+  })
+  return parseErrorOr<{ url: string }>(res, "Failed to upload image")
+}
