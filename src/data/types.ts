@@ -31,6 +31,7 @@ export interface ItineraryDay {
   title: string
   description: string
   activities: string[]
+  image?: string
 }
 
 export interface Review {

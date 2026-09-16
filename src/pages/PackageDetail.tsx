@@ -214,7 +214,10 @@ export default function PackageDetail() {
                     <h3 className="font-display text-base font-bold text-ocean-950">
                       Day {day.day}: {day.title}
                     </h3>
-                    <p className="mt-1 text-sm text-ocean-950/70">{day.description}</p>
+                    <p className="mt-1 whitespace-pre-line text-sm text-ocean-950/70">{day.description}</p>
+                    {day.image && (
+                      <SmartImage src={day.image} alt={day.title} className="mt-3 aspect-video w-full max-w-md rounded-xl" />
+                    )}
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {day.activities.map((a) => (
                         <span key={a} className="rounded-full bg-ocean-50 px-2.5 py-1 text-xs font-medium text-ocean-700">

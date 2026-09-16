@@ -497,6 +497,47 @@ export function FeaturedPackagesBlock({ content }: BlockProps) {
   )
 }
 
+export function PackageShowcaseBlock({ content }: BlockProps) {
+  const { packages } = useCatalog()
+  const mode = content.mode ?? "manual"
+  const limit = Number(content.limit) || 8
+
+  const shown = useMemo(() => {
+    let base: typeof packages
+    if (mode === "category") {
+      const cat = content.categoryValue as Category | undefined
+      base = cat ? packages.filter((p) => p.category.includes(cat)) : []
+    } else if (mode === "destination") {
+      const destId = content.destinationValue as string | undefined
+      base = destId ? packages.filter((p) => p.destinationId === destId) : []
+    } else {
+      const ids: string[] = content.packageIds ?? []
+      base = ids.map((id) => packages.find((p) => p.id === id)).filter((p): p is (typeof packages)[number] => Boolean(p))
+    }
+    return base.slice(0, limit)
+  }, [mode, content.categoryValue, content.destinationValue, content.packageIds, limit, packages])
+
+  if (shown.length === 0) return null
+
+  return (
+    <section className="bg-white py-14">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <Reveal className="mb-6">
+          <h2 className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">{content.heading}</h2>
+          {content.subtitle && <p className="mt-1 text-sm text-ocean-950/60">{content.subtitle}</p>}
+        </Reveal>
+        <StaggerGroup className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {shown.map((pkg) => (
+            <StaggerItem key={pkg.id}>
+              <PackageCard pkg={pkg} />
+            </StaggerItem>
+          ))}
+        </StaggerGroup>
+      </div>
+    </section>
+  )
+}
+
 export function DealsStripBlock({ content }: BlockProps) {
   const { packages, deals } = useCatalog()
   return (

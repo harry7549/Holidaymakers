@@ -53,6 +53,7 @@ interface ItineraryForm {
   title: string
   description: string
   activities: string[]
+  image?: string
 }
 
 interface ReviewForm {
@@ -521,7 +522,7 @@ export default function AdminPackages() {
 }
 
 function ItineraryEditor({ items, onChange }: { items: ItineraryForm[]; onChange: (items: ItineraryForm[]) => void }) {
-  const add = () => onChange([...items, { day: items.length + 1, title: "", description: "", activities: [] }])
+  const add = () => onChange([...items, { day: items.length + 1, title: "", description: "", activities: [], image: "" }])
   const update = (i: number, patch: Partial<ItineraryForm>) => onChange(items.map((d, idx) => (idx === i ? { ...d, ...patch } : d)))
   const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
 
@@ -544,11 +545,16 @@ function ItineraryEditor({ items, onChange }: { items: ItineraryForm[]; onChange
             </Field>
             <div className="sm:col-span-2">
               <Field label="Description">
-                <textarea rows={2} value={day.description} onChange={(e) => update(i, { description: e.target.value })} className={inputClass} />
+                <textarea rows={4} value={day.description} onChange={(e) => update(i, { description: e.target.value })} className={inputClass} placeholder="What happens this day — as much detail as you like." />
               </Field>
             </div>
             <div className="sm:col-span-2">
               <TagListField label="Activities" values={day.activities} onChange={(activities) => update(i, { activities })} placeholder="e.g. Old Quarter walking tour" />
+            </div>
+            <div className="sm:col-span-2">
+              <Field label="Day image (optional)">
+                <ImageUploadField value={day.image ?? ""} onChange={(image) => update(i, { image })} placeholder="Photo for this day, or upload one →" />
+              </Field>
             </div>
           </div>
         </div>

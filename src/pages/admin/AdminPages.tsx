@@ -108,6 +108,7 @@ const BLOCK_TYPE_ICON: Record<string, LucideIcon> = {
   "search-widget": Search,
   "trending-destinations": MapPin,
   "featured-packages": PackageIcon,
+  "package-showcase": PackageIcon,
   "deals-strip": Percent,
   "supplier-network": Users,
 }

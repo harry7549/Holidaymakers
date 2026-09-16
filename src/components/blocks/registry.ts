@@ -4,7 +4,7 @@ import type { BlockContent } from "../../data/types"
 export interface FieldDef {
   key: string
   label: string
-  type: "text" | "textarea" | "image" | "number" | "boolean" | "select"
+  type: "text" | "textarea" | "image" | "number" | "boolean" | "select" | "package-picker" | "destination-picker"
   options?: { value: string; label: string }[]
   placeholder?: string
 }
@@ -33,6 +33,23 @@ const colorOptions = [
   { value: "ocean", label: "Ocean" },
   { value: "sunset", label: "Sunset" },
   { value: "gold", label: "Gold" },
+]
+const categoryOptions = [
+  "Beach",
+  "Adventure",
+  "Honeymoon",
+  "Family",
+  "Hill Station",
+  "Wildlife",
+  "Pilgrimage",
+  "Luxury",
+  "Cruise",
+  "International",
+].map((c) => ({ value: c, label: c }))
+const showcaseModeOptions = [
+  { value: "manual", label: "Specific packages I pick" },
+  { value: "category", label: "Every package in a category" },
+  { value: "destination", label: "Every package at one destination" },
 ]
 
 export const REGISTRY: Record<string, BlockSchema> = {
@@ -410,6 +427,31 @@ export const REGISTRY: Record<string, BlockSchema> = {
       heading: "Featured Packages",
       subtitle: "Curated favourites across styles and budgets",
       categories: ["All", "Beach", "Honeymoon", "Family", "Adventure", "Luxury", "Hill Station"].map((label) => ({ label })),
+    }),
+  },
+
+  "package-showcase": {
+    type: "package-showcase",
+    label: "Package showcase (live)",
+    description: "Show hand-picked packages, or every package in one category or destination — anywhere on any page.",
+    liveData: true,
+    fields: [
+      { key: "heading", label: "Heading", type: "text" },
+      { key: "subtitle", label: "Subtitle (optional)", type: "text" },
+      { key: "mode", label: "Show", type: "select", options: showcaseModeOptions },
+      { key: "categoryValue", label: "Category (used when \"Show\" = category)", type: "select", options: categoryOptions },
+      { key: "destinationValue", label: "Destination (used when \"Show\" = destination)", type: "destination-picker" },
+      { key: "packageIds", label: "Packages (used when \"Show\" = specific packages)", type: "package-picker" },
+      { key: "limit", label: "Max packages to show", type: "number" },
+    ],
+    defaultContent: () => ({
+      heading: "Handpicked For You",
+      subtitle: "",
+      mode: "manual",
+      categoryValue: "Beach",
+      destinationValue: "",
+      packageIds: [],
+      limit: 8,
     }),
   },
 

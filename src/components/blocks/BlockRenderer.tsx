@@ -11,6 +11,7 @@ import {
   HeroBlock,
   ImageTextSplitBlock,
   MilestonesBlock,
+  PackageShowcaseBlock,
   PageBannerBlock,
   RichTextBlock,
   SearchWidgetBlock,
@@ -40,6 +41,7 @@ const BLOCK_COMPONENTS: Record<string, ComponentType<{ content: BlockContent }>>
   "search-widget": SearchWidgetBlock,
   "trending-destinations": TrendingDestinationsBlock,
   "featured-packages": FeaturedPackagesBlock,
+  "package-showcase": PackageShowcaseBlock,
   "deals-strip": DealsStripBlock,
   "supplier-network": SupplierNetworkBlock,
 }

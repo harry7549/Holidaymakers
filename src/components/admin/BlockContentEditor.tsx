@@ -1,7 +1,9 @@
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
+import { useState } from "react"
+import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react"
 import { getBlockSchema, type FieldDef } from "../blocks/registry"
 import type { BlockContent } from "../../data/types"
 import { ImageUploadField } from "./ImageUploadField"
+import { useCatalog } from "../../context/CatalogContext"
 
 interface Props {
   type: string
@@ -10,6 +12,71 @@ interface Props {
 }
 
 const inputClass = "w-full rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400"
+
+function PackagePickerField({ value, onChange }: { value: string[]; onChange: (ids: string[]) => void }) {
+  const { packages } = useCatalog()
+  const [search, setSearch] = useState("")
+  const selected = value.map((id) => packages.find((p) => p.id === id)).filter((p): p is (typeof packages)[number] => Boolean(p))
+  const results = search.trim()
+    ? packages.filter((p) => !value.includes(p.id) && p.title.toLowerCase().includes(search.trim().toLowerCase())).slice(0, 8)
+    : []
+
+  return (
+    <div>
+      {selected.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {selected.map((p) => (
+            <span key={p.id} className="flex items-center gap-1 rounded-full bg-sand-100 px-2.5 py-1 text-xs font-medium text-ocean-950/80">
+              {p.title}
+              <button type="button" onClick={() => onChange(value.filter((id) => id !== p.id))} className="text-ocean-950/40 hover:text-sunset-600">
+                <X size={11} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="relative">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search packages by name..."
+          className={inputClass}
+        />
+        {results.length > 0 && (
+          <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-sand-200 bg-white shadow-lg">
+            {results.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  onChange([...value, p.id])
+                  setSearch("")
+                }}
+                className="block w-full px-3 py-2 text-left text-sm hover:bg-sand-50"
+              >
+                {p.title} <span className="text-xs text-ocean-950/40">· {p.destinationName}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function DestinationPickerField({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  const { destinations } = useCatalog()
+  return (
+    <select value={value} onChange={(e) => onChange(e.target.value)} className={inputClass}>
+      <option value="">Select destination...</option>
+      {destinations.map((d) => (
+        <option key={d.id} value={d.id}>
+          {d.name}
+        </option>
+      ))}
+    </select>
+  )
+}
 
 function FieldControl({ field, value, onChange }: { field: FieldDef; value: unknown; onChange: (v: unknown) => void }) {
   if (field.type === "boolean") {
@@ -74,6 +141,24 @@ function FieldControl({ field, value, onChange }: { field: FieldDef; value: unkn
     )
   }
 
+  if (field.type === "package-picker") {
+    return (
+      <div>
+        <label className="mb-1 block text-xs font-semibold text-ocean-950/60">{field.label}</label>
+        <PackagePickerField value={Array.isArray(value) ? (value as string[]) : []} onChange={onChange} />
+      </div>
+    )
+  }
+
+  if (field.type === "destination-picker") {
+    return (
+      <div>
+        <label className="mb-1 block text-xs font-semibold text-ocean-950/60">{field.label}</label>
+        <DestinationPickerField value={String(value ?? "")} onChange={onChange} />
+      </div>
+    )
+  }
+
   return (
     <div>
       <label className="mb-1 block text-xs font-semibold text-ocean-950/60">{field.label}</label>
@@ -126,7 +211,7 @@ export function BlockContentEditor({ type, content, onChange }: Props) {
       {schema.fields.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-2">
           {schema.fields.map((f) => (
-            <div key={f.key} className={f.type === "textarea" ? "sm:col-span-2" : undefined}>
+            <div key={f.key} className={f.type === "textarea" || f.type === "package-picker" ? "sm:col-span-2" : undefined}>
               <FieldControl field={f} value={content[f.key]} onChange={(v) => setField(f.key, v)} />
             </div>
           ))}
