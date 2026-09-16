@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
-import { supabaseAdmin } from "../_lib/supabaseAdmin"
-import { requireAdmin } from "../_lib/requireAdmin"
+import { supabaseAdmin } from "../_lib/supabaseAdmin.js"
+import { requireAdmin } from "../_lib/requireAdmin.js"
 
 const BUCKET = "page-images"
 const MAX_BYTES = 3 * 1024 * 1024 // 3MB raw — keeps the base64 body under Vercel's 4.5MB request cap
