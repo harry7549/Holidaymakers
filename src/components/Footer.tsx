@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom"
-import { Compass, Mail, MapPin, Phone } from "lucide-react"
+import { ArrowUp, Compass, Mail, MapPin, Phone } from "lucide-react"
 import { useState } from "react"
 import { useToast } from "../context/ToastContext"
 import { FacebookIcon, InstagramIcon, XIcon, YoutubeIcon } from "./SocialIcons"
+import { getLenis } from "../lib/lenis"
 
 const columns = [
   {
@@ -38,13 +39,25 @@ export function Footer() {
   const [email, setEmail] = useState("")
   const { showToast } = useToast()
 
+  const scrollToTop = () => {
+    const lenis = getLenis()
+    if (lenis) lenis.scrollTo(0, { duration: 1 })
+    else window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   return (
-    <footer className="border-t border-sand-200 bg-ocean-950 text-sand-100">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mb-12 grid gap-10 rounded-2xl bg-ocean-900/60 p-6 sm:p-8 md:grid-cols-[1.3fr_1fr] md:items-center">
+    <footer className="relative overflow-hidden border-t border-sand-200 bg-ocean-950 text-sand-100">
+      <div className="pointer-events-none absolute -left-24 top-0 h-80 w-80 rounded-full bg-ocean-600/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 top-40 h-96 w-96 rounded-full bg-sunset-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-gold-400/10 blur-3xl" />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <div className="mb-12 grid gap-8 overflow-hidden rounded-3xl bg-gradient-to-br from-sunset-500 to-sunset-700 p-6 sm:p-10 md:grid-cols-[1.3fr_1fr] md:items-center">
           <div>
-            <h3 className="font-display text-2xl font-bold text-white">Get exclusive deals in your inbox</h3>
-            <p className="mt-1 text-sm text-sand-100/70">
+            <h3 className="font-display text-2xl font-bold text-white sm:text-3xl">
+              Get exclusive deals in your <span className="text-accent-serif italic text-gold-200">inbox</span>
+            </h3>
+            <p className="mt-2 text-sm text-white/85">
               Join 40,000+ travellers getting early access to flash sales and new itineraries.
             </p>
           </div>
@@ -63,11 +76,11 @@ export function Footer() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-sand-100/40 outline-none focus:border-sunset-400"
+              className="w-full rounded-full border border-white/25 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/50 outline-none backdrop-blur focus:border-white/60"
             />
             <button
               type="submit"
-              className="shrink-0 rounded-full bg-sunset-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-sunset-600"
+              className="shrink-0 rounded-full bg-ocean-950 px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105"
             >
               Subscribe
             </button>
@@ -76,17 +89,17 @@ export function Footer() {
 
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
-            <Link to="/" className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sunset-500 text-white">
-                <Compass size={19} />
+            <Link to="/" className="flex items-center gap-2.5">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sunset-400 to-sunset-600 text-white shadow-[0_2px_12px_-2px_rgba(217,96,61,0.6)]">
+                <Compass size={20} />
               </span>
-              <span className="font-display text-xl font-bold text-white">Roamly</span>
+              <span className="font-display text-2xl font-bold text-white">Roamly</span>
             </Link>
-            <p className="mt-3 max-w-xs text-sm text-sand-100/60">
-              Roamly connects travellers with 200+ verified offline and online suppliers to craft holidays worth
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-sand-100/60">
+              Connecting travellers with 200+ verified offline and online suppliers to craft holidays worth
               remembering — from ready-made packages to fully custom itineraries.
             </p>
-            <div className="mt-4 flex gap-3">
+            <div className="mt-5 flex gap-3">
               {[FacebookIcon, InstagramIcon, XIcon, YoutubeIcon].map((Icon, i) => (
                 <a
                   key={i}
@@ -101,8 +114,11 @@ export function Footer() {
 
           {columns.map((col) => (
             <div key={col.title}>
-              <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/90">{col.title}</h4>
-              <ul className="space-y-2">
+              <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-white">
+                <span className="h-1 w-4 rounded-full bg-sunset-500" />
+                {col.title}
+              </h4>
+              <ul className="space-y-2.5">
                 {col.links.map((link, i) => (
                   <li key={link.label + i}>
                     <Link to={link.to} className="text-sm text-sand-100/60 transition-colors hover:text-white">
@@ -127,10 +143,19 @@ export function Footer() {
               <MapPin size={13} /> Mumbai, India
             </span>
           </div>
-          <p>© {new Date().getFullYear()} Roamly Holidays. All rights reserved.</p>
-          <Link to="/admin/login" className="text-sand-100/40 transition-colors hover:text-white">
-            Admin
-          </Link>
+          <div className="flex items-center gap-4">
+            <p>© {new Date().getFullYear()} Roamly Holidays. All rights reserved.</p>
+            <Link to="/admin/login" className="text-sand-100/40 transition-colors hover:text-white">
+              Admin
+            </Link>
+            <button
+              onClick={scrollToTop}
+              aria-label="Back to top"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-white/40 hover:text-white"
+            >
+              <ArrowUp size={15} />
+            </button>
+          </div>
         </div>
       </div>
     </footer>
