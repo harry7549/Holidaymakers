@@ -3,6 +3,7 @@ import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminUpdate } from "../../lib/adminApi"
 import { formatDate, formatPrice } from "../../lib/utils"
 import { useToast } from "../../context/ToastContext"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, Badge } from "../../components/admin/AdminUI"
 
 interface QuoteRow {
   id: string
@@ -37,25 +38,21 @@ export default function AdminQuotes() {
 
   return (
     <div>
-      <h1 className="mb-1 flex items-center gap-2 font-display text-2xl font-bold text-ocean-950">
-        <Sparkles size={22} /> Custom Trip Quote Requests
-      </h1>
-      <p className="mb-6 text-sm text-ocean-950/60">Leads from the Trip Builder — reach out and mark their status.</p>
+      <AdminPageHeader icon={Sparkles} title="Custom Trip Quote Requests" subtitle="Leads from the Trip Builder — reach out and mark their status." />
 
       {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
-      {error && <p className="text-sm text-sunset-600">{error}</p>}
-      {!loading && items.length === 0 && !error && (
-        <div className="rounded-2xl border border-dashed border-sand-300 py-14 text-center text-sm text-ocean-950/60">
-          No quote requests yet.
-        </div>
-      )}
+      {error && <AdminErrorNotice resource="quote requests" message={error} />}
+      {!loading && items.length === 0 && !error && <AdminEmptyState label="No quote requests yet." />}
 
       <div className="space-y-3">
         {items.map((q) => (
-          <div key={q.id} className="rounded-2xl border border-sand-200 bg-white p-4">
+          <div key={q.id} className="rounded-2xl border border-sand-200 bg-white p-4 transition-shadow hover:shadow-card">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="font-display text-base font-bold text-ocean-950">{q.destinations.join(", ") || "Custom trip"}</p>
+                <p className="flex items-center gap-2 font-display text-base font-bold text-ocean-950">
+                  {q.destinations.join(", ") || "Custom trip"}
+                  {q.status === "new" && <Badge tone="sunset">New</Badge>}
+                </p>
                 <p className="text-xs text-ocean-950/50">
                   {q.days} days · {q.travelers} travelers · {q.style} style · {formatDate(q.created_at)}
                 </p>

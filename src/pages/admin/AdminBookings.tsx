@@ -1,8 +1,16 @@
 import { Calendar } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminUpdate } from "../../lib/adminApi"
-import { formatDate, formatPrice } from "../../lib/utils"
+import { formatDate, formatPrice, cn } from "../../lib/utils"
 import { useToast } from "../../context/ToastContext"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice } from "../../components/admin/AdminUI"
+
+const statusDot: Record<string, string> = {
+  upcoming: "bg-gold-500",
+  confirmed: "bg-ocean-500",
+  completed: "bg-emerald-500",
+  cancelled: "bg-sunset-500",
+}
 
 interface BookingRow {
   id: string
@@ -34,23 +42,19 @@ export default function AdminBookings() {
 
   return (
     <div>
-      <h1 className="mb-1 flex items-center gap-2 font-display text-2xl font-bold text-ocean-950">
-        <Calendar size={22} /> Bookings
-      </h1>
-      <p className="mb-6 text-sm text-ocean-950/60">Every booking made through checkout, newest first.</p>
+      <AdminPageHeader icon={Calendar} title="Bookings" subtitle="Every booking made through checkout, newest first." />
 
       {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
-      {error && <p className="text-sm text-sunset-600">{error}</p>}
+      {error && <AdminErrorNotice resource="bookings" message={error} />}
 
-      {!loading && items.length === 0 && !error && (
-        <div className="rounded-2xl border border-dashed border-sand-300 py-14 text-center text-sm text-ocean-950/60">
-          No bookings yet.
-        </div>
-      )}
+      {!loading && items.length === 0 && !error && <AdminEmptyState label="No bookings yet." />}
 
       <div className="space-y-3">
         {items.map((b) => (
-          <div key={b.id} className="rounded-2xl border border-sand-200 bg-white p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
+          <div
+            key={b.id}
+            className="rounded-2xl border border-sand-200 bg-white p-4 transition-shadow hover:shadow-card sm:flex sm:items-center sm:justify-between sm:gap-4"
+          >
             <div className="min-w-0">
               <p className="font-display text-base font-bold text-ocean-950">{b.package_title}</p>
               <p className="text-xs text-ocean-950/50">
@@ -62,17 +66,20 @@ export default function AdminBookings() {
             </div>
             <div className="mt-3 flex items-center gap-3 sm:mt-0 sm:shrink-0">
               <span className="font-display text-lg font-bold text-ocean-950">{formatPrice(b.total_price)}</span>
-              <select
-                value={b.status}
-                onChange={(e) => updateStatus(b.id, e.target.value)}
-                className="rounded-lg border border-sand-200 px-3 py-2 text-sm font-medium capitalize outline-none focus:border-ocean-400"
-              >
-                {statusOptions.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center gap-1.5 rounded-lg border border-sand-200 pl-2.5">
+                <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", statusDot[b.status] ?? "bg-ocean-950/30")} />
+                <select
+                  value={b.status}
+                  onChange={(e) => updateStatus(b.id, e.target.value)}
+                  className="bg-transparent py-2 pr-2.5 text-sm font-medium capitalize outline-none"
+                >
+                  {statusOptions.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         ))}

@@ -1,10 +1,13 @@
 import { useState } from "react"
-import { MapPin, Pencil, Plus, Trash2, X } from "lucide-react"
+import { MapPin, Pencil, Plus, Star, Trash2, X } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminUpdate } from "../../lib/adminApi"
 import { useToast } from "../../context/ToastContext"
 import { useCatalog } from "../../context/CatalogContext"
 import { formatPrice } from "../../lib/utils"
+import { SmartImage } from "../../components/SmartImage"
+import { ImageUploadField } from "../../components/admin/ImageUploadField"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
 
 interface DestinationRow {
   id: string
@@ -122,17 +125,16 @@ export default function AdminDestinations() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ocean-950">
-            <MapPin size={22} /> Destinations
-          </h1>
-          <p className="text-sm text-ocean-950/60">Places travellers can browse and filter by.</p>
-        </div>
-        <button onClick={startCreate} className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2.5 text-sm font-semibold text-white">
-          <Plus size={15} /> Add Destination
-        </button>
-      </div>
+      <AdminPageHeader
+        icon={MapPin}
+        title="Destinations"
+        subtitle="Places travellers can browse and filter by."
+        action={
+          <button onClick={startCreate} className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-ocean-700">
+            <Plus size={15} /> Add Destination
+          </button>
+        }
+      />
 
       {form && (
         <div className="mb-6 rounded-2xl border border-ocean-300 bg-white p-5">
@@ -170,12 +172,9 @@ export default function AdminDestinations() {
               <option value="Domestic">Domestic</option>
               <option value="International">International</option>
             </select>
-            <input
-              placeholder="Image URL"
-              value={form.image}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
-              className="rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400 sm:col-span-2"
-            />
+            <div className="sm:col-span-2">
+              <ImageUploadField value={form.image} onChange={(v) => setForm({ ...form, image: v })} />
+            </div>
             <input
               placeholder="Tagline"
               value={form.tagline}
@@ -229,30 +228,45 @@ export default function AdminDestinations() {
         </div>
       )}
 
-      {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
-      {error && <p className="text-sm text-sunset-600">{error}</p>}
+      {loading && <AdminSkeletonGrid />}
+      {error && <AdminErrorNotice resource="destinations" message={error} />}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((d) => (
-          <div key={d.id} className="rounded-2xl border border-sand-200 bg-white p-4">
-            <div className="mb-1 flex items-start justify-between">
-              <p className="font-display text-base font-bold text-ocean-950">{d.name}</p>
-              <div className="flex gap-1.5">
-                <button onClick={() => startEdit(d)} className="text-ocean-950/50 hover:text-ocean-700">
-                  <Pencil size={15} />
-                </button>
-                <button onClick={() => remove(d.id)} className="text-ocean-950/50 hover:text-sunset-600">
-                  <Trash2 size={15} />
-                </button>
+      {!loading && !error && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((d) => (
+            <div
+              key={d.id}
+              className="group overflow-hidden rounded-2xl border border-sand-200 bg-white transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
+            >
+              <div className="relative h-28">
+                <SmartImage src={d.image} alt={d.name} className="h-full w-full" />
+                <div className="absolute left-2 top-2">
+                  <Badge tone={d.region === "International" ? "sunset" : "ocean"}>{d.region}</Badge>
+                </div>
+                <div className="absolute right-1.5 top-1.5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <button onClick={() => startEdit(d)} className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700">
+                    <Pencil size={13} />
+                  </button>
+                  <button onClick={() => remove(d.id)} className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-sunset-600">
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+              <div className="p-4">
+                <p className="truncate font-display text-base font-bold text-ocean-950">{d.name}</p>
+                <p className="mt-0.5 text-xs text-ocean-950/50">{d.country}</p>
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-ocean-950">From {formatPrice(d.from_price)}</p>
+                  <span className="flex items-center gap-1 text-xs text-ocean-950/50">
+                    <Star size={11} className="text-gold-500" /> {d.rating}
+                  </span>
+                </div>
               </div>
             </div>
-            <p className="text-xs text-ocean-950/50">
-              {d.country} · {d.region}
-            </p>
-            <p className="mt-2 text-sm font-semibold text-ocean-950">From {formatPrice(d.from_price)}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+          {items.length === 0 && <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label="No destinations yet — add your first one above." /></div>}
+        </div>
+      )}
     </div>
   )
 }

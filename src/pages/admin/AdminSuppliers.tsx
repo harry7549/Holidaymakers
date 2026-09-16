@@ -1,10 +1,17 @@
 import { useState } from "react"
-import { BadgeCheck, Globe2, Pencil, Plus, Trash2, X } from "lucide-react"
+import { BadgeCheck, Globe2, Pencil, Plus, Star, Trash2, X } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminUpdate } from "../../lib/adminApi"
 import { useToast } from "../../context/ToastContext"
 import { useCatalog } from "../../context/CatalogContext"
 import { cn } from "../../lib/utils"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
+
+const colorGradients: Record<string, string> = {
+  ocean: "from-ocean-500 to-ocean-800",
+  sunset: "from-sunset-400 to-sunset-600",
+  gold: "from-gold-400 to-gold-600",
+}
 
 interface SupplierRow {
   id: string
@@ -93,17 +100,16 @@ export default function AdminSuppliers() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ocean-950">
-            <Globe2 size={22} /> Suppliers
-          </h1>
-          <p className="text-sm text-ocean-950/60">Your online and offline partner network.</p>
-        </div>
-        <button onClick={startCreate} className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2.5 text-sm font-semibold text-white">
-          <Plus size={15} /> Add Supplier
-        </button>
-      </div>
+      <AdminPageHeader
+        icon={Globe2}
+        title="Suppliers"
+        subtitle="Your online and offline partner network."
+        action={
+          <button onClick={startCreate} className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-ocean-700">
+            <Plus size={15} /> Add Supplier
+          </button>
+        }
+      />
 
       {form && (
         <div className="mb-6 rounded-2xl border border-ocean-300 bg-white p-5">
@@ -195,33 +201,54 @@ export default function AdminSuppliers() {
         </div>
       )}
 
-      {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
-      {error && <p className="text-sm text-sunset-600">{error}</p>}
+      {loading && <AdminSkeletonGrid />}
+      {error && <AdminErrorNotice resource="suppliers" message={error} />}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((s) => (
-          <div key={s.id} className="rounded-2xl border border-sand-200 bg-white p-4">
-            <div className="mb-1 flex items-start justify-between">
-              <div className="flex items-center gap-1.5">
-                <p className="font-display text-base font-bold text-ocean-950">{s.name}</p>
-                {s.verified && <BadgeCheck size={14} className="text-ocean-500" />}
+      {!loading && !error && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((s) => (
+            <div
+              key={s.id}
+              className="group rounded-2xl border border-sand-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
+            >
+              <div className="mb-2 flex items-start justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br text-sm font-bold text-white",
+                      colorGradients[s.color] ?? colorGradients.ocean,
+                    )}
+                  >
+                    {s.logo_initial || s.name.charAt(0)}
+                  </span>
+                  <div>
+                    <p className="flex items-center gap-1 font-display text-sm font-bold text-ocean-950">
+                      {s.name}
+                      {s.verified && <BadgeCheck size={13} className="text-ocean-500" />}
+                    </p>
+                    <p className="text-xs text-ocean-950/50">{s.location}</p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <button onClick={() => startEdit(s)} className="rounded-lg p-1.5 text-ocean-950/50 hover:bg-sand-100 hover:text-ocean-700">
+                    <Pencil size={14} />
+                  </button>
+                  <button onClick={() => remove(s.id)} className="rounded-lg p-1.5 text-ocean-950/50 hover:bg-sand-100 hover:text-sunset-600">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-1.5">
-                <button onClick={() => startEdit(s)} className="text-ocean-950/50 hover:text-ocean-700">
-                  <Pencil size={15} />
-                </button>
-                <button onClick={() => remove(s.id)} className="text-ocean-950/50 hover:text-sunset-600">
-                  <Trash2 size={15} />
-                </button>
+              <div className="flex items-center justify-between">
+                <Badge tone={s.type === "online" ? "sunset" : "ocean"}>{s.type}</Badge>
+                <span className="flex items-center gap-1 text-xs text-ocean-950/50">
+                  <Star size={11} className="text-gold-500" /> {s.rating}
+                </span>
               </div>
             </div>
-            <p className="text-xs text-ocean-950/50">{s.location}</p>
-            <p className={cn("mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize", s.type === "online" ? "bg-sunset-50 text-sunset-600" : "bg-ocean-50 text-ocean-700")}>
-              {s.type}
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+          {items.length === 0 && <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label="No suppliers yet — add your first one above." /></div>}
+        </div>
+      )}
     </div>
   )
 }

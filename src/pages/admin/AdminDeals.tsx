@@ -1,10 +1,13 @@
 import { useState } from "react"
-import { Percent, Pencil, Plus, Trash2, X } from "lucide-react"
+import { Clock, Percent, Pencil, Plus, Trash2, X } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminUpdate } from "../../lib/adminApi"
 import { useToast } from "../../context/ToastContext"
 import { useCatalog } from "../../context/CatalogContext"
 import { formatDate } from "../../lib/utils"
+import { SmartImage } from "../../components/SmartImage"
+import { ImageUploadField } from "../../components/admin/ImageUploadField"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonGrid } from "../../components/admin/AdminUI"
 
 interface DealRow {
   id: string
@@ -98,17 +101,16 @@ export default function AdminDeals() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ocean-950">
-            <Percent size={22} /> Deals
-          </h1>
-          <p className="text-sm text-ocean-950/60">Limited-time offers shown on the homepage and Deals page.</p>
-        </div>
-        <button onClick={startCreate} className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2.5 text-sm font-semibold text-white">
-          <Plus size={15} /> Add Deal
-        </button>
-      </div>
+      <AdminPageHeader
+        icon={Percent}
+        title="Deals"
+        subtitle="Limited-time offers shown on the homepage and Deals page."
+        action={
+          <button onClick={startCreate} className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-ocean-700">
+            <Plus size={15} /> Add Deal
+          </button>
+        }
+      />
 
       {form && (
         <div className="mb-6 rounded-2xl border border-ocean-300 bg-white p-5">
@@ -162,12 +164,9 @@ export default function AdminDeals() {
               onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
               className="rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400"
             />
-            <input
-              placeholder="Image URL (defaults to package image)"
-              value={form.image}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
-              className="rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400"
-            />
+            <div>
+              <ImageUploadField value={form.image} onChange={(v) => setForm({ ...form, image: v })} placeholder="Image URL (defaults to package image)" />
+            </div>
           </div>
           <button
             onClick={save}
@@ -179,31 +178,46 @@ export default function AdminDeals() {
         </div>
       )}
 
-      {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
-      {error && <p className="text-sm text-sunset-600">{error}</p>}
+      {loading && <AdminSkeletonGrid />}
+      {error && <AdminErrorNotice resource="deals" message={error} />}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((d) => (
-          <div key={d.id} className="rounded-2xl border border-sand-200 bg-white p-4">
-            <div className="mb-1 flex items-start justify-between">
-              <p className="font-display text-base font-bold text-ocean-950">{d.title}</p>
-              <div className="flex gap-1.5">
-                <button onClick={() => startEdit(d)} className="text-ocean-950/50 hover:text-ocean-700">
-                  <Pencil size={15} />
-                </button>
-                <button onClick={() => remove(d.id)} className="text-ocean-950/50 hover:text-sunset-600">
-                  <Trash2 size={15} />
-                </button>
+      {!loading && !error && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((d) => (
+            <div
+              key={d.id}
+              className="group overflow-hidden rounded-2xl border border-sand-200 bg-white transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
+            >
+              <div className="relative h-24">
+                <SmartImage src={d.image} alt={d.title} className="h-full w-full" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <span className="absolute left-2 top-2 rounded-full bg-sunset-500 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+                  {d.discount_percent}% OFF
+                </span>
+                <div className="absolute right-1.5 top-1.5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <button onClick={() => startEdit(d)} className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700">
+                    <Pencil size={13} />
+                  </button>
+                  <button onClick={() => remove(d.id)} className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-sunset-600">
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+              <div className="p-4">
+                <p className="truncate font-display text-base font-bold text-ocean-950">{d.title}</p>
+                <p className="mt-0.5 truncate text-xs text-ocean-950/50">{d.subtitle}</p>
+                <div className="mt-2 flex items-center justify-between text-xs">
+                  <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono font-semibold text-ocean-950/70">{d.code}</code>
+                  <span className="flex items-center gap-1 text-ocean-950/50">
+                    <Clock size={11} /> {d.expires_at ? formatDate(d.expires_at) : "—"}
+                  </span>
+                </div>
               </div>
             </div>
-            <p className="text-xs text-ocean-950/50">{d.subtitle}</p>
-            <p className="mt-2 text-sm font-semibold text-sunset-600">
-              {d.discount_percent}% OFF · {d.code}
-            </p>
-            <p className="text-xs text-ocean-950/50">Expires {d.expires_at ? formatDate(d.expires_at) : "—"}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+          {items.length === 0 && <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label="No deals yet — add your first one above." /></div>}
+        </div>
+      )}
     </div>
   )
 }

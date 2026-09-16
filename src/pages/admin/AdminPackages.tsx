@@ -1,10 +1,13 @@
 import { useState } from "react"
-import { Package as PackageIcon, Pencil, Plus, Trash2, X } from "lucide-react"
+import { Award, Flame, Package as PackageIcon, Pencil, Plus, Sparkles, Star, Trash2, X } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminUpdate } from "../../lib/adminApi"
 import { useToast } from "../../context/ToastContext"
 import { useCatalog } from "../../context/CatalogContext"
 import { formatPrice, slugify } from "../../lib/utils"
+import { SmartImage } from "../../components/SmartImage"
+import { ImageUploadField } from "../../components/admin/ImageUploadField"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
 
 interface PackageRow {
   id: string
@@ -247,17 +250,16 @@ export default function AdminPackages() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ocean-950">
-            <PackageIcon size={22} /> Packages
-          </h1>
-          <p className="text-sm text-ocean-950/60">Every holiday package shown on the site, and their prices.</p>
-        </div>
-        <button onClick={startCreate} className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2.5 text-sm font-semibold text-white">
-          <Plus size={15} /> Add Package
-        </button>
-      </div>
+      <AdminPageHeader
+        icon={PackageIcon}
+        title="Packages"
+        subtitle="Every holiday package shown on the site, and their prices."
+        action={
+          <button onClick={startCreate} className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-ocean-700">
+            <Plus size={15} /> Add Package
+          </button>
+        }
+      />
 
       {form && (
         <div className="mb-6 rounded-2xl border border-ocean-300 bg-white p-5">
@@ -295,7 +297,9 @@ export default function AdminPackages() {
               <option>Challenging</option>
             </select>
 
-            <input placeholder="Main image URL" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
+            <div className="sm:col-span-2 lg:col-span-3">
+              <ImageUploadField value={form.image} onChange={(v) => setForm({ ...form, image: v })} placeholder="Main image URL, or upload one →" />
+            </div>
             <input placeholder="Gallery image URLs, comma separated" value={form.gallery} onChange={(e) => setForm({ ...form, gallery: e.target.value })} className={`${inputClass} sm:col-span-2 lg:col-span-3`} />
 
             <input type="number" placeholder="Nights" value={form.nights} onChange={(e) => setForm({ ...form, nights: Number(e.target.value) })} className={inputClass} />
@@ -366,30 +370,67 @@ export default function AdminPackages() {
         </div>
       )}
 
-      {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
-      {error && <p className="text-sm text-sunset-600">{error}</p>}
+      {loading && <AdminSkeletonGrid />}
+      {error && <AdminErrorNotice resource="packages" message={error} />}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((p) => (
-          <div key={p.id} className="rounded-2xl border border-sand-200 bg-white p-4">
-            <div className="mb-1 flex items-start justify-between">
-              <p className="font-display text-base font-bold text-ocean-950">{p.title}</p>
-              <div className="flex gap-1.5 shrink-0">
-                <button onClick={() => startEdit(p)} className="text-ocean-950/50 hover:text-ocean-700">
-                  <Pencil size={15} />
-                </button>
-                <button onClick={() => remove(p.id)} className="text-ocean-950/50 hover:text-sunset-600">
-                  <Trash2 size={15} />
-                </button>
+      {!loading && !error && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((p) => (
+            <div
+              key={p.id}
+              className="group overflow-hidden rounded-2xl border border-sand-200 bg-white transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
+            >
+              <div className="relative h-32">
+                <SmartImage src={p.image} alt={p.title} className="h-full w-full" />
+                <div className="absolute left-2 top-2 flex flex-wrap gap-1">
+                  {p.featured && (
+                    <Badge tone="gold">
+                      <span className="inline-flex items-center gap-0.5">
+                        <Star size={9} /> Featured
+                      </span>
+                    </Badge>
+                  )}
+                  {p.trending && (
+                    <Badge tone="sunset">
+                      <span className="inline-flex items-center gap-0.5">
+                        <Flame size={9} /> Trending
+                      </span>
+                    </Badge>
+                  )}
+                  {p.best_seller && (
+                    <Badge tone="ocean">
+                      <span className="inline-flex items-center gap-0.5">
+                        <Award size={9} /> Bestseller
+                      </span>
+                    </Badge>
+                  )}
+                </div>
+                <div className="absolute right-1.5 top-1.5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <button onClick={() => startEdit(p)} className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700">
+                    <Pencil size={13} />
+                  </button>
+                  <button onClick={() => remove(p.id)} className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-sunset-600">
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+              <div className="p-4">
+                <p className="truncate font-display text-base font-bold text-ocean-950">{p.title}</p>
+                <p className="mt-0.5 text-xs text-ocean-950/50">
+                  {p.destination_name}, {p.country} · {p.days}D/{p.nights}N
+                </p>
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-ocean-950">{formatPrice(p.price)}</p>
+                  <span className="flex items-center gap-1 text-xs text-ocean-950/50">
+                    <Sparkles size={11} className="text-gold-500" /> {p.rating}
+                  </span>
+                </div>
               </div>
             </div>
-            <p className="text-xs text-ocean-950/50">
-              {p.destination_name}, {p.country} · {p.days}D/{p.nights}N
-            </p>
-            <p className="mt-2 text-sm font-semibold text-ocean-950">{formatPrice(p.price)}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+          {items.length === 0 && <div className="sm:col-span-2 lg:col-span-3"><AdminEmptyState label="No packages yet — add your first one above." /></div>}
+        </div>
+      )}
     </div>
   )
 }

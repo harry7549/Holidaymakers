@@ -3,6 +3,7 @@ import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminUpdate } from "../../lib/adminApi"
 import { cn, formatDate } from "../../lib/utils"
 import { useToast } from "../../context/ToastContext"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice } from "../../components/admin/AdminUI"
 
 interface ApplicationRow {
   id: string
@@ -32,20 +33,15 @@ export default function AdminSupplierApplications() {
 
   return (
     <div>
-      <h1 className="mb-1 flex items-center gap-2 font-display text-2xl font-bold text-ocean-950">
-        <BadgeCheck size={22} /> Partner Applications
-      </h1>
-      <p className="mb-6 text-sm text-ocean-950/60">
-        Applications from the Suppliers page. Approving one automatically adds it to your Suppliers list.
-      </p>
+      <AdminPageHeader
+        icon={BadgeCheck}
+        title="Partner Applications"
+        subtitle="Applications from the Suppliers page. Approving one automatically adds it to your Suppliers list."
+      />
 
       {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
-      {error && <p className="text-sm text-sunset-600">{error}</p>}
-      {!loading && items.length === 0 && !error && (
-        <div className="rounded-2xl border border-dashed border-sand-300 py-14 text-center text-sm text-ocean-950/60">
-          No applications yet.
-        </div>
-      )}
+      {error && <AdminErrorNotice resource="partner applications" message={error} />}
+      {!loading && items.length === 0 && !error && <AdminEmptyState label="No applications yet." />}
 
       <div className="space-y-3">
         {items.map((a) => (

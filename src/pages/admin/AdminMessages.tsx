@@ -3,6 +3,7 @@ import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminUpdate } from "../../lib/adminApi"
 import { cn, formatDate } from "../../lib/utils"
 import { useToast } from "../../context/ToastContext"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice } from "../../components/admin/AdminUI"
 
 interface MessageRow {
   id: string
@@ -29,18 +30,11 @@ export default function AdminMessages() {
 
   return (
     <div>
-      <h1 className="mb-1 flex items-center gap-2 font-display text-2xl font-bold text-ocean-950">
-        <Mail size={22} /> Contact Messages
-      </h1>
-      <p className="mb-6 text-sm text-ocean-950/60">Messages submitted through the Contact page.</p>
+      <AdminPageHeader icon={Mail} title="Contact Messages" subtitle="Messages submitted through the Contact page." />
 
       {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
-      {error && <p className="text-sm text-sunset-600">{error}</p>}
-      {!loading && items.length === 0 && !error && (
-        <div className="rounded-2xl border border-dashed border-sand-300 py-14 text-center text-sm text-ocean-950/60">
-          No messages yet.
-        </div>
-      )}
+      {error && <AdminErrorNotice resource="messages" message={error} />}
+      {!loading && items.length === 0 && !error && <AdminEmptyState label="No messages yet." />}
 
       <div className="space-y-3">
         {items.map((m) => (

@@ -6,6 +6,7 @@ import { useToast } from "../../context/ToastContext"
 import { BLOCK_TYPES, getBlockSchema } from "../../components/blocks/registry"
 import { BlockContentEditor } from "../../components/admin/BlockContentEditor"
 import { ImageUploadField } from "../../components/admin/ImageUploadField"
+import { AdminPageHeader } from "../../components/admin/AdminUI"
 import { defaultMetaByPage } from "../../data/pageBlocks"
 import type { BlockContent } from "../../data/types"
 import { cn, humanize, slugify } from "../../lib/utils"
@@ -249,12 +250,7 @@ export default function AdminPages() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ocean-950">
-          <Layers size={22} /> Pages
-        </h1>
-        <p className="text-sm text-ocean-950/60">Edit the content blocks and SEO details for every page — like a CMS.</p>
-      </div>
+      <AdminPageHeader icon={Layers} title="Pages" subtitle="Edit the content blocks and SEO details for every page — like a CMS." />
 
       <div className="mb-2 flex flex-wrap items-center gap-2">
         {pages.map((p) => (
