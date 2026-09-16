@@ -1,17 +1,35 @@
 import { useMemo, useState } from "react"
 import {
+  AlignLeft,
   ArrowLeft,
+  BarChart3,
+  Columns2,
   Eye,
   EyeOff,
   ExternalLink,
   FileText,
   GripVertical,
+  HelpCircle,
+  Image as ImageIcon,
   Layers,
+  LayoutGrid,
+  Mail,
+  MapPin,
+  Megaphone,
+  MessageSquareQuote,
+  Milestone,
+  Package as PackageIcon,
   Pencil,
+  Percent,
+  Phone,
   Plus,
+  Rows3,
   Search,
   Trash2,
+  Type,
+  Users,
   X,
+  type LucideIcon,
 } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminReorder, adminUpdate } from "../../lib/adminApi"
@@ -72,6 +90,28 @@ function pagePath(slug: string) {
   return slug === "home" ? "/" : `/${slug}`
 }
 
+const BLOCK_TYPE_ICON: Record<string, LucideIcon> = {
+  hero: ImageIcon,
+  "page-banner": Rows3,
+  "section-heading": Type,
+  stats: BarChart3,
+  steps: LayoutGrid,
+  "feature-grid": LayoutGrid,
+  testimonials: MessageSquareQuote,
+  "cta-banner": Megaphone,
+  milestones: Milestone,
+  "faq-list": HelpCircle,
+  "contact-info": Phone,
+  "rich-text": AlignLeft,
+  "image-text-split": Columns2,
+  "contact-form": Mail,
+  "search-widget": Search,
+  "trending-destinations": MapPin,
+  "featured-packages": PackageIcon,
+  "deals-strip": Percent,
+  "supplier-network": Users,
+}
+
 export default function AdminPages() {
   const { items: blocks, setItems: setBlocks, loading: blocksLoading } = useAdminResource<BlockRow>("page-blocks")
   const { items: metaRows, setItems: setMetaRows, loading: metaLoading } = useAdminResource<MetaRow>("page-meta")
@@ -83,8 +123,9 @@ export default function AdminPages() {
   const [tab, setTab] = useState<"blocks" | "seo">("blocks")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draftContent, setDraftContent] = useState<BlockContent>({})
-  const [addingType, setAddingType] = useState("")
   const [dragId, setDragId] = useState<string | null>(null)
+  const [showAddBlock, setShowAddBlock] = useState(false)
+  const [blockSearch, setBlockSearch] = useState("")
   const [showNewPage, setShowNewPage] = useState(false)
   const [newPageLabel, setNewPageLabel] = useState("")
   const [newPageSlug, setNewPageSlug] = useState("")
@@ -175,22 +216,22 @@ export default function AdminPages() {
     }
   }
 
-  const addBlock = async () => {
-    if (!addingType) return
-    const schema = getBlockSchema(addingType)
+  const addBlock = async (type: string) => {
+    const schema = getBlockSchema(type)
     if (!schema) return
-    const id = `${activePage}-${addingType}-${Date.now()}`
+    const id = `${activePage}-${type}-${Date.now()}`
     try {
       const created = await adminCreate<BlockRow>("page-blocks", {
         id,
         page: activePage,
-        type: addingType,
+        type,
         position: pageBlocks.length,
         visible: true,
         content: schema.defaultContent(),
       })
       setBlocks((prev) => [...prev, created])
-      setAddingType("")
+      setShowAddBlock(false)
+      setBlockSearch("")
       showToast("Block added — edit it to fill in content")
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to add block", "info")
@@ -480,23 +521,12 @@ export default function AdminPages() {
 
           {tab === "blocks" ? (
             <div>
-              <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-sand-200 bg-white p-3">
-                <select value={addingType} onChange={(e) => setAddingType(e.target.value)} className="flex-1 rounded-lg border border-sand-200 px-3 py-2 text-sm outline-none focus:border-ocean-400 sm:flex-none">
-                  <option value="">Choose a block type to add...</option>
-                  {BLOCK_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {getBlockSchema(t)?.label ?? t}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={addBlock}
-                  disabled={!addingType}
-                  className="flex items-center gap-1.5 rounded-full bg-ocean-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
-                >
-                  <Plus size={15} /> Add block
-                </button>
-              </div>
+              <button
+                onClick={() => setShowAddBlock(true)}
+                className="mb-4 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-sand-300 bg-white py-3 text-sm font-semibold text-ocean-950/60 hover:border-ocean-300 hover:text-ocean-700"
+              >
+                <Plus size={15} /> Add Block
+              </button>
 
               {blocksLoading && <p className="text-sm text-ocean-950/50">Loading...</p>}
 
@@ -612,6 +642,59 @@ export default function AdminPages() {
           </a>
         </div>
       </div>
+
+      {showAddBlock && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ocean-950/60 p-4 pt-12 backdrop-blur-sm sm:pt-20"
+          onClick={() => setShowAddBlock(false)}
+        >
+          <div className="w-full max-w-4xl rounded-3xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-sand-200 p-5">
+              <h2 className="font-display text-2xl font-bold text-ocean-950">Add Block</h2>
+              <button onClick={() => setShowAddBlock(false)} className="rounded-full p-2 text-ocean-950/40 hover:bg-sand-100">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-5">
+              <div className="mb-5 flex items-center gap-2 rounded-xl border border-sand-200 px-3.5 py-2.5">
+                <Search size={16} className="shrink-0 text-ocean-950/40" />
+                <input
+                  autoFocus
+                  value={blockSearch}
+                  onChange={(e) => setBlockSearch(e.target.value)}
+                  placeholder="Search for a block"
+                  className="w-full bg-transparent text-sm outline-none"
+                />
+              </div>
+              <div className="grid max-h-[55vh] grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3 lg:grid-cols-4">
+                {BLOCK_TYPES.filter((t) => (getBlockSchema(t)?.label ?? t).toLowerCase().includes(blockSearch.trim().toLowerCase())).map((t) => {
+                  const schema = getBlockSchema(t)
+                  const Icon = BLOCK_TYPE_ICON[t] ?? Layers
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => addBlock(t)}
+                      className="group flex flex-col overflow-hidden rounded-xl border border-sand-200 text-left transition-all hover:-translate-y-0.5 hover:border-ocean-300 hover:shadow-card"
+                    >
+                      <div className="flex h-20 items-center justify-center bg-gradient-to-br from-sand-100 to-sand-50 text-ocean-950/25 transition-colors group-hover:text-ocean-500">
+                        <Icon size={26} />
+                      </div>
+                      <div className="p-3">
+                        <p className="text-sm font-semibold leading-tight text-ocean-950">{schema?.label ?? t}</p>
+                        {schema?.liveData && (
+                          <span className="mt-1.5 inline-block rounded-full bg-ocean-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ocean-600">
+                            Live data
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
