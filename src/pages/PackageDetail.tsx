@@ -71,9 +71,9 @@ export default function PackageDetail() {
       </div>
 
       {/* Gallery */}
-      <Reveal className="mb-6 grid gap-2 sm:grid-cols-[2fr_1fr]">
+      <Reveal className="mb-6 grid items-start gap-2 sm:grid-cols-[2fr_1fr]">
         <SmartImage src={pkg.gallery[activeImage] ?? pkg.image} alt={pkg.title} className="aspect-[16/10] w-full rounded-2xl sm:aspect-[4/3]" />
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-4 content-start gap-2 sm:grid-cols-2">
           {pkg.gallery.slice(0, 4).map((img, i) => (
             <button
               key={img + i}
