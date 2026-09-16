@@ -42,7 +42,7 @@ export function ParallaxHero({ image, imageAlt, eyebrow, heading, subtext }: Par
       const stickyH = stickyEl.offsetHeight
       const textBottomPx = textEl.getBoundingClientRect().bottom - stickyEl.getBoundingClientRect().top
       const gapPx = 28
-      const bottomMarginPx = 48
+      const bottomMarginPx = 80 // clears the "Scroll" cue pinned at the very bottom
 
       let cardWidthPx = Math.min(w * 0.82, 460)
       let cardHeightPx = cardWidthPx * 0.66
