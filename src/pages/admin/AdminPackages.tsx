@@ -8,6 +8,7 @@ import { formatPrice, slugify } from "../../lib/utils"
 import { SmartImage } from "../../components/SmartImage"
 import { ImageUploadField } from "../../components/admin/ImageUploadField"
 import { TagListField } from "../../components/admin/TagListField"
+import { GalleryUploadField } from "../../components/admin/GalleryUploadField"
 import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
 
 interface PackageRow {
@@ -346,7 +347,7 @@ export default function AdminPackages() {
               </Field>
             </div>
             <div className="sm:col-span-2 lg:col-span-3">
-              <TagListField label="Gallery images (URLs)" values={form.gallery} onChange={(v) => setForm({ ...form, gallery: v })} placeholder="Paste an image URL and press Enter" />
+              <GalleryUploadField label="Gallery images" values={form.gallery} onChange={(v) => setForm({ ...form, gallery: v })} />
             </div>
 
             <Field label="Nights">
