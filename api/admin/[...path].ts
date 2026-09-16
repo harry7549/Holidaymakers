@@ -25,22 +25,22 @@ const RESOURCES: Record<string, ResourceConfig> = {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const admin = await requireAdmin(req, res)
-  if (!admin) return
-
-  const pathParam = req.query.path
-  const segments = Array.isArray(pathParam) ? pathParam : pathParam ? [pathParam] : []
-  const [resourceName, id] = segments
-
-  const config = resourceName ? RESOURCES[resourceName] : undefined
-  if (!config) {
-    res.status(404).json({ error: "Unknown resource" })
-    return
-  }
-
-  const { table, writable } = config
-
   try {
+    const admin = await requireAdmin(req, res)
+    if (!admin) return
+
+    const pathParam = req.query.path
+    const segments = Array.isArray(pathParam) ? pathParam : pathParam ? [pathParam] : []
+    const [resourceName, id] = segments
+
+    const config = resourceName ? RESOURCES[resourceName] : undefined
+    if (!config) {
+      res.status(404).json({ error: "Unknown resource" })
+      return
+    }
+
+    const { table, writable } = config
+
     // Bulk reorder: POST /api/admin/page-blocks/reorder { ids: string[] } —
     // assigns position = index in the given order.
     if (resourceName === "page-blocks" && id === "reorder" && req.method === "POST") {
