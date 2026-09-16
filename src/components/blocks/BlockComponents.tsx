@@ -375,7 +375,7 @@ export function ContactFormBlock() {
 export function SearchWidgetBlock({ content }: BlockProps) {
   const tags = content.popularTags ?? []
   return (
-    <section className="relative -mt-1 bg-ocean-950 pb-16 pt-4 sm:pb-20">
+    <section className="relative -mt-1 bg-ocean-950 pt-4">
       <Reveal className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <SearchWidget />
         {tags.length > 0 && (
