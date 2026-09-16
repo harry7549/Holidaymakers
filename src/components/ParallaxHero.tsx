@@ -35,8 +35,8 @@ export function ParallaxHero({ image, imageAlt, eyebrow, heading, subtext }: Par
         <SmartImage src={image} alt={imageAlt} className="h-full w-full" imgClassName="animate-hero-zoom" />
       </motion.div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-ocean-950/75 via-ocean-950/15 to-ocean-950/80" />
-      <div className="absolute inset-0 bg-gradient-to-t from-ocean-950/40 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-ocean-950/80 via-ocean-950/35 to-ocean-950/85" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_45%,rgba(6,20,32,0.55),transparent_70%)]" />
 
       <motion.div
         style={{ opacity: contentOpacity, y: contentY }}
@@ -54,6 +54,7 @@ export function ParallaxHero({ image, imageAlt, eyebrow, heading, subtext }: Par
           initial={{ opacity: 0, y: 26 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.85, delay: 0.1, ease: EASE }}
+          style={{ textShadow: "0 2px 24px rgba(0,0,0,0.5)" }}
           className="max-w-3xl text-balance font-display text-4xl font-semibold leading-[1.08] text-white sm:text-6xl lg:text-7xl"
         >
           {heading}
@@ -62,7 +63,8 @@ export function ParallaxHero({ image, imageAlt, eyebrow, heading, subtext }: Par
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.24, ease: EASE }}
-          className="mx-auto mt-5 max-w-xl text-balance text-sm text-white/75 sm:text-lg"
+          style={{ textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
+          className="mx-auto mt-5 max-w-xl text-balance text-sm text-white/90 sm:text-lg"
         >
           {subtext}
         </motion.p>
