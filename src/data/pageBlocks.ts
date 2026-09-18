@@ -20,7 +20,8 @@ export const defaultBlocksByPage: Record<string, PageBlock[]> = {
     block("home", "stats", 2),
     block("home", "trending-destinations", 3),
     block("home", "featured-packages", 4),
-    block("home", "cta-banner", 5, {
+    block("home", "guarantee-banner", 5),
+    block("home", "cta-banner", 6, {
       eyebrow: "New — Trip Builder",
       heading: "Can't find the perfect package? Build your own.",
       body: "Pick destinations, set your pace, add the activities you love, and get a live price estimate — then let our experts turn it into a real itinerary.",
@@ -28,12 +29,12 @@ export const defaultBlocksByPage: Record<string, PageBlock[]> = {
       buttonHref: "/build-trip",
       style: "sunset",
     }),
-    block("home", "deals-strip", 6),
-    block("home", "steps", 7),
-    block("home", "feature-grid", 8),
-    block("home", "supplier-network", 9),
-    block("home", "testimonials", 10),
-    block("home", "cta-banner", 11, {
+    block("home", "deals-strip", 7),
+    block("home", "steps", 8),
+    block("home", "feature-grid", 9),
+    block("home", "supplier-network", 10),
+    block("home", "testimonials", 11),
+    block("home", "cta-banner", 12, {
       eyebrow: "",
       heading: "Ready to plan your next escape?",
       body: "Talk to a trip expert or start exploring — either way, your perfect holiday is a few clicks away.",
@@ -85,13 +86,13 @@ export const defaultMetaByPage: Record<string, PageMeta> = {
     page: "home",
     title: "Roamly Holidays — Flexible Holiday Packages, Your Way",
     description: "Compare ready-made holiday packages or build a fully custom itinerary with 200+ verified online and offline suppliers.",
-    ogImage: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80",
+    ogImage: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/73ed1d37-78c7-43aa-b101-0311b31c42af.jpg",
   },
   about: {
     page: "about",
     title: "About Roamly — Our Story & Mission",
     description: "Roamly connects travellers with a curated network of trusted local and global suppliers for genuinely tailored holidays.",
-    ogImage: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80",
+    ogImage: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/e69fc31d-ec5a-4c26-9c70-3dce15bea587.jpg",
   },
   contact: {
     page: "contact",

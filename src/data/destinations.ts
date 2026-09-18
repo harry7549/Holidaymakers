@@ -3,10 +3,12 @@ import type { Destination } from "./types"
 export const destinations: Destination[] = [
   {
     id: "bali",
+    lat: -8.4095,
+    lng: 115.1889,
     name: "Bali",
     country: "Indonesia",
     region: "International",
-    image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/deae9f3a-0c62-4742-8a14-36d308372efa.jpg",
     tagline: "Temples, rice terraces & sunset surf",
     description:
       "Bali blends spiritual calm with tropical thrill — cliffside temples, emerald rice terraces, and beach clubs that come alive at sunset.",
@@ -18,10 +20,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "santorini",
+    lat: 36.3932,
+    lng: 25.4615,
     name: "Santorini",
     country: "Greece",
     region: "International",
-    image: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/3915616f-93f1-4548-a2c7-93608cec1bf0.jpg",
     tagline: "Whitewashed cliffs over the Aegean",
     description:
       "Iconic blue domes, caldera views, and some of the most romantic sunsets on the planet make Santorini a bucket-list classic.",
@@ -33,10 +37,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "kerala",
+    lat: 9.9312,
+    lng: 76.2673,
     name: "Kerala",
     country: "India",
     region: "Domestic",
-    image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/f3208786-477d-4280-bc52-5f2cdfc31f17.jpg",
     tagline: "God's Own Country — backwaters & tea hills",
     description:
       "Drift on a houseboat through palm-fringed backwaters, wander misty tea estates, and unwind with authentic Ayurveda.",
@@ -48,10 +54,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "swiss-alps",
+    lat: 46.6863,
+    lng: 7.8632,
     name: "Swiss Alps",
     country: "Switzerland",
     region: "International",
-    image: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/ef957ca9-f22a-4e8f-8115-66a0596f4767.jpg",
     tagline: "Snow peaks, glacier trains & alpine lakes",
     description:
       "Ride the world's most scenic rail routes past snowcapped peaks, turquoise lakes, and storybook villages.",
@@ -63,10 +71,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "maldives",
+    lat: 4.1755,
+    lng: 73.5093,
     name: "Maldives",
     country: "Maldives",
     region: "International",
-    image: "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/62c242ee-ba65-4bc8-888b-140fa198fee4.jpg",
     tagline: "Overwater villas & coral lagoons",
     description:
       "Turquoise lagoons, private overwater villas, and world-class diving — the ultimate barefoot-luxury escape.",
@@ -78,10 +88,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "goa",
+    lat: 15.4909,
+    lng: 73.8278,
     name: "Goa",
     country: "India",
     region: "Domestic",
-    image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f3?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/d00bfdc4-3e3e-47c7-8279-19af4686d133.jpg",
     tagline: "Sun, sand & Portuguese charm",
     description:
       "Golden beaches by day, beach shacks and night markets after dark — Goa is India's favourite coastal escape.",
@@ -93,10 +105,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "dubai",
+    lat: 25.2048,
+    lng: 55.2708,
     name: "Dubai",
     country: "UAE",
     region: "International",
-    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/88f923f0-fbe0-4823-9338-54daeae8dfe6.jpg",
     tagline: "Desert dunes meet skyline glamour",
     description:
       "Ski indoors, dune-bash outdoors, and shop till sunset — Dubai packs desert adventure and futuristic luxury into one trip.",
@@ -108,10 +122,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "kashmir",
+    lat: 34.0837,
+    lng: 74.7973,
     name: "Kashmir",
     country: "India",
     region: "Domestic",
-    image: "https://images.unsplash.com/photo-1566837945700-30057527ade0?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/5dee9506-1dcd-4d3d-bc16-fa1704ad55ea.jpg",
     tagline: "Paradise on Earth",
     description:
       "Shikara rides on Dal Lake, alpine meadows, and snow-dusted peaks — Kashmir earns its legendary reputation.",
@@ -123,10 +139,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "rajasthan",
+    lat: 26.9124,
+    lng: 75.7873,
     name: "Rajasthan",
     country: "India",
     region: "Domestic",
-    image: "https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/98db8f04-797c-43b7-bf68-b6e6671a7f41.jpg",
     tagline: "Forts, palaces & desert royalty",
     description:
       "Camel safaris across golden dunes, royal palace-hotels, and centuries of Rajput history come alive.",
@@ -138,10 +156,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "manali",
+    lat: 32.2432,
+    lng: 77.1892,
     name: "Manali & Ladakh",
     country: "India",
     region: "Domestic",
-    image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/75f7ac0e-4587-409c-9ba5-d2e40fa5c6c1.jpg",
     tagline: "High passes & monastic serenity",
     description:
       "Ride some of the world's highest motorable passes, camp under stars in Nubra Valley, and visit centuries-old monasteries.",
@@ -153,10 +173,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "thailand",
+    lat: 13.7563,
+    lng: 100.5018,
     name: "Thailand",
     country: "Thailand",
     region: "International",
-    image: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/c8842f05-e828-4b14-9b1d-e3788190589d.jpg",
     tagline: "Islands, street food & golden temples",
     description:
       "Hop between limestone islands, feast on legendary street food, and explore gilded temples in Bangkok and beyond.",
@@ -168,10 +190,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "japan",
+    lat: 35.6762,
+    lng: 139.6503,
     name: "Japan",
     country: "Japan",
     region: "International",
-    image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/a9679ede-633b-4ea3-84c2-97a8968c2847.jpg",
     tagline: "Neon cities & cherry blossom calm",
     description:
       "From Tokyo's neon sprawl to Kyoto's temple gardens and bullet trains in between — Japan is thrillingly precise and beautiful.",
@@ -183,10 +207,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "andaman",
+    lat: 11.6234,
+    lng: 92.7265,
     name: "Andaman Islands",
     country: "India",
     region: "Domestic",
-    image: "https://images.unsplash.com/photo-1589979481223-deb893043163?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/944bdbde-bfb5-490d-975e-e50c3ddb27d7.jpg",
     tagline: "Coral reefs & castaway beaches",
     description:
       "Some of India's clearest waters — snorkel over coral gardens and relax on powder-white, near-empty beaches.",
@@ -198,10 +224,12 @@ export const destinations: Destination[] = [
   },
   {
     id: "vietnam",
+    lat: 21.0278,
+    lng: 105.8342,
     name: "Vietnam",
     country: "Vietnam",
     region: "International",
-    image: "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1200&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/97953113-8ade-436b-971d-31c21de4979e.jpg",
     tagline: "Emerald bays & timeless old towns",
     description:
       "Cruise the limestone karsts of Halong Bay and wander lantern-lit streets of Hoi An on this unforgettable circuit.",

@@ -11,7 +11,7 @@ export const testimonials: Testimonial[] = [
     quote:
       "From the first call with our trip expert to the moment we landed back home, everything about our Bali honeymoon felt effortless. The itinerary balanced romance and adventure perfectly.",
     tripName: "Bali Honeymoon Bliss",
-    image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/cad1da11-3027-44f7-b22f-bf809772f5ab.jpg",
   },
   {
     id: "t2",
@@ -22,7 +22,7 @@ export const testimonials: Testimonial[] = [
     quote:
       "We've booked three family trips through Roamly now. The custom trip builder let us mix a houseboat night with a wildlife safari — something no fixed package offered.",
     tripName: "Kashmir Paradise Trail",
-    image: "https://images.unsplash.com/photo-1566837945700-30057527ade0?auto=format&fit=crop&w=800&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/399658c9-46bc-4f11-bea8-c8ddc1e3330f.jpg",
   },
   {
     id: "t3",
@@ -33,7 +33,7 @@ export const testimonials: Testimonial[] = [
     quote:
       "The Ladakh trip was flawlessly organised for such a remote, high-altitude route. Our supplier partner clearly knew every pass and monastery inside out.",
     tripName: "Manali to Ladakh Adventure",
-    image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/592a4815-8703-4e51-8db0-fdebef51a32a.jpg",
   },
   {
     id: "t4",
@@ -44,7 +44,7 @@ export const testimonials: Testimonial[] = [
     quote:
       "Booking our Maldives villa felt like using a premium concierge, not just a website. Transparent pricing, real reviews, and support that actually picked up the phone.",
     tripName: "Maldives Overwater Dream",
-    image: "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=800&q=80",
+    image: "https://zofhoammbitcvjrkmijr.supabase.co/storage/v1/object/public/page-images/migrated/b136435f-de9d-423a-a18d-72856ff9f24a.jpg",
   },
 ]
 
