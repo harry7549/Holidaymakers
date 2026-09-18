@@ -12,9 +12,11 @@ import {
   Mail,
   MapPin,
   Menu,
+  MessageSquare,
   Moon,
   Package as PackageIcon,
   Percent,
+  Settings as SettingsIcon,
   Sparkles,
   Sun,
   Users,
@@ -64,8 +66,13 @@ const navGroups: { heading: string; items: NavItem[] }[] = [
       { to: "/admin/bookings", label: "Bookings", icon: Calendar, notifSource: "bookings" },
       { to: "/admin/quotes", label: "Quote Requests", icon: Sparkles, notifSource: "quotes" },
       { to: "/admin/messages", label: "Messages", icon: Mail, notifSource: "messages" },
+      { to: "/admin/chat", label: "Live Chat", icon: MessageSquare, notifSource: "chat" },
       { to: "/admin/supplier-applications", label: "Partner Applications", icon: BadgeCheck, notifSource: "supplier-applications" },
     ],
+  },
+  {
+    heading: "",
+    items: [{ to: "/admin/settings", label: "Settings", icon: SettingsIcon }],
   },
 ]
 

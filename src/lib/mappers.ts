@@ -20,6 +20,8 @@ export function mapDestinationRow(row: Row): Destination {
     rating: Number(row.rating),
     bestMonths: row.best_months,
     tags: row.tags ?? [],
+    lat: row.lat != null ? Number(row.lat) : undefined,
+    lng: row.lng != null ? Number(row.lng) : undefined,
   }
 }
 

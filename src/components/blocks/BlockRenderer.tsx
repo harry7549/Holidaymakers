@@ -9,6 +9,7 @@ import {
   FaqListBlock,
   FeatureGridBlock,
   FeaturedPackagesBlock,
+  GuaranteeBannerBlock,
   HeroBlock,
   ImageTextSplitBlock,
   MilestonesBlock,
@@ -46,6 +47,7 @@ const BLOCK_COMPONENTS: Record<string, ComponentType<{ content: BlockContent }>>
   "package-showcase": PackageShowcaseBlock,
   "deals-strip": DealsStripBlock,
   "supplier-network": SupplierNetworkBlock,
+  "guarantee-banner": GuaranteeBannerBlock,
 }
 
 export function BlockRenderer({ blocks }: { blocks: PageBlock[] }) {

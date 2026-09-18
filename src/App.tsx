@@ -40,6 +40,8 @@ import AdminBookings from "./pages/admin/AdminBookings"
 import AdminQuotes from "./pages/admin/AdminQuotes"
 import AdminMessages from "./pages/admin/AdminMessages"
 import AdminSupplierApplications from "./pages/admin/AdminSupplierApplications"
+import AdminSettings from "./pages/admin/AdminSettings"
+import AdminChat from "./pages/admin/AdminChat"
 
 export default function App() {
   return (
@@ -95,6 +97,8 @@ export default function App() {
           <Route path="quotes" element={<AdminQuotes />} />
           <Route path="messages" element={<AdminMessages />} />
           <Route path="supplier-applications" element={<AdminSupplierApplications />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="chat" element={<AdminChat />} />
         </Route>
       </Routes>
     </>

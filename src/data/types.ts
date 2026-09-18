@@ -44,6 +44,7 @@ export interface Review {
   body: string
   tripType: string
   helpful: number
+  photo?: string
 }
 
 export interface Package {
@@ -98,6 +99,8 @@ export interface Destination {
   rating: number
   bestMonths: string
   tags: string[]
+  lat?: number
+  lng?: number
 }
 
 export interface Testimonial {

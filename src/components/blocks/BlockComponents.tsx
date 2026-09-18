@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { BadgeCheck, ChevronDown, Sparkle, Users } from "lucide-react"
+import { BadgeCheck, ChevronDown, ShieldCheck, Sparkle, Users } from "lucide-react"
 import type { BlockContent, Category } from "../../data/types"
 import { useCatalog } from "../../context/CatalogContext"
 import { getIcon } from "../../lib/iconMap"
@@ -150,6 +150,23 @@ export function FeatureGridBlock({ content }: BlockProps) {
         </StaggerGroup>
       </div>
     </section>
+  )
+}
+
+export function GuaranteeBannerBlock({ content }: BlockProps) {
+  return (
+    <Reveal as="section" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="flex flex-col items-start gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 sm:flex-row sm:items-center sm:p-6">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white">
+          <ShieldCheck size={20} />
+        </span>
+        <div>
+          <h3 className="font-display text-base font-bold text-ocean-950 sm:text-lg">{content.heading}</h3>
+          <p className="mt-1 text-sm text-ocean-950/70">{content.body}</p>
+          {content.finePrint && <p className="mt-1.5 text-xs text-ocean-950/45">{content.finePrint}</p>}
+        </div>
+      </div>
+    </Reveal>
   )
 }
 

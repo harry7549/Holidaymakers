@@ -19,6 +19,8 @@ create table if not exists destinations (
   rating numeric(2,1) not null default 4.5,
   best_months text not null default '',
   tags jsonb not null default '[]',
+  lat numeric(9,5), -- used by the map-based destination explorer (Destinations page)
+  lng numeric(9,5),
   created_at timestamptz not null default now()
 );
 
@@ -144,6 +146,56 @@ create index if not exists clients_email_idx on clients (lower(email));
 create index if not exists clients_phone_norm_idx on clients (phone_norm) where phone_norm <> '';
 
 -- ============================================================
+-- Customer auth (Supabase Auth) — admin and customer accounts share the
+-- same auth.users table, so admin access is gated by membership in
+-- admin_users, not just "is there a valid session" (see AdminAuthContext).
+-- ============================================================
+
+create table if not exists admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+alter table admin_users enable row level security;
+drop policy if exists "self check admin" on admin_users;
+create policy "self check admin" on admin_users for select using (auth.uid() = user_id);
+
+-- Simple per-user table, safe for direct client-side access via RLS
+-- (unlike the inbound tables below, which only ever go through /api).
+create table if not exists wishlist_items (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  package_id text not null references packages(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, package_id)
+);
+alter table wishlist_items enable row level security;
+drop policy if exists "own wishlist select" on wishlist_items;
+create policy "own wishlist select" on wishlist_items for select using (auth.uid() = user_id);
+drop policy if exists "own wishlist insert" on wishlist_items;
+create policy "own wishlist insert" on wishlist_items for insert with check (auth.uid() = user_id);
+drop policy if exists "own wishlist delete" on wishlist_items;
+create policy "own wishlist delete" on wishlist_items for delete using (auth.uid() = user_id);
+
+-- ============================================================
+-- Site settings: small admin-editable key/value config, public-readable
+-- (nothing sensitive lives here). Currently holds the Trip Protection
+-- checkout add-on fee — a business-configurable amount, not a licensed
+-- insurance product, so it's worded as a "protection plan" everywhere.
+-- ============================================================
+
+create table if not exists site_settings (
+  key text primary key,
+  value jsonb not null default '{}',
+  updated_at timestamptz not null default now()
+);
+alter table site_settings enable row level security;
+drop policy if exists "public read site_settings" on site_settings;
+create policy "public read site_settings" on site_settings for select using (true);
+
+insert into site_settings (key, value)
+values ('trip_protection', '{"enabled": true, "feePerTraveler": 999, "label": "Trip Protection Plan", "description": "Helps cover trip cancellations and unexpected disruptions"}'::jsonb)
+on conflict (key) do nothing;
+
+-- ============================================================
 -- Inbound tables (public can insert, only admin can read/update)
 -- ============================================================
 
@@ -169,6 +221,7 @@ create table if not exists bookings (
   contact_email text not null,
   contact_phone text not null,
   client_id text references clients(id) on delete set null,
+  user_id uuid references auth.users(id) on delete set null, -- signed-in customer who booked, if any (anonymous checkout is still supported)
   ip text not null default '',
   geo_city text not null default '',
   geo_region text not null default '',
@@ -176,6 +229,8 @@ create table if not exists bookings (
   seen_by_admin boolean not null default false, -- powers the admin notification bell, independent of workflow status
   created_at timestamptz not null default now()
 );
+
+create index if not exists bookings_user_id_idx on bookings (user_id) where user_id is not null;
 
 create table if not exists quote_requests (
   id text primary key default gen_random_uuid()::text,
@@ -191,6 +246,7 @@ create table if not exists quote_requests (
   notes text not null default '',
   status text not null default 'new' check (status in ('new', 'contacted', 'closed')),
   client_id text references clients(id) on delete set null,
+  user_id uuid references auth.users(id) on delete set null,
   ip text not null default '',
   geo_city text not null default '',
   geo_region text not null default '',
@@ -198,6 +254,8 @@ create table if not exists quote_requests (
   seen_by_admin boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+create index if not exists quote_requests_user_id_idx on quote_requests (user_id) where user_id is not null;
 
 create table if not exists contact_messages (
   id uuid primary key default gen_random_uuid(),
@@ -231,6 +289,42 @@ create table if not exists supplier_applications (
   seen_by_admin boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+-- ============================================================
+-- Live chat widget — like the inbound tables above, all access goes
+-- through /api using the service role key. Live delivery to the open
+-- widget uses Supabase Realtime Broadcast (channel-based), not table RLS
+-- or direct client reads, so anonymous visitors need no auth at all.
+-- ============================================================
+
+create table if not exists chat_sessions (
+  id uuid primary key default gen_random_uuid(),
+  visitor_name text not null default '',
+  visitor_email text not null default '',
+  status text not null default 'open' check (status in ('open', 'closed')),
+  client_id text references clients(id) on delete set null,
+  user_id uuid references auth.users(id) on delete set null,
+  ip text not null default '',
+  geo_city text not null default '',
+  geo_region text not null default '',
+  geo_country text not null default '',
+  last_message_at timestamptz not null default now(),
+  seen_by_admin boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists chat_messages (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid not null references chat_sessions(id) on delete cascade,
+  sender text not null check (sender in ('visitor', 'admin')),
+  body text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists chat_messages_session_idx on chat_messages (session_id, created_at);
+create index if not exists chat_sessions_last_message_idx on chat_sessions (last_message_at desc);
+
+alter table chat_sessions enable row level security;
+alter table chat_messages enable row level security;
 
 -- ============================================================
 -- Row Level Security

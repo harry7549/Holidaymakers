@@ -476,6 +476,22 @@ export const REGISTRY: Record<string, BlockSchema> = {
     defaultContent: () => ({ heading: "Limited-Time Deals", subtitle: "Grab these before the clock runs out" }),
   },
 
+  "guarantee-banner": {
+    type: "guarantee-banner",
+    label: "Best-price guarantee banner",
+    description: "A compact trust banner communicating your price-match policy — safe to place on the homepage, package pages, or right before checkout.",
+    fields: [
+      { key: "heading", label: "Heading", type: "text" },
+      { key: "body", label: "Body", type: "textarea" },
+      { key: "finePrint", label: "Fine print (optional)", type: "text" },
+    ],
+    defaultContent: () => ({
+      heading: "Best Price Guarantee",
+      body: "Find the same package cheaper elsewhere within 24 hours of booking, and we'll refund the difference — no questions asked.",
+      finePrint: "Applies to identical package, dates and inclusions from a verified competitor listing.",
+    }),
+  },
+
   "supplier-network": {
     type: "supplier-network",
     label: "Supplier network (live)",

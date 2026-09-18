@@ -73,6 +73,54 @@ export async function adminBulkImport(resource: string, rows: unknown[]): Promis
   return parseErrorOr<{ imported: number }>(res, `Failed to import ${resource}`)
 }
 
+export async function adminGetSettings(): Promise<{ key: string; value: Record<string, unknown> }[]> {
+  const headers = await authHeaders()
+  const res = await fetch("/api/admin/settings", { headers })
+  return parseErrorOr(res, "Failed to load settings")
+}
+
+export async function adminPutSetting(key: string, value: object): Promise<void> {
+  const headers = await authHeaders()
+  const res = await fetch("/api/admin/settings", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify({ key, value }),
+  })
+  await parseErrorOr<void>(res, "Failed to save setting")
+}
+
+export async function adminListChatSessions<T>(): Promise<T> {
+  const headers = await authHeaders()
+  const res = await fetch("/api/admin/chat", { headers })
+  return parseErrorOr<T>(res, "Failed to load chat sessions")
+}
+
+export async function adminListChatMessages<T>(sessionId: string): Promise<T> {
+  const headers = await authHeaders()
+  const res = await fetch(`/api/admin/chat?sessionId=${sessionId}`, { headers })
+  return parseErrorOr<T>(res, "Failed to load chat messages")
+}
+
+export async function adminSendChatReply<T>(sessionId: string, message: string): Promise<T> {
+  const headers = await authHeaders()
+  const res = await fetch("/api/admin/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify({ sessionId, message }),
+  })
+  return parseErrorOr<T>(res, "Failed to send reply")
+}
+
+export async function adminMarkChatSeen(sessionId: string): Promise<void> {
+  const headers = await authHeaders()
+  const res = await fetch("/api/admin/chat", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify({ sessionId, seenByAdmin: true }),
+  })
+  await parseErrorOr<void>(res, "Failed to mark chat as seen")
+}
+
 export async function adminUploadImage(payload: { filename: string; contentType: string; dataBase64: string }): Promise<{ url: string }> {
   const headers = await authHeaders()
   const res = await fetch(`/api/admin/upload`, {
