@@ -21,6 +21,8 @@ import {
 import { useState, type ComponentType } from "react"
 import { useAdminAuth } from "../context/AdminAuthContext"
 import { useCatalog } from "../context/CatalogContext"
+import { AdminNotificationsProvider, useAdminNotifications, type NotificationSource } from "../context/AdminNotificationsContext"
+import { AdminNotificationBell } from "./admin/AdminNotificationBell"
 import { cn } from "../lib/utils"
 
 interface NavItem {
@@ -28,6 +30,7 @@ interface NavItem {
   label: string
   icon: ComponentType<{ size?: number | string; className?: string }>
   end?: boolean
+  notifSource?: NotificationSource
 }
 
 const navGroups: { heading: string; items: NavItem[] }[] = [
@@ -55,10 +58,10 @@ const navGroups: { heading: string; items: NavItem[] }[] = [
   {
     heading: "Inbox",
     items: [
-      { to: "/admin/bookings", label: "Bookings", icon: Calendar },
-      { to: "/admin/quotes", label: "Quote Requests", icon: Sparkles },
-      { to: "/admin/messages", label: "Messages", icon: Mail },
-      { to: "/admin/supplier-applications", label: "Partner Applications", icon: BadgeCheck },
+      { to: "/admin/bookings", label: "Bookings", icon: Calendar, notifSource: "bookings" },
+      { to: "/admin/quotes", label: "Quote Requests", icon: Sparkles, notifSource: "quotes" },
+      { to: "/admin/messages", label: "Messages", icon: Mail, notifSource: "messages" },
+      { to: "/admin/supplier-applications", label: "Partner Applications", icon: BadgeCheck, notifSource: "supplier-applications" },
     ],
   },
 ]
@@ -78,31 +81,41 @@ function Brand() {
 }
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
+  const { countBySource } = useAdminNotifications()
+
   return (
     <nav className="flex flex-1 flex-col gap-4 overflow-y-auto p-3">
       {navGroups.map((group, i) => (
         <div key={i}>
           {group.heading && <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-ocean-950/35">{group.heading}</p>}
           <div className="flex flex-col gap-0.5">
-            {group.items.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={onNavigate}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-gradient-to-r from-ocean-600 to-ocean-700 text-white shadow-[0_2px_10px_-2px_rgba(50,69,119,0.5)]"
-                      : "text-ocean-950/65 hover:bg-sand-100 hover:text-ocean-950",
-                  )
-                }
-              >
-                <item.icon size={16} />
-                {item.label}
-              </NavLink>
-            ))}
+            {group.items.map((item) => {
+              const count = item.notifSource ? countBySource[item.notifSource] : 0
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  onClick={onNavigate}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-gradient-to-r from-ocean-600 to-ocean-700 text-white shadow-[0_2px_10px_-2px_rgba(50,69,119,0.5)]"
+                        : "text-ocean-950/65 hover:bg-sand-100 hover:text-ocean-950",
+                    )
+                  }
+                >
+                  <item.icon size={16} />
+                  <span className="flex-1">{item.label}</span>
+                  {count > 0 && (
+                    <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-sunset-500 px-1.5 text-[10px] font-bold text-white">
+                      {count > 9 ? "9+" : count}
+                    </span>
+                  )}
+                </NavLink>
+              )
+            })}
           </div>
         </div>
       ))}
@@ -137,6 +150,7 @@ export function AdminLayout() {
   )
 
   return (
+    <AdminNotificationsProvider>
     <div className="flex min-h-svh bg-sand-50">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-sand-200 bg-white lg:flex">
         <div className="relative border-b border-sand-200 p-4">
@@ -151,10 +165,16 @@ export function AdminLayout() {
         <header className="relative flex items-center justify-between border-b border-sand-200 bg-white px-4 py-3 lg:hidden">
           <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-ocean-600 via-sunset-500 to-gold-400" />
           <Brand />
-          <button onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle menu" className="rounded-lg p-1.5 text-ocean-950/70 hover:bg-sand-100">
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          <div className="flex items-center gap-1">
+            <AdminNotificationBell />
+            <button onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle menu" className="rounded-lg p-1.5 text-ocean-950/70 hover:bg-sand-100">
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </header>
+        <div className="hidden items-center justify-end border-b border-sand-200 bg-white px-6 py-2.5 lg:flex">
+          <AdminNotificationBell />
+        </div>
         {mobileOpen && (
           <div className="flex max-h-[70vh] flex-col border-b border-sand-200 bg-white lg:hidden">
             <NavList onNavigate={() => setMobileOpen(false)} />
@@ -174,5 +194,6 @@ export function AdminLayout() {
         </main>
       </div>
     </div>
+    </AdminNotificationsProvider>
   )
 }

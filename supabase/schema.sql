@@ -173,6 +173,7 @@ create table if not exists bookings (
   geo_city text not null default '',
   geo_region text not null default '',
   geo_country text not null default '',
+  seen_by_admin boolean not null default false, -- powers the admin notification bell, independent of workflow status
   created_at timestamptz not null default now()
 );
 
@@ -194,6 +195,7 @@ create table if not exists quote_requests (
   geo_city text not null default '',
   geo_region text not null default '',
   geo_country text not null default '',
+  seen_by_admin boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -203,7 +205,7 @@ create table if not exists contact_messages (
   email text not null,
   subject text not null default '',
   message text not null,
-  status text not null default 'new' check (status in ('new', 'read', 'replied')),
+  status text not null default 'new' check (status in ('new', 'read', 'replied')), -- status='new' doubles as the notification-bell "unseen" flag, no separate column needed
   client_id text references clients(id) on delete set null,
   ip text not null default '',
   geo_city text not null default '',
@@ -226,6 +228,7 @@ create table if not exists supplier_applications (
   geo_city text not null default '',
   geo_region text not null default '',
   geo_country text not null default '',
+  seen_by_admin boolean not null default false,
   created_at timestamptz not null default now()
 );
 
