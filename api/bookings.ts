@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node"
 import { supabaseAdmin } from "./_lib/supabaseAdmin.js"
 import { getRequestGeo } from "./_lib/geo.js"
 import { linkClient } from "./_lib/clients.js"
+import { getAuthedUserId } from "./_lib/auth.js"
+import { sendBookingConfirmationWhatsApp } from "./_lib/whatsapp.js"
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -19,6 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const id = `RM${Date.now().toString().slice(-8)}`
   const geo = getRequestGeo(req)
+  const userId = await getAuthedUserId(req)
 
   let supplierCost = 0
   if (packageId) {
@@ -54,6 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       contact_email: contactEmail,
       contact_phone: contactPhone,
       client_id: clientId,
+      user_id: userId,
       ip: geo.ip,
       geo_city: geo.city,
       geo_region: geo.region,
@@ -67,6 +71,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(500).json({ error: "Could not save booking" })
     return
   }
+
+  sendBookingConfirmationWhatsApp({
+    phone: contactPhone,
+    customerName: travelerDetails?.[0]?.name,
+    packageTitle,
+    bookingId: id,
+  })
 
   res.status(201).json(data)
 }

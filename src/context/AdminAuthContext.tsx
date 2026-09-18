@@ -11,6 +11,15 @@ interface AdminAuthContextValue {
 
 const AdminAuthContext = createContext<AdminAuthContextValue | undefined>(undefined)
 
+// Admin and customer accounts share one Supabase Auth users table (see
+// supabaseClient.ts), so a valid session alone doesn't prove admin access —
+// it's only granted to user_ids listed in admin_users. Every self-registered
+// customer would otherwise be able to sign in here with their own account.
+async function isAllowedAdmin(userId: string): Promise<boolean> {
+  const { data } = await supabase.from("admin_users").select("user_id").eq("user_id", userId).maybeSingle()
+  return Boolean(data)
+}
+
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
@@ -21,12 +30,22 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session && !(await isAllowedAdmin(data.session.user.id))) {
+        await supabase.auth.signOut()
+        setSession(null)
+      } else {
+        setSession(data.session)
+      }
       setLoading(false)
     })
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      if (newSession && !(await isAllowedAdmin(newSession.user.id))) {
+        await supabase.auth.signOut()
+        setSession(null)
+        return
+      }
       setSession(newSession)
     })
 
@@ -34,8 +53,13 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error: error?.message ?? null }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) return { error: error.message }
+    if (data.session && !(await isAllowedAdmin(data.session.user.id))) {
+      await supabase.auth.signOut()
+      return { error: "This account doesn't have admin access." }
+    }
+    return { error: null }
   }
 
   const signOut = async () => {

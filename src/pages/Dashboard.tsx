@@ -1,16 +1,75 @@
+import { useEffect, useState } from "react"
 import { Link, Navigate } from "react-router-dom"
 import { Calendar, Compass, Heart, LogOut, Mail, MapPin, Phone, Sparkles, Users } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
-import { useTrip } from "../context/TripContext"
+import { useTrip, type Booking, type CustomQuoteRequest } from "../context/TripContext"
 import { formatDate, formatPrice } from "../lib/utils"
 import { SmartImage } from "../components/SmartImage"
 import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 
+// Maps the snake_case row shape /api/my-bookings and /api/my-quotes return
+// onto the same camelCase interfaces the (local-storage) demo data uses, so
+// the rendering below doesn't need two code paths.
+function mapBookingRow(row: Record<string, unknown>): Booking {
+  return {
+    id: row.id as string,
+    packageId: (row.package_id as string) ?? "",
+    packageTitle: row.package_title as string,
+    image: (row.image as string) ?? "",
+    startDate: (row.start_date as string) ?? "",
+    travelers: row.travelers as number,
+    addOns: (row.add_ons as string[]) ?? [],
+    totalPrice: row.total_price as number,
+    status: row.status as Booking["status"],
+    createdAt: row.created_at as string,
+    travelerDetails: (row.traveler_details as Booking["travelerDetails"]) ?? [],
+    contactEmail: row.contact_email as string,
+    contactPhone: row.contact_phone as string,
+  }
+}
+
+function mapQuoteRow(row: Record<string, unknown>): CustomQuoteRequest {
+  return {
+    id: row.id as string,
+    destinations: (row.destinations as string[]) ?? [],
+    days: row.days as number,
+    travelers: row.travelers as number,
+    budget: row.budget as number,
+    style: row.style as string,
+    addOns: (row.add_ons as string[]) ?? [],
+    name: row.name as string,
+    email: row.email as string,
+    phone: row.phone as string,
+    notes: (row.notes as string) ?? "",
+    createdAt: row.created_at as string,
+  }
+}
+
 export default function Dashboard() {
-  const { user, logout } = useAuth()
-  const { bookings, wishlist, quoteRequests } = useTrip()
+  const { user, session, logout } = useAuth()
+  const { bookings: localBookings, wishlist, quoteRequests: localQuoteRequests } = useTrip()
+  const [remoteBookings, setRemoteBookings] = useState<Booking[] | null>(null)
+  const [remoteQuotes, setRemoteQuotes] = useState<CustomQuoteRequest[] | null>(null)
+
+  useEffect(() => {
+    if (!session) return
+    const authHeader = { Authorization: `Bearer ${session.access_token}` }
+    fetch("/api/my-bookings", { headers: authHeader })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows) => setRemoteBookings(Array.isArray(rows) ? rows.map(mapBookingRow) : []))
+      .catch(() => setRemoteBookings([]))
+    fetch("/api/my-quotes", { headers: authHeader })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows) => setRemoteQuotes(Array.isArray(rows) ? rows.map(mapQuoteRow) : []))
+      .catch(() => setRemoteQuotes([]))
+  }, [session])
 
   if (!user) return <Navigate to="/login" replace />
+
+  // Server-side history (works across devices) once loaded, local-only demo
+  // data as a fallback while it's still loading.
+  const bookings = remoteBookings ?? localBookings
+  const quoteRequests = remoteQuotes ?? localQuoteRequests
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">

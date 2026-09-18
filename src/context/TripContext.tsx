@@ -1,6 +1,8 @@
-import { createContext, useContext, type ReactNode } from "react"
+import { createContext, useContext, useEffect, type ReactNode } from "react"
 import { useLocalStorage } from "../hooks/useLocalStorage"
 import { useToast } from "./ToastContext"
+import { useAuth } from "./AuthContext"
+import { supabaseCustomer, supabaseConfigured } from "../lib/supabaseClient"
 
 export interface Traveler {
   name: string
@@ -62,10 +64,43 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [bookings, setBookings] = useLocalStorage<Booking[]>("roamly:bookings", [])
   const [quoteRequests, setQuoteRequests] = useLocalStorage<CustomQuoteRequest[]>("roamly:quotes", [])
   const { showToast } = useToast()
+  const { user } = useAuth()
+
+  // When a customer signs in, pull their server-side wishlist and push up
+  // any locally-saved (anonymous) items so nothing saved before login is lost.
+  useEffect(() => {
+    if (!user || !supabaseConfigured) return
+    let cancelled = false
+    supabaseCustomer
+      .from("wishlist_items")
+      .select("package_id")
+      .eq("user_id", user.id)
+      .then(async ({ data }) => {
+        if (cancelled) return
+        const serverIds = (data ?? []).map((r) => r.package_id as string)
+        const localOnly = wishlist.filter((id) => !serverIds.includes(id))
+        if (localOnly.length > 0) {
+          await supabaseCustomer.from("wishlist_items").insert(localOnly.map((package_id) => ({ user_id: user.id, package_id })))
+        }
+        if (!cancelled) setWishlist([...new Set([...serverIds, ...localOnly])])
+      })
+    return () => {
+      cancelled = true
+    }
+    // Only re-run when the signed-in user changes, not on every wishlist edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   const toggleWishlist = (packageId: string) => {
     setWishlist((prev) => {
-      if (prev.includes(packageId)) {
+      const has = prev.includes(packageId)
+      if (user && supabaseConfigured) {
+        const query = has
+          ? supabaseCustomer.from("wishlist_items").delete().eq("user_id", user.id).eq("package_id", packageId)
+          : supabaseCustomer.from("wishlist_items").insert({ user_id: user.id, package_id: packageId })
+        query.then(({ error }) => error && console.error("wishlist sync failed", error))
+      }
+      if (has) {
         showToast("Removed from wishlist", "info")
         return prev.filter((id) => id !== packageId)
       }

@@ -1,19 +1,28 @@
 import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Compass, Lock, Mail } from "lucide-react"
+import { AlertTriangle, Compass, Lock, Mail } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { Reveal } from "../components/Reveal"
 
 export default function Login() {
-  const { login } = useAuth()
+  const { signIn } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
     if (!email || !password) return
-    login(email)
+    setSubmitting(true)
+    setError("")
+    const { error } = await signIn(email, password)
+    setSubmitting(false)
+    if (error) {
+      setError(error)
+      return
+    }
     navigate("/dashboard")
   }
 
@@ -28,6 +37,11 @@ export default function Login() {
       </div>
 
       <form onSubmit={submit} className="space-y-3 rounded-2xl border border-sand-200 bg-white p-6">
+        {error && (
+          <div className="flex items-start gap-2 rounded-lg bg-sunset-50 px-3 py-2.5 text-xs text-sunset-700">
+            <AlertTriangle size={14} className="mt-0.5 shrink-0" /> {error}
+          </div>
+        )}
         <div>
           <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-ocean-950/60">
             <Mail size={13} /> Email
@@ -54,10 +68,9 @@ export default function Login() {
             className="w-full rounded-lg border border-sand-200 px-4 py-2.5 text-sm outline-none focus:border-ocean-400"
           />
         </div>
-        <button type="submit" className="w-full rounded-full bg-ocean-600 py-3 text-sm font-bold text-white hover:bg-ocean-700">
-          Sign In
+        <button type="submit" disabled={submitting} className="w-full rounded-full bg-ocean-600 py-3 text-sm font-bold text-white hover:bg-ocean-700 disabled:opacity-60">
+          {submitting ? "Signing in..." : "Sign In"}
         </button>
-        <p className="text-center text-xs text-ocean-950/40">This is a demo login — any email & password works.</p>
       </form>
 
       <p className="mt-6 text-center text-sm text-ocean-950/60">

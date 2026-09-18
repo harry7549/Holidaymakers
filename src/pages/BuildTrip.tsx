@@ -7,6 +7,7 @@ import { SmartImage } from "../components/SmartImage"
 import { Reveal } from "../components/Reveal"
 import { useTrip } from "../context/TripContext"
 import { useToast } from "../context/ToastContext"
+import { useAuth } from "../context/AuthContext"
 
 const styles = [
   { id: "relaxed", label: "Relaxed", body: "Fewer activities, more downtime", multiplier: 1.12 },
@@ -15,7 +16,7 @@ const styles = [
 ]
 
 const addOnsList = [
-  { id: "insurance", label: "Travel Insurance", price: 1499 },
+  { id: "protection", label: "Trip Protection Plan", price: 1499 },
   { id: "visa", label: "Visa Assistance", price: 2499 },
   { id: "guide", label: "Private Local Guide", price: 3999 },
   { id: "transfer", label: "Airport Transfers", price: 1999 },
@@ -28,6 +29,7 @@ export default function BuildTrip() {
   const navigate = useNavigate()
   const { addQuoteRequest } = useTrip()
   const { showToast } = useToast()
+  const { session } = useAuth()
   const { destinations } = useCatalog()
 
   const [step, setStep] = useState(0)
@@ -99,7 +101,10 @@ export default function BuildTrip() {
     try {
       await fetch("/api/quotes", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ destinations: destinationNames, days: totalDays, travelers, budget: estimate.high, style, addOns, ...form }),
       })
     } catch {

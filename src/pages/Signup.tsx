@@ -1,18 +1,31 @@
 import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Compass, Mail, Phone, User } from "lucide-react"
+import { AlertTriangle, Compass, Mail, Phone, User } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { Reveal } from "../components/Reveal"
 
 export default function Signup() {
-  const { login } = useAuth()
+  const { signUp } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" })
+  const [error, setError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
     if (!form.name || !form.email || !form.password) return
-    login(form.email, form.name)
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters")
+      return
+    }
+    setSubmitting(true)
+    setError("")
+    const { error } = await signUp(form.email, form.password, form.name, form.phone)
+    setSubmitting(false)
+    if (error) {
+      setError(error)
+      return
+    }
     navigate("/dashboard")
   }
 
@@ -27,6 +40,11 @@ export default function Signup() {
       </div>
 
       <form onSubmit={submit} className="space-y-3 rounded-2xl border border-sand-200 bg-white p-6">
+        {error && (
+          <div className="flex items-start gap-2 rounded-lg bg-sunset-50 px-3 py-2.5 text-xs text-sunset-700">
+            <AlertTriangle size={14} className="mt-0.5 shrink-0" /> {error}
+          </div>
+        )}
         <div>
           <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-ocean-950/60">
             <User size={13} /> Full Name
@@ -70,14 +88,13 @@ export default function Signup() {
             required
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-            placeholder="••••••••"
+            placeholder="At least 6 characters"
             className="w-full rounded-lg border border-sand-200 px-4 py-2.5 text-sm outline-none focus:border-ocean-400"
           />
         </div>
-        <button type="submit" className="w-full rounded-full bg-ocean-600 py-3 text-sm font-bold text-white hover:bg-ocean-700">
-          Create Account
+        <button type="submit" disabled={submitting} className="w-full rounded-full bg-ocean-600 py-3 text-sm font-bold text-white hover:bg-ocean-700 disabled:opacity-60">
+          {submitting ? "Creating account..." : "Create Account"}
         </button>
-        <p className="text-center text-xs text-ocean-950/40">This is a demo signup — no real account is created.</p>
       </form>
 
       <p className="mt-6 text-center text-sm text-ocean-950/60">

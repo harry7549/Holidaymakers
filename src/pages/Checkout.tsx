@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { Banknote, Building2, Check, ChevronLeft, ChevronRight, CreditCard, Lock, ShieldCheck, Smartphone } from "lucide-react"
 import { getPackageBySlug } from "../lib/catalogHelpers"
@@ -10,8 +10,14 @@ import { useAuth } from "../context/AuthContext"
 import { useToast } from "../context/ToastContext"
 import { Reveal } from "../components/Reveal"
 
-const checkoutAddOns = [
-  { id: "insurance", label: "Travel Insurance", desc: "Medical & trip cancellation cover", price: 1499 },
+interface TripProtectionSetting {
+  enabled: boolean
+  feePerTraveler: number
+  label: string
+  description: string
+}
+
+const staticAddOns = [
   { id: "transfer", label: "Priority Airport Transfers", desc: "Dedicated pickup & drop-off", price: 1999 },
   { id: "guide", label: "Private Local Guide", desc: "English-speaking guide throughout", price: 3999 },
 ]
@@ -30,7 +36,7 @@ export default function Checkout() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { addBooking } = useTrip()
-  const { user } = useAuth()
+  const { user, session } = useAuth()
   const { showToast } = useToast()
   const { packages } = useCatalog()
 
@@ -49,6 +55,21 @@ export default function Checkout() {
   const [addOns, setAddOns] = useState<string[]>([])
   const [paymentMethod, setPaymentMethod] = useState("card")
   const [processing, setProcessing] = useState(false)
+  const [tripProtection, setTripProtection] = useState<TripProtectionSetting | null>(null)
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setTripProtection(data?.trip_protection ?? null))
+      .catch(() => setTripProtection(null))
+  }, [])
+
+  const checkoutAddOns = [
+    ...(tripProtection?.enabled
+      ? [{ id: "protection", label: tripProtection.label, desc: tripProtection.description, price: tripProtection.feePerTraveler }]
+      : []),
+    ...staticAddOns,
+  ]
 
   if (!pkg) return <Navigate to="/explore" replace />
 
@@ -101,7 +122,10 @@ export default function Checkout() {
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify(bookingPayload),
       })
       if (res.ok) {
