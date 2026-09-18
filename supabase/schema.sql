@@ -66,6 +66,7 @@ create table if not exists packages (
   exclusions jsonb not null default '[]',
   supplier_id text references suppliers(id) on delete set null,
   start_dates jsonb not null default '[]',
+  cost_price integer not null default 0, -- what the supplier charges per traveller; margin = price - cost_price
   flexible boolean not null default true,
   trending boolean not null default false,
   featured boolean not null default false,
@@ -113,68 +114,10 @@ create table if not exists page_meta (
 );
 
 -- ============================================================
--- Inbound tables (public can insert, only admin can read/update)
--- ============================================================
-
-create table if not exists bookings (
-  id text primary key,
-  package_id text,
-  package_title text not null,
-  image text,
-  start_date date,
-  travelers integer not null default 1,
-  add_ons jsonb not null default '[]',
-  total_price integer not null default 0,
-  status text not null default 'upcoming' check (status in ('upcoming', 'confirmed', 'completed', 'cancelled')),
-  traveler_details jsonb not null default '[]',
-  contact_email text not null,
-  contact_phone text not null,
-  created_at timestamptz not null default now()
-);
-
-create table if not exists quote_requests (
-  id text primary key default gen_random_uuid()::text,
-  destinations jsonb not null default '[]',
-  days integer not null default 0,
-  travelers integer not null default 1,
-  budget integer not null default 0,
-  style text not null default 'balanced',
-  add_ons jsonb not null default '[]',
-  name text not null,
-  email text not null,
-  phone text not null,
-  notes text not null default '',
-  status text not null default 'new' check (status in ('new', 'contacted', 'closed')),
-  created_at timestamptz not null default now()
-);
-
-create table if not exists contact_messages (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  email text not null,
-  subject text not null default '',
-  message text not null,
-  status text not null default 'new' check (status in ('new', 'read', 'replied')),
-  created_at timestamptz not null default now()
-);
-
-create table if not exists supplier_applications (
-  id uuid primary key default gen_random_uuid(),
-  business text not null,
-  contact text not null,
-  email text not null,
-  phone text not null default '',
-  city text not null default '',
-  type text not null default 'offline' check (type in ('online', 'offline')),
-  message text not null default '',
-  status text not null default 'new' check (status in ('new', 'approved', 'rejected')),
-  created_at timestamptz not null default now()
-);
-
--- ============================================================
 -- CRM: clients (a unified contact record per traveller/lead — online or
 -- offline). Fully admin-managed, same access pattern as the inbound tables
 -- below (no public insert/read at all, only /api/admin via service role).
+-- Created before the inbound tables since they reference it by client_id.
 -- ============================================================
 
 create table if not exists clients (
@@ -191,12 +134,100 @@ create table if not exists clients (
   notes text not null default '',
   next_follow_up timestamptz,
   last_contact_at timestamptz,
+  phone_norm text generated always as (right(regexp_replace(coalesce(phone, ''), '\D', '', 'g'), 10)) stored,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 create index if not exists clients_phone_idx on clients (phone);
 create index if not exists clients_email_idx on clients (lower(email));
+create index if not exists clients_phone_norm_idx on clients (phone_norm) where phone_norm <> '';
+
+-- ============================================================
+-- Inbound tables (public can insert, only admin can read/update)
+-- ============================================================
+
+-- ip/geo_* columns are best-effort, populated server-side from Vercel's edge
+-- geo headers at submission time (see api/_lib/geo.ts) — never trust these
+-- for anything beyond a rough "where did this lead come from" signal.
+-- client_id links the submission to its CRM record (see api/_lib/clients.ts,
+-- which finds-or-creates a client by normalized phone/email on every insert).
+
+create table if not exists bookings (
+  id text primary key,
+  package_id text,
+  package_title text not null,
+  image text,
+  start_date date,
+  travelers integer not null default 1,
+  add_ons jsonb not null default '[]',
+  total_price integer not null default 0,
+  supplier_cost integer not null default 0, -- snapshot of package.cost_price * travelers at booking time
+  margin integer not null default 0, -- snapshot of total_price - supplier_cost at booking time
+  status text not null default 'upcoming' check (status in ('upcoming', 'confirmed', 'completed', 'cancelled')),
+  traveler_details jsonb not null default '[]',
+  contact_email text not null,
+  contact_phone text not null,
+  client_id text references clients(id) on delete set null,
+  ip text not null default '',
+  geo_city text not null default '',
+  geo_region text not null default '',
+  geo_country text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists quote_requests (
+  id text primary key default gen_random_uuid()::text,
+  destinations jsonb not null default '[]',
+  days integer not null default 0,
+  travelers integer not null default 1,
+  budget integer not null default 0,
+  style text not null default 'balanced',
+  add_ons jsonb not null default '[]',
+  name text not null,
+  email text not null,
+  phone text not null,
+  notes text not null default '',
+  status text not null default 'new' check (status in ('new', 'contacted', 'closed')),
+  client_id text references clients(id) on delete set null,
+  ip text not null default '',
+  geo_city text not null default '',
+  geo_region text not null default '',
+  geo_country text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists contact_messages (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null,
+  subject text not null default '',
+  message text not null,
+  status text not null default 'new' check (status in ('new', 'read', 'replied')),
+  client_id text references clients(id) on delete set null,
+  ip text not null default '',
+  geo_city text not null default '',
+  geo_region text not null default '',
+  geo_country text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists supplier_applications (
+  id uuid primary key default gen_random_uuid(),
+  business text not null,
+  contact text not null,
+  email text not null,
+  phone text not null default '',
+  city text not null default '',
+  type text not null default 'offline' check (type in ('online', 'offline')),
+  message text not null default '',
+  status text not null default 'new' check (status in ('new', 'approved', 'rejected')),
+  ip text not null default '',
+  geo_city text not null default '',
+  geo_region text not null default '',
+  geo_country text not null default '',
+  created_at timestamptz not null default now()
+);
 
 -- ============================================================
 -- Row Level Security

@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import { CalendarClock, Mail, Pencil, Phone, Plus, Trash2, Upload, Users, X } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminUpdate } from "../../lib/adminApi"
@@ -130,6 +131,19 @@ export default function AdminClients() {
       next_follow_up: c.next_follow_up ? c.next_follow_up.slice(0, 16) : "",
     })
   }
+
+  const [searchParams, setSearchParams] = useSearchParams()
+  useEffect(() => {
+    const openId = searchParams.get("open")
+    if (!openId || items.length === 0) return
+    const target = items.find((c) => c.id === openId)
+    if (target) startEdit(target)
+    setSearchParams((prev) => {
+      prev.delete("open")
+      return prev
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, searchParams])
 
   const save = async () => {
     if (!form) return

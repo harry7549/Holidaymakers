@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 import { supabaseAdmin } from "./_lib/supabaseAdmin.js"
+import { getRequestGeo } from "./_lib/geo.js"
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -15,6 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
+  const geo = getRequestGeo(req)
+
   const { data, error } = await supabaseAdmin
     .from("supplier_applications")
     .insert({
@@ -26,6 +29,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       type: type === "online" ? "online" : "offline",
       message: message ?? "",
       status: "new",
+      ip: geo.ip,
+      geo_city: geo.city,
+      geo_region: geo.region,
+      geo_country: geo.country,
     })
     .select()
     .single()

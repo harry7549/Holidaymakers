@@ -61,6 +61,8 @@ export interface Package {
   days: number
   price: number
   originalPrice: number
+  /** What the supplier charges per traveller — absent on the static demo fallback data. */
+  costPrice?: number
   rating: number
   reviewsCount: number
   groupSizeMax: number

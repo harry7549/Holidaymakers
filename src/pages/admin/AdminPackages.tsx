@@ -9,6 +9,7 @@ import { SmartImage } from "../../components/SmartImage"
 import { ImageUploadField } from "../../components/admin/ImageUploadField"
 import { TagListField } from "../../components/admin/TagListField"
 import { GalleryUploadField } from "../../components/admin/GalleryUploadField"
+import { InlineCostEditor } from "../../components/admin/InlineCostEditor"
 import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSearchBar, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
 
 interface PackageRow {
@@ -26,6 +27,7 @@ interface PackageRow {
   days: number
   price: number
   original_price: number
+  cost_price: number
   rating: number
   reviews_count: number
   group_size_max: number
@@ -86,6 +88,7 @@ function emptyForm(destinationId: string, supplierId: string) {
     days: 4,
     price: 0,
     original_price: 0,
+    cost_price: 0,
     rating: 4.5,
     reviews_count: 0,
     group_size_max: 10,
@@ -155,6 +158,7 @@ export default function AdminPackages() {
       days: p.days,
       price: p.price,
       original_price: p.original_price,
+      cost_price: p.cost_price ?? 0,
       rating: p.rating,
       reviews_count: p.reviews_count,
       group_size_max: p.group_size_max,
@@ -213,6 +217,7 @@ export default function AdminPackages() {
       days: Number(form.days) || 2,
       price: Number(form.price) || 0,
       original_price: Number(form.original_price) || 0,
+      cost_price: Number(form.cost_price) || 0,
       rating: Number(form.rating) || 4.5,
       reviews_count: Number(form.reviews_count) || 0,
       group_size_max: Number(form.group_size_max) || 10,
@@ -374,9 +379,19 @@ export default function AdminPackages() {
             <Field label="Original price (for discount %)">
               <input type="number" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: Number(e.target.value) })} className={inputClass} />
             </Field>
+            <Field label="Supplier cost price (per person)">
+              <input type="number" value={form.cost_price} onChange={(e) => setForm({ ...form, cost_price: Number(e.target.value) })} className={inputClass} />
+            </Field>
             <Field label="Max group size">
               <input type="number" value={form.group_size_max} onChange={(e) => setForm({ ...form, group_size_max: Number(e.target.value) })} className={inputClass} />
             </Field>
+
+            <div className="rounded-lg bg-sand-50 px-3 py-2.5 text-sm sm:col-span-2 lg:col-span-3">
+              <span className="font-semibold text-ocean-950">Margin: {formatPrice(form.price - form.cost_price)} per person</span>
+              <span className="ml-2 text-ocean-950/50">
+                ({form.price > 0 ? Math.round(((form.price - form.cost_price) / form.price) * 100) : 0}% of sell price)
+              </span>
+            </div>
 
             <Field label="Rating (0-5)">
               <input type="number" step="0.1" min="0" max="5" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className={inputClass} />
@@ -517,6 +532,17 @@ export default function AdminPackages() {
                   <span className="flex items-center gap-1 text-xs text-ocean-950/50">
                     <Sparkles size={11} className="text-gold-500" /> {p.rating}
                   </span>
+                </div>
+                <div className="mt-1.5 flex items-center justify-between border-t border-sand-100 pt-1.5">
+                  <InlineCostEditor
+                    label="Cost"
+                    value={p.cost_price ?? 0}
+                    onSave={async (v) => {
+                      const updated = await adminUpdate<PackageRow>("packages", p.id, { cost_price: v })
+                      setItems((prev) => prev.map((row) => (row.id === p.id ? updated : row)))
+                    }}
+                  />
+                  <span className="text-xs font-semibold text-ocean-600">Margin {formatPrice(p.price - (p.cost_price ?? 0))}</span>
                 </div>
               </div>
             </div>

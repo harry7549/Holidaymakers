@@ -55,6 +55,7 @@ export function mapPackageRow(row: Row): Package {
     days: row.days,
     price: row.price,
     originalPrice: row.original_price,
+    costPrice: row.cost_price ?? 0,
     rating: Number(row.rating),
     reviewsCount: row.reviews_count,
     groupSizeMax: row.group_size_max,

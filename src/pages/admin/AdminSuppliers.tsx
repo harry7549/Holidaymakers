@@ -1,11 +1,20 @@
-import { useState } from "react"
-import { BadgeCheck, Globe2, Pencil, Plus, Star, Trash2, X } from "lucide-react"
+import { useMemo, useState } from "react"
+import { BadgeCheck, Briefcase, Globe2, Pencil, Plus, Star, Trash2, TrendingUp, X } from "lucide-react"
 import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminCreate, adminDelete, adminUpdate } from "../../lib/adminApi"
 import { useToast } from "../../context/ToastContext"
 import { useCatalog } from "../../context/CatalogContext"
-import { cn } from "../../lib/utils"
+import { cn, formatPrice } from "../../lib/utils"
 import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSearchBar, AdminSkeletonGrid, Badge } from "../../components/admin/AdminUI"
+import { InlineCostEditor } from "../../components/admin/InlineCostEditor"
+
+interface BookingRow {
+  package_id: string | null
+  total_price: number
+  supplier_cost: number
+  margin: number
+  status: string
+}
 
 const colorGradients: Record<string, string> = {
   ocean: "from-ocean-500 to-ocean-800",
@@ -43,7 +52,8 @@ const emptyForm = {
 
 export default function AdminSuppliers() {
   const { items, setItems, loading, error } = useAdminResource<SupplierRow>("suppliers")
-  const { refresh } = useCatalog()
+  const { packages, refresh } = useCatalog()
+  const { items: bookings } = useAdminResource<BookingRow>("bookings")
   const { showToast } = useToast()
   const [form, setForm] = useState<typeof emptyForm | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -51,6 +61,23 @@ export default function AdminSuppliers() {
   const [search, setSearch] = useState("")
 
   const filteredItems = items.filter((s) => s.name.toLowerCase().includes(search.trim().toLowerCase()))
+
+  const statsBySupplier = useMemo(() => {
+    const map = new Map<string, { count: number; revenue: number; cost: number; margin: number }>()
+    for (const s of items) map.set(s.id, { count: 0, revenue: 0, cost: 0, margin: 0 })
+    const packageSupplier = new Map(packages.map((p) => [p.id, p.supplierId]))
+    for (const b of bookings) {
+      if (!b.package_id || b.status === "cancelled") continue
+      const supplierId = packageSupplier.get(b.package_id)
+      const stat = supplierId ? map.get(supplierId) : undefined
+      if (!stat) continue
+      stat.count += 1
+      stat.revenue += b.total_price
+      stat.cost += b.supplier_cost
+      stat.margin += b.margin
+    }
+    return map
+  }, [items, packages, bookings])
 
   const startCreate = () => {
     setEditingId(null)
@@ -194,6 +221,38 @@ export default function AdminSuppliers() {
               Verified partner
             </label>
           </div>
+
+          {editingId && (
+            <div className="mt-5 border-t border-sand-100 pt-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ocean-950/40">
+                Their packages & what they charge you (updates often — edit directly here)
+              </p>
+              {packages.filter((p) => p.supplierId === editingId).length === 0 ? (
+                <p className="text-xs text-ocean-950/40">No packages linked to this supplier yet — assign one from the Packages tab.</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {packages
+                    .filter((p) => p.supplierId === editingId)
+                    .map((p) => (
+                      <div key={p.id} className="flex items-center justify-between gap-3 rounded-lg bg-sand-50 px-3 py-2 text-xs">
+                        <span className="min-w-0 truncate font-medium text-ocean-950/80">{p.title}</span>
+                        <span className="shrink-0 text-ocean-950/50">Sell {formatPrice(p.price)}</span>
+                        <div className="shrink-0">
+                          <InlineCostEditor
+                            value={p.costPrice ?? 0}
+                            onSave={async (v) => {
+                              await adminUpdate("packages", p.id, { cost_price: v })
+                              refresh()
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             onClick={save}
             disabled={saving}
@@ -245,11 +304,29 @@ export default function AdminSuppliers() {
                   </button>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="mb-3 flex items-center justify-between">
                 <Badge tone={s.type === "online" ? "sunset" : "ocean"}>{s.type}</Badge>
                 <span className="flex items-center gap-1 text-xs text-ocean-950/50">
                   <Star size={11} className="text-gold-500" /> {s.rating}
                 </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 rounded-xl bg-sand-50 p-2.5 text-center">
+                <div>
+                  <p className="flex items-center justify-center gap-1 text-sm font-bold text-ocean-950">
+                    <Briefcase size={11} className="text-ocean-950/40" /> {statsBySupplier.get(s.id)?.count ?? 0}
+                  </p>
+                  <p className="text-[10px] text-ocean-950/40">Bookings</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-ocean-950">{formatPrice(statsBySupplier.get(s.id)?.cost ?? 0)}</p>
+                  <p className="text-[10px] text-ocean-950/40">Paid to them</p>
+                </div>
+                <div>
+                  <p className="flex items-center justify-center gap-1 text-sm font-bold text-ocean-600">
+                    <TrendingUp size={11} /> {formatPrice(statsBySupplier.get(s.id)?.margin ?? 0)}
+                  </p>
+                  <p className="text-[10px] text-ocean-950/40">Your margin</p>
+                </div>
               </div>
             </div>
           ))}

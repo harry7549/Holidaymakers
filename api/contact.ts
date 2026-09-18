@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 import { supabaseAdmin } from "./_lib/supabaseAdmin.js"
+import { getRequestGeo } from "./_lib/geo.js"
+import { linkClient } from "./_lib/clients.js"
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -15,9 +17,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
+  const geo = getRequestGeo(req)
+  const clientId = await linkClient({ full_name: name, email, source: "Website", city: geo.city, country: geo.country })
+
   const { data, error } = await supabaseAdmin
     .from("contact_messages")
-    .insert({ name, email, subject: subject ?? "", message, status: "new" })
+    .insert({
+      name,
+      email,
+      subject: subject ?? "",
+      message,
+      status: "new",
+      client_id: clientId,
+      ip: geo.ip,
+      geo_city: geo.city,
+      geo_region: geo.region,
+      geo_country: geo.country,
+    })
     .select()
     .single()
 

@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 import { supabaseAdmin } from "./_lib/supabaseAdmin.js"
+import { getRequestGeo } from "./_lib/geo.js"
+import { linkClient } from "./_lib/clients.js"
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -16,6 +18,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const id = `RM${Date.now().toString().slice(-8)}`
+  const geo = getRequestGeo(req)
+
+  let supplierCost = 0
+  if (packageId) {
+    const { data: pkg } = await supabaseAdmin.from("packages").select("cost_price").eq("id", packageId).maybeSingle()
+    supplierCost = (pkg?.cost_price ?? 0) * travelers
+  }
+  const margin = (totalPrice ?? 0) - supplierCost
+
+  const clientId = await linkClient({
+    full_name: travelerDetails?.[0]?.name,
+    phone: contactPhone,
+    email: contactEmail,
+    source: "Website",
+    city: geo.city,
+    country: geo.country,
+  })
 
   const { data, error } = await supabaseAdmin
     .from("bookings")
@@ -28,10 +47,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       travelers,
       add_ons: addOns ?? [],
       total_price: totalPrice ?? 0,
+      supplier_cost: supplierCost,
+      margin,
       status: "upcoming",
       traveler_details: travelerDetails ?? [],
       contact_email: contactEmail,
       contact_phone: contactPhone,
+      client_id: clientId,
+      ip: geo.ip,
+      geo_city: geo.city,
+      geo_region: geo.region,
+      geo_country: geo.country,
     })
     .select()
     .single()
