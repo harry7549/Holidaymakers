@@ -1,17 +1,20 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { Search, Star } from "lucide-react"
+import { LayoutGrid, Map as MapIcon, Search, Star } from "lucide-react"
 import { useCatalog } from "../context/CatalogContext"
 import { SmartImage } from "../components/SmartImage"
+import { DestinationsMap } from "../components/DestinationsMap"
 import { Reveal, StaggerGroup, StaggerItem } from "../components/Reveal"
 import { formatPrice, cn } from "../lib/utils"
 
 const regions = ["All", "Domestic", "International"] as const
+const views = ["grid", "map"] as const
 
 export default function Destinations() {
   const { destinations } = useCatalog()
   const [query, setQuery] = useState("")
   const [region, setRegion] = useState<(typeof regions)[number]>("All")
+  const [view, setView] = useState<(typeof views)[number]>("grid")
 
   const filtered = useMemo(() => {
     return destinations.filter((d) => {
@@ -54,8 +57,31 @@ export default function Destinations() {
             </button>
           ))}
         </div>
+        <div className="flex gap-1 rounded-full border border-sand-200 p-1">
+          <button
+            onClick={() => setView("grid")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors",
+              view === "grid" ? "bg-ocean-600 text-white" : "text-ocean-950/60",
+            )}
+          >
+            <LayoutGrid size={14} /> Grid
+          </button>
+          <button
+            onClick={() => setView("map")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors",
+              view === "map" ? "bg-ocean-600 text-white" : "text-ocean-950/60",
+            )}
+          >
+            <MapIcon size={14} /> Map
+          </button>
+        </div>
       </div>
 
+      {view === "map" && <DestinationsMap destinations={filtered} />}
+
+      {view === "grid" && (
       <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((d) => (
           <StaggerItem key={d.id}>
@@ -84,6 +110,7 @@ export default function Destinations() {
           </StaggerItem>
         ))}
       </StaggerGroup>
+      )}
     </div>
   )
 }

@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Calendar, MapPin, Search, Users } from "lucide-react"
+import { Calendar, Loader2, MapPin, Search, Users } from "lucide-react"
 import { useCatalog } from "../context/CatalogContext"
 import { cn } from "../lib/utils"
+
+const SEARCH_PROGRESS_MS = 700
 
 export function SearchWidget({ className }: { className?: string }) {
   const navigate = useNavigate()
@@ -11,6 +13,7 @@ export function SearchWidget({ className }: { className?: string }) {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [travelers, setTravelers] = useState(2)
   const [date, setDate] = useState("")
+  const [searching, setSearching] = useState(false)
 
   const suggestions = useMemo(() => {
     if (!query.trim()) return destinations.slice(0, 6)
@@ -19,12 +22,14 @@ export function SearchWidget({ className }: { className?: string }) {
   }, [query, destinations])
 
   const submit = (destinationName?: string) => {
+    if (searching) return
     const params = new URLSearchParams()
     const term = destinationName ?? query
     if (term) params.set("q", term)
     if (travelers) params.set("travelers", String(travelers))
     if (date) params.set("date", date)
-    navigate(`/explore?${params.toString()}`)
+    setSearching(true)
+    setTimeout(() => navigate(`/explore?${params.toString()}`), SEARCH_PROGRESS_MS)
   }
 
   return (
@@ -100,10 +105,20 @@ export function SearchWidget({ className }: { className?: string }) {
           <button
             type="button"
             onClick={() => submit()}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-sunset-500 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-sunset-600 sm:rounded-full sm:py-2.5"
+            disabled={searching}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-sunset-500 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-sunset-600 disabled:opacity-90 sm:rounded-full sm:py-2.5"
           >
-            <Search size={16} />
-            Search
+            {searching ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Getting you the best rates...
+              </>
+            ) : (
+              <>
+                <Search size={16} />
+                Search
+              </>
+            )}
           </button>
         </div>
       </div>
