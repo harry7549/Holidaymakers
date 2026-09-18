@@ -37,7 +37,7 @@ export async function linkClient(input: {
         city: input.city || "",
         country: input.country || "",
         source: input.source,
-        status: "active",
+        status: "new",
       })
       .select("id")
       .single()

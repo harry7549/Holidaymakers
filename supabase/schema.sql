@@ -130,7 +130,7 @@ create table if not exists clients (
   city text not null default '',
   source text not null default 'Manual',
   tags jsonb not null default '[]',
-  status text not null default 'active' check (status in ('active', 'dormant', 'lost')),
+  status text not null default 'active' check (status in ('new', 'contacted', 'active', 'booked', 'dormant', 'lost')),
   notes text not null default '',
   next_follow_up timestamptz,
   last_contact_at timestamptz,

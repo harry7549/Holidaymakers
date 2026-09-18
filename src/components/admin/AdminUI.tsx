@@ -31,12 +31,13 @@ export function AdminPageHeader({
 }
 
 /** Small colored status/feature pill, e.g. "Featured", "Verified", "New". */
-export function Badge({ children, tone = "ocean" }: { children: ReactNode; tone?: "ocean" | "sunset" | "gold" | "neutral" }) {
+export function Badge({ children, tone = "ocean" }: { children: ReactNode; tone?: "ocean" | "sunset" | "gold" | "neutral" | "emerald" }) {
   const tones: Record<string, string> = {
     ocean: "bg-ocean-50 text-ocean-700",
     sunset: "bg-sunset-50 text-sunset-600",
     gold: "bg-gold-400/20 text-gold-700",
     neutral: "bg-sand-100 text-ocean-950/60",
+    emerald: "bg-emerald-50 text-emerald-700",
   }
   return <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide", tones[tone])}>{children}</span>
 }

@@ -27,10 +27,15 @@ import AdminLogin from "./pages/admin/AdminLogin"
 import AdminOverview from "./pages/admin/AdminOverview"
 import AdminPages from "./pages/admin/AdminPages"
 import AdminPackages from "./pages/admin/AdminPackages"
+import AdminPackageDetail from "./pages/admin/AdminPackageDetail"
 import AdminDestinations from "./pages/admin/AdminDestinations"
+import AdminDestinationDetail from "./pages/admin/AdminDestinationDetail"
 import AdminSuppliers from "./pages/admin/AdminSuppliers"
+import AdminSupplierDetail from "./pages/admin/AdminSupplierDetail"
 import AdminDeals from "./pages/admin/AdminDeals"
+import AdminDealDetail from "./pages/admin/AdminDealDetail"
 import AdminClients from "./pages/admin/AdminClients"
+import AdminClientDetail from "./pages/admin/AdminClientDetail"
 import AdminBookings from "./pages/admin/AdminBookings"
 import AdminQuotes from "./pages/admin/AdminQuotes"
 import AdminMessages from "./pages/admin/AdminMessages"
@@ -77,10 +82,15 @@ export default function App() {
           <Route index element={<AdminOverview />} />
           <Route path="pages" element={<AdminPages />} />
           <Route path="packages" element={<AdminPackages />} />
+          <Route path="packages/:id" element={<AdminPackageDetail />} />
           <Route path="destinations" element={<AdminDestinations />} />
+          <Route path="destinations/:id" element={<AdminDestinationDetail />} />
           <Route path="suppliers" element={<AdminSuppliers />} />
+          <Route path="suppliers/:id" element={<AdminSupplierDetail />} />
           <Route path="deals" element={<AdminDeals />} />
+          <Route path="deals/:id" element={<AdminDealDetail />} />
           <Route path="clients" element={<AdminClients />} />
+          <Route path="clients/:id" element={<AdminClientDetail />} />
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="quotes" element={<AdminQuotes />} />
           <Route path="messages" element={<AdminMessages />} />

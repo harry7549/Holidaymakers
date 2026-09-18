@@ -97,7 +97,7 @@ export default function AdminQuotes() {
               </a>
               <span className="font-semibold text-ocean-950">Budget up to {formatPrice(q.budget)}</span>
               {q.client_id && (
-                <Link to={`/admin/clients?open=${q.client_id}`} className="font-semibold text-ocean-600 hover:text-ocean-700">
+                <Link to={`/admin/clients/${q.client_id}`} className="font-semibold text-ocean-600 hover:text-ocean-700">
                   View in CRM →
                 </Link>
               )}

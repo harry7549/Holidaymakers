@@ -101,7 +101,7 @@ export default function AdminBookings() {
                     {b.contact_email} · {b.contact_phone}
                   </span>
                   {b.client_id && (
-                    <Link to={`/admin/clients?open=${b.client_id}`} className="font-semibold text-ocean-600 hover:text-ocean-700">
+                    <Link to={`/admin/clients/${b.client_id}`} className="font-semibold text-ocean-600 hover:text-ocean-700">
                       View in CRM →
                     </Link>
                   )}

@@ -65,7 +65,7 @@ export default function AdminMessages() {
                       </span>
                     )}
                     {m.client_id && (
-                      <Link to={`/admin/clients?open=${m.client_id}`} className="font-semibold text-ocean-600 hover:text-ocean-700">
+                      <Link to={`/admin/clients/${m.client_id}`} className="font-semibold text-ocean-600 hover:text-ocean-700">
                         View in CRM →
                       </Link>
                     )}
