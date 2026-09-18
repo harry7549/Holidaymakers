@@ -87,7 +87,7 @@ export default function AdminOverview() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-sand-200 bg-white p-5">
+        <div className="rounded-3xl border border-sand-200 bg-surface p-5">
           <p className="mb-3 text-xs font-bold uppercase tracking-wide text-ocean-950/40">Quick actions</p>
           <div className="flex flex-col gap-2">
             {quickActions.map((a) => (
@@ -112,7 +112,7 @@ export default function AdminOverview() {
           <Link
             key={c.label}
             to={c.to}
-            className="group rounded-2xl border border-sand-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
+            className="group rounded-2xl border border-sand-200 bg-surface p-5 transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
           >
             <div className="mb-3 flex items-center justify-between">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-ocean-500 to-ocean-800 text-white">
@@ -126,7 +126,7 @@ export default function AdminOverview() {
         ))}
       </div>
 
-      <div className="rounded-2xl border border-sand-200 bg-white p-5">
+      <div className="rounded-2xl border border-sand-200 bg-surface p-5">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-bold text-ocean-950">Recent bookings</p>
           <Link to="/admin/bookings" className="text-xs font-semibold text-ocean-600 hover:text-ocean-700">

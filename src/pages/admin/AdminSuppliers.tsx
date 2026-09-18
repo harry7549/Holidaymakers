@@ -104,7 +104,7 @@ export default function AdminSuppliers() {
             <div
               key={s.id}
               onClick={() => navigate(`/admin/suppliers/${s.id}`)}
-              className="group cursor-pointer rounded-2xl border border-sand-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
+              className="group cursor-pointer rounded-2xl border border-sand-200 bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
             >
               <div className="mb-2 flex items-start justify-between">
                 <div className="flex items-center gap-2.5">

@@ -61,7 +61,7 @@ export default function AdminPackages() {
             <div
               key={p.id}
               onClick={() => navigate(`/admin/packages/${p.id}`)}
-              className="group cursor-pointer overflow-hidden rounded-2xl border border-sand-200 bg-white transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
+              className="group cursor-pointer overflow-hidden rounded-2xl border border-sand-200 bg-surface transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
             >
               <div className="relative h-32">
                 <SmartImage src={p.image} alt={p.title} className="h-full w-full" />
@@ -95,7 +95,7 @@ export default function AdminPackages() {
                     rel="noreferrer"
                     title="Preview live page"
                     onClick={(e) => e.stopPropagation()}
-                    className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700"
+                    className="rounded-lg bg-surface/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700"
                   >
                     <ExternalLink size={13} />
                   </a>
@@ -104,7 +104,7 @@ export default function AdminPackages() {
                       e.stopPropagation()
                       navigate(`/admin/packages/${p.id}`)
                     }}
-                    className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700"
+                    className="rounded-lg bg-surface/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700"
                   >
                     <Pencil size={13} />
                   </button>
@@ -113,7 +113,7 @@ export default function AdminPackages() {
                       e.stopPropagation()
                       remove(p.id)
                     }}
-                    className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-sunset-600"
+                    className="rounded-lg bg-surface/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-sunset-600"
                   >
                     <Trash2 size={13} />
                   </button>

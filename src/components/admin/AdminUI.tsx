@@ -47,7 +47,7 @@ export function AdminSkeletonGrid({ count = 6 }: { count?: number }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="animate-pulse rounded-2xl border border-sand-200 bg-white p-4">
+        <div key={i} className="animate-pulse rounded-2xl border border-sand-200 bg-surface p-4">
           <div className="mb-3 h-28 rounded-xl bg-sand-100" />
           <div className="mb-2 h-4 w-2/3 rounded bg-sand-100" />
           <div className="h-3 w-1/2 rounded bg-sand-100" />
@@ -62,7 +62,7 @@ export function AdminSkeletonRows({ count = 4 }: { count?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="animate-pulse rounded-2xl border border-sand-200 bg-white p-4">
+        <div key={i} className="animate-pulse rounded-2xl border border-sand-200 bg-surface p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="w-2/3 space-y-2">
               <div className="h-4 w-1/2 rounded bg-sand-100" />
@@ -97,7 +97,7 @@ export function AdminErrorNotice({ resource, message }: { resource: string; mess
         <p className="mt-0.5 text-xs text-sunset-600/80">{message}</p>
         <p className="mt-1.5 text-xs text-ocean-950/50">
           This usually means Supabase isn't wired up on the server yet — check that{" "}
-          <code className="rounded bg-white/60 px-1 py-0.5 font-mono">SUPABASE_SERVICE_ROLE_KEY</code> is set in Vercel's environment variables.
+          <code className="rounded bg-surface/60 px-1 py-0.5 font-mono">SUPABASE_SERVICE_ROLE_KEY</code> is set in Vercel's environment variables.
         </p>
       </div>
     </div>
@@ -117,7 +117,7 @@ export function AdminSearchBar({
   resultCount?: number
 }) {
   return (
-    <div className="mb-4 flex items-center gap-2 rounded-2xl border border-sand-200 bg-white px-3 py-2">
+    <div className="mb-4 flex items-center gap-2 rounded-2xl border border-sand-200 bg-surface px-3 py-2">
       <Search size={15} className="shrink-0 text-ocean-950/40" />
       <input
         value={value}

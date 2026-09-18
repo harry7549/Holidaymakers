@@ -33,8 +33,8 @@ export function AdminNotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-50 mt-2 max-h-[70vh] w-80 overflow-y-auto rounded-2xl border border-sand-200 bg-white shadow-lift">
-            <div className="sticky top-0 flex items-center justify-between border-b border-sand-100 bg-white px-4 py-3">
+          <div className="absolute right-0 z-50 mt-2 max-h-[70vh] w-80 overflow-y-auto rounded-2xl border border-sand-200 bg-surface shadow-lift">
+            <div className="sticky top-0 flex items-center justify-between border-b border-sand-100 bg-surface px-4 py-3">
               <p className="text-sm font-bold text-ocean-950">Notifications {totalCount > 0 && `(${totalCount})`}</p>
               {items.length > 0 && (
                 <button onClick={dismissAll} className="text-xs font-semibold text-ocean-600 hover:text-ocean-700">

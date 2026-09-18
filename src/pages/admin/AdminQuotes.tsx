@@ -50,7 +50,7 @@ export default function AdminQuotes() {
 
       <div className="space-y-3">
         {items.map((q) => (
-          <div key={q.id} className="rounded-2xl border border-sand-200 bg-white p-4 transition-shadow hover:shadow-card">
+          <div key={q.id} className="rounded-2xl border border-sand-200 bg-surface p-4 transition-shadow hover:shadow-card">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-ocean-500 to-ocean-800 font-display text-sm font-bold text-white">

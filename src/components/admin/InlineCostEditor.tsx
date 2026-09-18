@@ -34,7 +34,7 @@ export function InlineCostEditor({ value, onSave, label = "Cost" }: { value: num
         type="button"
         onClick={start}
         title="Click to edit"
-        className="flex items-center gap-1.5 rounded-full border border-sand-200 bg-white px-2.5 py-1 text-xs font-medium text-ocean-950/70 hover:border-ocean-300 hover:text-ocean-700"
+        className="flex items-center gap-1.5 rounded-full border border-sand-200 bg-surface px-2.5 py-1 text-xs font-medium text-ocean-950/70 hover:border-ocean-300 hover:text-ocean-700"
       >
         {label} {formatPrice(value)}
         <Pencil size={11} className="text-ocean-950/40" />

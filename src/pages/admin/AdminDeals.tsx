@@ -70,7 +70,7 @@ export default function AdminDeals() {
             <div
               key={d.id}
               onClick={() => navigate(`/admin/deals/${d.id}`)}
-              className="group cursor-pointer overflow-hidden rounded-2xl border border-sand-200 bg-white transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
+              className="group cursor-pointer overflow-hidden rounded-2xl border border-sand-200 bg-surface transition-all hover:-translate-y-0.5 hover:border-ocean-200 hover:shadow-card"
             >
               <div className="relative h-24">
                 <SmartImage src={d.image} alt={d.title} className="h-full w-full" />
@@ -82,7 +82,7 @@ export default function AdminDeals() {
                       e.stopPropagation()
                       navigate(`/admin/deals/${d.id}`)
                     }}
-                    className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700"
+                    className="rounded-lg bg-surface/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-ocean-700"
                   >
                     <Pencil size={13} />
                   </button>
@@ -91,7 +91,7 @@ export default function AdminDeals() {
                       e.stopPropagation()
                       remove(d.id)
                     }}
-                    className="rounded-lg bg-white/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-sunset-600"
+                    className="rounded-lg bg-surface/95 p-1.5 text-ocean-950/60 shadow-sm hover:text-sunset-600"
                   >
                     <Trash2 size={13} />
                   </button>

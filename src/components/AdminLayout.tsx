@@ -12,9 +12,11 @@ import {
   Mail,
   MapPin,
   Menu,
+  Moon,
   Package as PackageIcon,
   Percent,
   Sparkles,
+  Sun,
   Users,
   X,
 } from "lucide-react"
@@ -22,6 +24,7 @@ import { useState, type ComponentType } from "react"
 import { useAdminAuth } from "../context/AdminAuthContext"
 import { useCatalog } from "../context/CatalogContext"
 import { AdminNotificationsProvider, useAdminNotifications, type NotificationSource } from "../context/AdminNotificationsContext"
+import { AdminThemeProvider, useAdminTheme } from "../context/AdminThemeContext"
 import { AdminNotificationBell } from "./admin/AdminNotificationBell"
 import { cn } from "../lib/utils"
 
@@ -65,6 +68,20 @@ const navGroups: { heading: string; items: NavItem[] }[] = [
     ],
   },
 ]
+
+function ThemeToggle() {
+  const { theme, toggle } = useAdminTheme()
+  return (
+    <button
+      onClick={toggle}
+      aria-label="Toggle dark mode"
+      title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      className="rounded-xl p-2 text-ocean-950/60 hover:bg-sand-100 hover:text-ocean-950"
+    >
+      {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
+  )
+}
 
 function Brand() {
   return (
@@ -150,9 +167,10 @@ export function AdminLayout() {
   )
 
   return (
+    <AdminThemeProvider>
     <AdminNotificationsProvider>
     <div className="flex min-h-svh bg-sand-50">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-sand-200 bg-white lg:flex">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-sand-200 bg-surface lg:flex">
         <div className="relative border-b border-sand-200 p-4">
           <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-ocean-600 via-sunset-500 to-gold-400" />
           <Brand />
@@ -162,21 +180,23 @@ export function AdminLayout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="relative flex items-center justify-between border-b border-sand-200 bg-white px-4 py-3 lg:hidden">
+        <header className="relative flex items-center justify-between border-b border-sand-200 bg-surface px-4 py-3 lg:hidden">
           <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-ocean-600 via-sunset-500 to-gold-400" />
           <Brand />
           <div className="flex items-center gap-1">
+            <ThemeToggle />
             <AdminNotificationBell />
             <button onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle menu" className="rounded-lg p-1.5 text-ocean-950/70 hover:bg-sand-100">
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </header>
-        <div className="hidden items-center justify-end border-b border-sand-200 bg-white px-6 py-2.5 lg:flex">
+        <div className="hidden items-center justify-end gap-1 border-b border-sand-200 bg-surface px-6 py-2.5 lg:flex">
+          <ThemeToggle />
           <AdminNotificationBell />
         </div>
         {mobileOpen && (
-          <div className="flex max-h-[70vh] flex-col border-b border-sand-200 bg-white lg:hidden">
+          <div className="flex max-h-[70vh] flex-col border-b border-sand-200 bg-surface lg:hidden">
             <NavList onNavigate={() => setMobileOpen(false)} />
             {footer}
           </div>
@@ -195,5 +215,6 @@ export function AdminLayout() {
       </div>
     </div>
     </AdminNotificationsProvider>
+    </AdminThemeProvider>
   )
 }

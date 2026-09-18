@@ -56,15 +56,15 @@ export default function AdminBookings() {
 
       {!loading && !error && items.length > 0 && (
         <div className="mb-4 grid grid-cols-3 gap-3">
-          <div className="rounded-2xl border border-sand-200 bg-white p-4 text-center">
+          <div className="rounded-2xl border border-sand-200 bg-surface p-4 text-center">
             <p className="font-display text-2xl font-bold text-ocean-950">{items.length}</p>
             <p className="text-xs text-ocean-950/50">Total bookings</p>
           </div>
-          <div className="rounded-2xl border border-sand-200 bg-white p-4 text-center">
+          <div className="rounded-2xl border border-sand-200 bg-surface p-4 text-center">
             <p className="font-display text-2xl font-bold text-ocean-950">{formatPrice(totalRevenue)}</p>
             <p className="text-xs text-ocean-950/50">Revenue (excl. cancelled)</p>
           </div>
-          <div className="rounded-2xl border border-sand-200 bg-white p-4 text-center">
+          <div className="rounded-2xl border border-sand-200 bg-surface p-4 text-center">
             <p className="flex items-center justify-center gap-1 font-display text-2xl font-bold text-ocean-600">
               <TrendingUp size={16} /> {formatPrice(totalMargin)}
             </p>
@@ -80,7 +80,7 @@ export default function AdminBookings() {
 
       <div className="space-y-3">
         {items.map((b) => (
-          <div key={b.id} className="rounded-2xl border border-sand-200 bg-white p-4 transition-shadow hover:shadow-card">
+          <div key={b.id} className="rounded-2xl border border-sand-200 bg-surface p-4 transition-shadow hover:shadow-card">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="font-display text-base font-bold text-ocean-950">{b.package_title}</p>
@@ -113,7 +113,7 @@ export default function AdminBookings() {
                   {b.margin > 0 && <p className="text-xs text-ocean-600">+{formatPrice(b.margin)} margin</p>}
                 </div>
                 <div className="flex items-center gap-1.5 rounded-lg border border-sand-200 pl-2.5">
-                  <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", statusDot[b.status] ?? "bg-ocean-950/30")} />
+                  <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", statusDot[b.status] ?? "bg-black/30")} />
                   <select
                     value={b.status}
                     onChange={(e) => updateStatus(b.id, e.target.value)}

@@ -35,6 +35,12 @@
   --color-gold-400: #e0b566;
   --color-gold-500: #cc9640;
   --color-gold-600: #a9772a;
+  --color-gold-700: #8a611f;
+
+  /* Card/surface background — separate from --color-white so button/badge
+     text (which must always stay literal white) can't be dragged along
+     when the admin dark theme flips surfaces to a dark colour. */
+  --color-surface: #ffffff;
 
   /* Sand / neutral warm */
   --color-sand-50: #fbf9f5;
@@ -51,6 +57,30 @@
   --animate-float: float 6s ease-in-out infinite;
   --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-shimmer: shimmer 2.2s linear infinite;
+}
+
+/* Admin panel dark theme — scoped to [data-theme="dark"] on the admin shell
+   only, never applied to the public site. Tailwind v4 utilities read colours
+   via var(--color-*), so redefining the tokens here re-themes every existing
+   bg-sand-50 / text-ocean-950 / bg-surface / etc. utility already used across
+   the admin pages, with zero changes to their className strings. Saturated
+   brand accents (ocean-500/600, sunset-500, gold-400/500) are deliberately
+   left alone — they already read fine on a dark surface. */
+[data-theme="dark"] {
+  --color-surface: #141a2b;
+  --color-sand-50: #0a0e18;
+  --color-sand-100: #1b2236;
+  --color-sand-200: #2a3349;
+  --color-sand-300: #3d4761;
+  --color-ocean-950: #eef1f7;
+  --color-ocean-50: #1a2440;
+  --color-ocean-700: #9db1e0;
+  --color-sunset-50: #2c1a12;
+  --color-sunset-600: #e2986a;
+  --color-sunset-700: #eab088;
+  --color-gold-700: #e3c27f;
+  --color-emerald-50: #112a1e;
+  --color-emerald-700: #6ee7b7;
 }
 
 @layer base {

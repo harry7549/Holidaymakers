@@ -43,7 +43,7 @@ function PackagePickerField({ value, onChange }: { value: string[]; onChange: (i
           className={inputClass}
         />
         {results.length > 0 && (
-          <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-sand-200 bg-white shadow-lg">
+          <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-sand-200 bg-surface shadow-lg">
             {results.map((p) => (
               <button
                 key={p.id}
@@ -230,13 +230,13 @@ export function BlockContentEditor({ type, content, onChange }: Props) {
             {list.map((item, i) => (
               <div key={i} className="rounded-xl border border-sand-200 bg-sand-50 p-3">
                 <div className="mb-2 flex items-center justify-end gap-1">
-                  <button type="button" onClick={() => moveItem(i, -1)} disabled={i === 0} className="rounded p-1 text-ocean-950/50 hover:bg-white disabled:opacity-30">
+                  <button type="button" onClick={() => moveItem(i, -1)} disabled={i === 0} className="rounded p-1 text-ocean-950/50 hover:bg-surface disabled:opacity-30">
                     <ChevronUp size={14} />
                   </button>
-                  <button type="button" onClick={() => moveItem(i, 1)} disabled={i === list.length - 1} className="rounded p-1 text-ocean-950/50 hover:bg-white disabled:opacity-30">
+                  <button type="button" onClick={() => moveItem(i, 1)} disabled={i === list.length - 1} className="rounded p-1 text-ocean-950/50 hover:bg-surface disabled:opacity-30">
                     <ChevronDown size={14} />
                   </button>
-                  <button type="button" onClick={() => removeItem(i)} className="rounded p-1 text-ocean-950/50 hover:bg-white hover:text-sunset-600">
+                  <button type="button" onClick={() => removeItem(i)} className="rounded p-1 text-ocean-950/50 hover:bg-surface hover:text-sunset-600">
                     <Trash2 size={14} />
                   </button>
                 </div>

@@ -343,7 +343,7 @@ export default function AdminPages() {
         />
 
         {showNewPage && (
-          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-ocean-300 bg-white p-3">
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-ocean-300 bg-surface p-3">
             <input
               autoFocus
               value={newPageLabel}
@@ -377,7 +377,7 @@ export default function AdminPages() {
           </div>
         )}
 
-        <div className="mb-4 flex items-center gap-2 rounded-2xl border border-sand-200 bg-white px-3 py-2">
+        <div className="mb-4 flex items-center gap-2 rounded-2xl border border-sand-200 bg-surface px-3 py-2">
           <Search size={15} className="text-ocean-950/40" />
           <input
             value={search}
@@ -387,7 +387,7 @@ export default function AdminPages() {
           />
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-sand-200 bg-white">
+        <div className="overflow-hidden rounded-2xl border border-sand-200 bg-surface">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-sand-200 text-xs font-bold uppercase tracking-wide text-ocean-950/40">
@@ -527,7 +527,7 @@ export default function AdminPages() {
             <div>
               <button
                 onClick={() => setShowAddBlock(true)}
-                className="mb-4 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-sand-300 bg-white py-3 text-sm font-semibold text-ocean-950/60 hover:border-ocean-300 hover:text-ocean-700"
+                className="mb-4 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-sand-300 bg-surface py-3 text-sm font-semibold text-ocean-950/60 hover:border-ocean-300 hover:text-ocean-700"
               >
                 <Plus size={15} /> Add Block
               </button>
@@ -551,7 +551,7 @@ export default function AdminPages() {
                       onDragStart={() => setDragId(b.id)}
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={() => onDrop(b.id)}
-                      className={cn("rounded-2xl border bg-white transition-colors", isEditing ? "border-ocean-300" : "border-sand-200")}
+                      className={cn("rounded-2xl border bg-surface transition-colors", isEditing ? "border-ocean-300" : "border-sand-200")}
                     >
                       <div className="flex items-center gap-2 p-3">
                         <span className="w-5 shrink-0 text-center text-xs font-bold text-ocean-950/30">{String(i + 1).padStart(2, "0")}</span>
@@ -626,7 +626,7 @@ export default function AdminPages() {
           )}
         </div>
 
-        <div className="h-fit rounded-2xl border border-sand-200 bg-white p-4">
+        <div className="h-fit rounded-2xl border border-sand-200 bg-surface p-4">
           <p className="mb-3 text-xs font-bold uppercase tracking-wide text-ocean-950/40">Page info</p>
           <dl className="space-y-3 text-sm">
             <div>
@@ -655,10 +655,10 @@ export default function AdminPages() {
 
       {showAddBlock && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ocean-950/60 p-4 pt-12 backdrop-blur-sm sm:pt-20"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 pt-12 backdrop-blur-sm sm:pt-20"
           onClick={() => setShowAddBlock(false)}
         >
-          <div className="w-full max-w-4xl rounded-3xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-4xl rounded-3xl bg-surface shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-sand-200 p-5">
               <h2 className="font-display text-2xl font-bold text-ocean-950">Add Block</h2>
               <button onClick={() => setShowAddBlock(false)} className="rounded-full p-2 text-ocean-950/40 hover:bg-sand-100">
@@ -727,10 +727,10 @@ function SeoForm({
     og_image: initial?.og_image ?? fallback?.ogImage ?? "",
   })
 
-  if (loading) return <div className="rounded-2xl border border-sand-200 bg-white p-5"><AdminSkeletonLines count={3} /></div>
+  if (loading) return <div className="rounded-2xl border border-sand-200 bg-surface p-5"><AdminSkeletonLines count={3} /></div>
 
   return (
-    <div className="space-y-3 rounded-2xl border border-sand-200 bg-white p-5">
+    <div className="space-y-3 rounded-2xl border border-sand-200 bg-surface p-5">
       <div>
         <label className="mb-1 block text-xs font-semibold text-ocean-950/60">Page title (browser tab / search results)</label>
         <input

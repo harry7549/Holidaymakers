@@ -223,7 +223,7 @@ export default function AdminPackageDetail() {
       {error && <AdminErrorNotice resource="packages" message={error} />}
 
       {!isNew && loading && !current && (
-        <div className="rounded-2xl border border-sand-200 bg-white p-5">
+        <div className="rounded-2xl border border-sand-200 bg-surface p-5">
           <AdminSkeletonLines count={6} />
         </div>
       )}
@@ -233,7 +233,7 @@ export default function AdminPackageDetail() {
       )}
 
       {form && (
-        <div className="rounded-2xl border border-sand-200 bg-white p-6">
+        <div className="rounded-2xl border border-sand-200 bg-surface p-6">
           <div className="mb-5 flex items-center justify-between gap-3">
             <h1 className="min-w-0 truncate font-display text-xl font-bold text-ocean-950">{isNew ? "New Package" : form.title || "Edit Package"}</h1>
             <div className="flex shrink-0 items-center gap-2">

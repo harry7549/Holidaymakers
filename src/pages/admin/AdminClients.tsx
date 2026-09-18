@@ -77,11 +77,11 @@ export default function AdminClients() {
       />
 
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl border border-sand-200 bg-white p-4 text-center">
+        <div className="rounded-2xl border border-sand-200 bg-surface p-4 text-center">
           <p className="font-display text-2xl font-bold text-ocean-950">{items.length}</p>
           <p className="text-xs text-ocean-950/50">Total clients</p>
         </div>
-        <div className="rounded-2xl border border-sand-200 bg-white p-4 text-center">
+        <div className="rounded-2xl border border-sand-200 bg-surface p-4 text-center">
           <p className="font-display text-2xl font-bold text-ocean-950">{items.filter((c) => c.status === "active" || c.status === "booked").length}</p>
           <p className="text-xs text-ocean-950/50">Active / booked</p>
         </div>
@@ -89,13 +89,13 @@ export default function AdminClients() {
           onClick={() => setOverdueOnly((v) => !v)}
           className={cn(
             "rounded-2xl border p-4 text-center transition-colors",
-            overdueOnly ? "border-sunset-400 bg-sunset-50" : "border-sand-200 bg-white hover:border-sunset-200",
+            overdueOnly ? "border-sunset-400 bg-sunset-50" : "border-sand-200 bg-surface hover:border-sunset-200",
           )}
         >
           <p className="font-display text-2xl font-bold text-sunset-600">{overdueCount}</p>
           <p className="text-xs text-ocean-950/50">Overdue follow-ups</p>
         </button>
-        <div className="rounded-2xl border border-sand-200 bg-white p-4 text-center">
+        <div className="rounded-2xl border border-sand-200 bg-surface p-4 text-center">
           <p className="font-display text-2xl font-bold text-ocean-950">{items.filter((c) => c.status === "lost").length}</p>
           <p className="text-xs text-ocean-950/50">Lost</p>
         </div>
@@ -127,7 +127,7 @@ export default function AdminClients() {
       {!loading && !error && items.length === 0 && <AdminEmptyState label="No clients yet — add one above or import a CSV of your existing contacts." />}
 
       {!loading && !error && items.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl border border-sand-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-sand-200 bg-surface">
           <table className="w-full text-left text-sm">
             <thead className="bg-sand-50 text-xs text-ocean-950/50">
               <tr>

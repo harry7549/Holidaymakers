@@ -110,7 +110,7 @@ export default function AdminSupplierDetail() {
       {error && <AdminErrorNotice resource="suppliers" message={error} />}
 
       {!isNew && loading && !current && (
-        <div className="rounded-2xl border border-sand-200 bg-white p-5">
+        <div className="rounded-2xl border border-sand-200 bg-surface p-5">
           <AdminSkeletonLines count={5} />
         </div>
       )}
@@ -120,7 +120,7 @@ export default function AdminSupplierDetail() {
       )}
 
       {form && (
-        <div className="rounded-2xl border border-sand-200 bg-white p-6">
+        <div className="rounded-2xl border border-sand-200 bg-surface p-6">
           <div className="mb-5 flex items-center justify-between">
             <h1 className="font-display text-xl font-bold text-ocean-950">{isNew ? "New Supplier" : form.name || "Edit Supplier"}</h1>
             {!isNew && (
