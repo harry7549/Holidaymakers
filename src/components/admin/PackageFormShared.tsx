@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { Plus, Trash2 } from "lucide-react"
 import { TagListField } from "./TagListField"
 import { ImageUploadField } from "./ImageUploadField"
+import { RichTextEditor } from "./RichTextEditor"
 
 export interface PackageRow {
   id: string
@@ -56,6 +57,7 @@ export interface ReviewForm {
   body: string
   tripType: string
   date: string
+  photo?: string
 }
 
 export interface FaqForm {
@@ -98,11 +100,9 @@ export function ItineraryEditor({ items, onChange }: { items: ItineraryForm[]; o
             </Field>
             <div className="sm:col-span-2">
               <Field label="Description">
-                <textarea
-                  rows={4}
+                <RichTextEditor
                   value={day.description}
-                  onChange={(e) => update(i, { description: e.target.value })}
-                  className={inputClass}
+                  onChange={(description) => update(i, { description })}
                   placeholder="What happens this day — as much detail as you like."
                 />
               </Field>
@@ -165,6 +165,11 @@ export function ReviewsEditor({ items, onChange }: { items: ReviewForm[]; onChan
             <div className="sm:col-span-2">
               <Field label="Review text">
                 <textarea rows={2} value={r.body} onChange={(e) => update(i, { body: e.target.value })} className={inputClass} />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label="Traveller photo (optional)">
+                <ImageUploadField value={r.photo ?? ""} onChange={(photo) => update(i, { photo })} placeholder="A real trip photo builds more trust, or upload one →" />
               </Field>
             </div>
           </div>

@@ -17,6 +17,7 @@ import {
 import { getPackageBySlug, getRelatedPackages } from "../lib/catalogHelpers"
 import { useCatalog } from "../context/CatalogContext"
 import { cn, discountPercent, formatDate, formatPrice } from "../lib/utils"
+import { sanitizeRichText } from "../lib/sanitizeHtml"
 import { RatingStars } from "../components/RatingStars"
 import { SmartImage } from "../components/SmartImage"
 import { WishlistButton } from "../components/WishlistButton"
@@ -214,7 +215,10 @@ export default function PackageDetail() {
                     <h3 className="font-display text-base font-bold text-ocean-950">
                       Day {day.day}: {day.title}
                     </h3>
-                    <p className="mt-1 whitespace-pre-line text-sm text-ocean-950/70">{day.description}</p>
+                    <div
+                      className="mt-1 whitespace-pre-line text-sm text-ocean-950/70 [&_a]:text-ocean-700 [&_a]:underline [&_li]:ml-4 [&_ol]:list-decimal [&_ul]:list-disc"
+                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(day.description) }}
+                    />
                     {day.image && (
                       <SmartImage src={day.image} alt={day.title} className="mt-3 aspect-video w-full max-w-md rounded-xl" />
                     )}
@@ -306,6 +310,9 @@ export default function PackageDetail() {
                   </div>
                   <h4 className="mb-1 text-sm font-semibold text-ocean-950">{r.title}</h4>
                   <p className="text-sm text-ocean-950/70">{r.body}</p>
+                  {r.photo && (
+                    <SmartImage src={r.photo} alt={`Photo from ${r.name}'s trip`} className="mt-3 h-40 w-full max-w-xs rounded-xl sm:h-32" />
+                  )}
                 </div>
               ))}
             </div>

@@ -3,6 +3,7 @@ import { BadgeCheck, Calendar, Check, Compass, Mail, MapPin, Phone, Printer, Use
 import { useCatalog } from "../context/CatalogContext"
 import { getPackageById } from "../lib/catalogHelpers"
 import { formatDate, formatPrice } from "../lib/utils"
+import { sanitizeRichText } from "../lib/sanitizeHtml"
 
 export default function ItineraryPrint() {
   const { packageId } = useParams()
@@ -99,7 +100,10 @@ export default function ItineraryPrint() {
                   <h3 className="font-display text-sm font-bold text-ocean-950">
                     Day {day.day}: {day.title}
                   </h3>
-                  <p className="mt-1 text-sm text-ocean-950/70">{day.description}</p>
+                  <div
+                    className="mt-1 whitespace-pre-line text-sm text-ocean-950/70 [&_li]:ml-4 [&_ol]:list-decimal [&_ul]:list-disc"
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(day.description) }}
+                  />
                   {day.activities.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {day.activities.map((a) => (
