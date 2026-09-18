@@ -25,6 +25,7 @@ import {
   Plus,
   Rows3,
   Search,
+  Sparkles,
   Trash2,
   Type,
   Users,
@@ -37,7 +38,7 @@ import { useToast } from "../../context/ToastContext"
 import { BLOCK_TYPES, getBlockSchema } from "../../components/blocks/registry"
 import { BlockContentEditor } from "../../components/admin/BlockContentEditor"
 import { ImageUploadField } from "../../components/admin/ImageUploadField"
-import { AdminPageHeader, Badge } from "../../components/admin/AdminUI"
+import { AdminPageHeader, AdminSkeletonLines, Badge } from "../../components/admin/AdminUI"
 import { defaultMetaByPage } from "../../data/pageBlocks"
 import type { BlockContent } from "../../data/types"
 import { cn, humanize, slugify } from "../../lib/utils"
@@ -106,6 +107,7 @@ const BLOCK_TYPE_ICON: Record<string, LucideIcon> = {
   "image-text-split": Columns2,
   "contact-form": Mail,
   "search-widget": Search,
+  "destinations-marquee": Sparkles,
   "trending-destinations": MapPin,
   "featured-packages": PackageIcon,
   "package-showcase": PackageIcon,
@@ -397,13 +399,14 @@ export default function AdminPages() {
               </tr>
             </thead>
             <tbody className="divide-y divide-sand-100">
-              {(blocksLoading || metaLoading) && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-ocean-950/40">
-                    Loading...
-                  </td>
-                </tr>
-              )}
+              {(blocksLoading || metaLoading) &&
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={5} className="px-4 py-3">
+                      <div className="h-6 animate-pulse rounded bg-sand-100" style={{ width: `${70 - i * 8}%` }} />
+                    </td>
+                  </tr>
+                ))}
               {!blocksLoading &&
                 !metaLoading &&
                 filteredPages.map((p) => {
@@ -529,7 +532,13 @@ export default function AdminPages() {
                 <Plus size={15} /> Add Block
               </button>
 
-              {blocksLoading && <p className="text-sm text-ocean-950/50">Loading...</p>}
+              {blocksLoading && (
+                <div className="mb-2 space-y-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="h-14 animate-pulse rounded-xl bg-sand-100" />
+                  ))}
+                </div>
+              )}
 
               <div className="space-y-2">
                 {pageBlocks.map((b, i) => {
@@ -718,7 +727,7 @@ function SeoForm({
     og_image: initial?.og_image ?? fallback?.ogImage ?? "",
   })
 
-  if (loading) return <p className="text-sm text-ocean-950/50">Loading...</p>
+  if (loading) return <div className="rounded-2xl border border-sand-200 bg-white p-5"><AdminSkeletonLines count={3} /></div>
 
   return (
     <div className="space-y-3 rounded-2xl border border-sand-200 bg-white p-5">

@@ -182,4 +182,7 @@
   .animate-hero-zoom {
     animation: none;
   }
+  .animate-marquee {
+    animation: none;
+  }
 }

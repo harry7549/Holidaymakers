@@ -3,7 +3,7 @@ import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminUpdate } from "../../lib/adminApi"
 import { cn, formatDate } from "../../lib/utils"
 import { useToast } from "../../context/ToastContext"
-import { AdminPageHeader, AdminEmptyState, AdminErrorNotice } from "../../components/admin/AdminUI"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonRows } from "../../components/admin/AdminUI"
 
 interface MessageRow {
   id: string
@@ -32,15 +32,15 @@ export default function AdminMessages() {
     <div>
       <AdminPageHeader icon={Mail} title="Contact Messages" subtitle="Messages submitted through the Contact page." />
 
-      {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
+      {loading && <AdminSkeletonRows />}
       {error && <AdminErrorNotice resource="messages" message={error} />}
       {!loading && items.length === 0 && !error && <AdminEmptyState label="No messages yet." />}
 
       <div className="space-y-3">
         {items.map((m) => (
           <div key={m.id} className={cn("rounded-2xl border bg-white p-4", m.status === "new" ? "border-ocean-300" : "border-sand-200")}>
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+              <div className="min-w-0">
                 <p className="font-display text-base font-bold text-ocean-950">{m.subject || "(No subject)"}</p>
                 <p className="text-xs text-ocean-950/50">
                   {m.name} · {m.email} · {formatDate(m.created_at)}

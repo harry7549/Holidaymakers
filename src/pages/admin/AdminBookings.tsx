@@ -3,7 +3,7 @@ import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminUpdate } from "../../lib/adminApi"
 import { formatDate, formatPrice, cn } from "../../lib/utils"
 import { useToast } from "../../context/ToastContext"
-import { AdminPageHeader, AdminEmptyState, AdminErrorNotice } from "../../components/admin/AdminUI"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonRows } from "../../components/admin/AdminUI"
 
 const statusDot: Record<string, string> = {
   upcoming: "bg-gold-500",
@@ -44,7 +44,7 @@ export default function AdminBookings() {
     <div>
       <AdminPageHeader icon={Calendar} title="Bookings" subtitle="Every booking made through checkout, newest first." />
 
-      {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
+      {loading && <AdminSkeletonRows />}
       {error && <AdminErrorNotice resource="bookings" message={error} />}
 
       {!loading && items.length === 0 && !error && <AdminEmptyState label="No bookings yet." />}

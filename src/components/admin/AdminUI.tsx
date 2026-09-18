@@ -56,6 +56,36 @@ export function AdminSkeletonGrid({ count = 6 }: { count?: number }) {
   )
 }
 
+/** Pulsing placeholder rows for a card-list loading state (title/meta on the left, an action on the right) — used by inbox-style admin pages instead of card grids. */
+export function AdminSkeletonRows({ count = 4 }: { count?: number }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="animate-pulse rounded-2xl border border-sand-200 bg-white p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="w-2/3 space-y-2">
+              <div className="h-4 w-1/2 rounded bg-sand-100" />
+              <div className="h-3 w-3/4 rounded bg-sand-100" />
+            </div>
+            <div className="h-7 w-20 shrink-0 rounded-full bg-sand-100" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** A few pulsing bars of decreasing width — a generic loading placeholder for small embedded lists, forms, and table rows. */
+export function AdminSkeletonLines({ count = 3 }: { count?: number }) {
+  return (
+    <div className="animate-pulse space-y-2.5 py-1">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="h-4 rounded bg-sand-100" style={{ width: `${85 - i * 14}%` }} />
+      ))}
+    </div>
+  )
+}
+
 /** Friendly error panel for a failed admin resource load, with a hint pointing at the likely cause. */
 export function AdminErrorNotice({ resource, message }: { resource: string; message: string }) {
   return (

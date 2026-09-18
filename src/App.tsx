@@ -30,6 +30,7 @@ import AdminPackages from "./pages/admin/AdminPackages"
 import AdminDestinations from "./pages/admin/AdminDestinations"
 import AdminSuppliers from "./pages/admin/AdminSuppliers"
 import AdminDeals from "./pages/admin/AdminDeals"
+import AdminClients from "./pages/admin/AdminClients"
 import AdminBookings from "./pages/admin/AdminBookings"
 import AdminQuotes from "./pages/admin/AdminQuotes"
 import AdminMessages from "./pages/admin/AdminMessages"
@@ -79,6 +80,7 @@ export default function App() {
           <Route path="destinations" element={<AdminDestinations />} />
           <Route path="suppliers" element={<AdminSuppliers />} />
           <Route path="deals" element={<AdminDeals />} />
+          <Route path="clients" element={<AdminClients />} />
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="quotes" element={<AdminQuotes />} />
           <Route path="messages" element={<AdminMessages />} />

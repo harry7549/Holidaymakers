@@ -33,6 +33,16 @@ export function slugify(text: string) {
     .replace(/(^-|-$)/g, "")
 }
 
+/** Last 10 digits only — lets phone numbers match regardless of +91/spaces/dashes formatting. */
+export function normalizePhone(phone: string) {
+  const digits = phone.replace(/\D/g, "")
+  return digits.slice(-10)
+}
+
+export function normalizeEmail(email: string) {
+  return email.trim().toLowerCase()
+}
+
 export function humanize(slug: string) {
   return slug
     .split("-")

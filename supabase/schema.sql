@@ -163,12 +163,40 @@ create table if not exists supplier_applications (
   business text not null,
   contact text not null,
   email text not null,
+  phone text not null default '',
   city text not null default '',
   type text not null default 'offline' check (type in ('online', 'offline')),
   message text not null default '',
   status text not null default 'new' check (status in ('new', 'approved', 'rejected')),
   created_at timestamptz not null default now()
 );
+
+-- ============================================================
+-- CRM: clients (a unified contact record per traveller/lead — online or
+-- offline). Fully admin-managed, same access pattern as the inbound tables
+-- below (no public insert/read at all, only /api/admin via service role).
+-- ============================================================
+
+create table if not exists clients (
+  id text primary key default gen_random_uuid()::text,
+  full_name text not null,
+  phone text not null default '',
+  whatsapp text not null default '',
+  email text not null default '',
+  country text not null default '',
+  city text not null default '',
+  source text not null default 'Manual',
+  tags jsonb not null default '[]',
+  status text not null default 'active' check (status in ('active', 'dormant', 'lost')),
+  notes text not null default '',
+  next_follow_up timestamptz,
+  last_contact_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists clients_phone_idx on clients (phone);
+create index if not exists clients_email_idx on clients (lower(email));
 
 -- ============================================================
 -- Row Level Security
@@ -189,6 +217,7 @@ alter table bookings enable row level security;
 alter table quote_requests enable row level security;
 alter table contact_messages enable row level security;
 alter table supplier_applications enable row level security;
+alter table clients enable row level security;
 
 drop policy if exists "public read destinations" on destinations;
 create policy "public read destinations" on destinations for select using (true);
@@ -209,9 +238,9 @@ drop policy if exists "public read page_meta" on page_meta;
 create policy "public read page_meta" on page_meta for select using (true);
 
 -- No policies are created for bookings / quote_requests / contact_messages /
--- supplier_applications: with RLS enabled and zero policies, anon and
--- authenticated roles get NO access at all (not even insert). All writes to
--- these tables happen server-side in /api routes using the service-role key.
+-- supplier_applications / clients: with RLS enabled and zero policies, anon
+-- and authenticated roles get NO access at all (not even insert). All writes
+-- to these tables happen server-side in /api routes using the service-role key.
 
 -- ============================================================
 -- Seed data: after running this file, run `node scripts/seed.mjs` (see

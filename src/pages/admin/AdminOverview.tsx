@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import { adminList } from "../../lib/adminApi"
 import { formatPrice } from "../../lib/utils"
-import { AdminPageHeader } from "../../components/admin/AdminUI"
+import { AdminPageHeader, AdminSkeletonLines } from "../../components/admin/AdminUI"
 
 interface BookingRow {
   total_price: number
@@ -134,7 +134,7 @@ export default function AdminOverview() {
           </Link>
         </div>
         {!counts ? (
-          <p className="py-6 text-center text-sm text-ocean-950/40">Loading...</p>
+          <AdminSkeletonLines count={4} />
         ) : counts.recentBookings.length === 0 ? (
           <p className="py-6 text-center text-sm text-ocean-950/40">No bookings yet.</p>
         ) : (

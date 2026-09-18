@@ -18,6 +18,7 @@ const RESOURCES: Record<string, ResourceConfig> = {
   deals: { table: "deals", writable: true },
   "page-blocks": { table: "page_blocks", writable: true },
   "page-meta": { table: "page_meta", writable: true },
+  clients: { table: "clients", writable: true },
   bookings: { table: "bookings", writable: false },
   quotes: { table: "quote_requests", writable: false },
   messages: { table: "contact_messages", writable: false },
@@ -55,6 +56,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (error) throw error
       }
       res.status(200).json({ ok: true })
+      return
+    }
+
+    // Bulk client import: POST /api/admin/clients/bulk-import { rows: object[] } —
+    // inserts many rows in one call (used by the CSV importer, which chunks
+    // large files client-side so each request stays well under Vercel's
+    // request-body limit).
+    if (resourceName === "clients" && id === "bulk-import" && req.method === "POST") {
+      const rows = req.body?.rows ?? []
+      if (!Array.isArray(rows) || rows.length === 0) {
+        res.status(400).json({ error: "No rows to import" })
+        return
+      }
+      const { data, error } = await supabaseAdmin.from(table).insert(rows).select("id")
+      if (error) throw error
+      res.status(201).json({ imported: data.length })
       return
     }
 

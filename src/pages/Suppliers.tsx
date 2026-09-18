@@ -10,7 +10,7 @@ const filters = ["All", "online", "offline"] as const
 export default function Suppliers() {
   const { suppliers } = useCatalog()
   const [filter, setFilter] = useState<(typeof filters)[number]>("All")
-  const [form, setForm] = useState({ business: "", contact: "", email: "", city: "", type: "offline", message: "" })
+  const [form, setForm] = useState({ business: "", contact: "", email: "", phone: "", city: "", type: "offline", message: "" })
   const [sent, setSent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const { showToast } = useToast()
@@ -19,8 +19,8 @@ export default function Suppliers() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!form.business || !form.contact || !form.email) {
-      showToast("Please fill in business name, contact and email", "info")
+    if (!form.business || !form.contact || !form.email || !form.phone) {
+      showToast("Please fill in business name, contact, email and phone", "info")
       return
     }
     setSubmitting(true)
@@ -151,19 +151,28 @@ export default function Suppliers() {
                   className="w-full rounded-lg border border-sand-200 px-4 py-2.5 text-sm outline-none focus:border-ocean-400"
                 />
                 <input
+                  type="tel"
+                  placeholder="Phone number"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="w-full rounded-lg border border-sand-200 px-4 py-2.5 text-sm outline-none focus:border-ocean-400"
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input
+                  type="email"
+                  placeholder="Business email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full rounded-lg border border-sand-200 px-4 py-2.5 text-sm outline-none focus:border-ocean-400"
+                />
+                <input
                   placeholder="City"
                   value={form.city}
                   onChange={(e) => setForm({ ...form, city: e.target.value })}
                   className="w-full rounded-lg border border-sand-200 px-4 py-2.5 text-sm outline-none focus:border-ocean-400"
                 />
               </div>
-              <input
-                type="email"
-                placeholder="Business email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full rounded-lg border border-sand-200 px-4 py-2.5 text-sm outline-none focus:border-ocean-400"
-              />
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value })}

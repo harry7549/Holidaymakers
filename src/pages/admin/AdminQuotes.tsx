@@ -3,7 +3,7 @@ import { useAdminResource } from "../../hooks/useAdminResource"
 import { adminUpdate } from "../../lib/adminApi"
 import { formatDate, formatPrice } from "../../lib/utils"
 import { useToast } from "../../context/ToastContext"
-import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, Badge } from "../../components/admin/AdminUI"
+import { AdminPageHeader, AdminEmptyState, AdminErrorNotice, AdminSkeletonRows, Badge } from "../../components/admin/AdminUI"
 
 interface QuoteRow {
   id: string
@@ -40,15 +40,15 @@ export default function AdminQuotes() {
     <div>
       <AdminPageHeader icon={Sparkles} title="Custom Trip Quote Requests" subtitle="Leads from the Trip Builder — reach out and mark their status." />
 
-      {loading && <p className="text-sm text-ocean-950/50">Loading...</p>}
+      {loading && <AdminSkeletonRows />}
       {error && <AdminErrorNotice resource="quote requests" message={error} />}
       {!loading && items.length === 0 && !error && <AdminEmptyState label="No quote requests yet." />}
 
       <div className="space-y-3">
         {items.map((q) => (
           <div key={q.id} className="rounded-2xl border border-sand-200 bg-white p-4 transition-shadow hover:shadow-card">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+              <div className="min-w-0">
                 <p className="flex items-center gap-2 font-display text-base font-bold text-ocean-950">
                   {q.destinations.join(", ") || "Custom trip"}
                   {q.status === "new" && <Badge tone="sunset">New</Badge>}

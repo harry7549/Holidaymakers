@@ -399,6 +399,15 @@ export const REGISTRY: Record<string, BlockSchema> = {
     }),
   },
 
+  "destinations-marquee": {
+    type: "destinations-marquee",
+    label: "Destinations marquee (live)",
+    description: "A smoothly auto-scrolling strip of destination names — pairs well placed right after a hero or banner.",
+    liveData: true,
+    fields: [],
+    defaultContent: () => ({}),
+  },
+
   "trending-destinations": {
     type: "trending-destinations",
     label: "Trending destinations (live)",

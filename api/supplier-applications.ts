@@ -8,9 +8,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const body = req.body || {}
-  const { business, contact, email, city, type, message } = body
+  const { business, contact, email, phone, city, type, message } = body
 
-  if (!business || !contact || !email) {
+  if (!business || !contact || !email || !phone) {
     res.status(400).json({ error: "Missing required fields" })
     return
   }
@@ -21,6 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       business,
       contact,
       email,
+      phone,
       city: city ?? "",
       type: type === "online" ? "online" : "offline",
       message: message ?? "",

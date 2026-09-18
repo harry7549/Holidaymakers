@@ -15,6 +15,7 @@ import {
   Package as PackageIcon,
   Percent,
   Sparkles,
+  Users,
   X,
 } from "lucide-react"
 import { useState, type ComponentType } from "react"
@@ -46,6 +47,10 @@ const navGroups: { heading: string; items: NavItem[] }[] = [
       { to: "/admin/suppliers", label: "Suppliers", icon: Globe2 },
       { to: "/admin/deals", label: "Deals", icon: Percent },
     ],
+  },
+  {
+    heading: "CRM",
+    items: [{ to: "/admin/clients", label: "Clients", icon: Users }],
   },
   {
     heading: "Inbox",

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { BadgeCheck, ChevronDown, Users } from "lucide-react"
+import { BadgeCheck, ChevronDown, Sparkle, Users } from "lucide-react"
 import type { BlockContent, Category } from "../../data/types"
 import { useCatalog } from "../../context/CatalogContext"
 import { getIcon } from "../../lib/iconMap"
@@ -396,6 +396,30 @@ export function SearchWidgetBlock({ content }: BlockProps) {
       <svg viewBox="0 0 1440 60" className="relative mt-14 block w-full text-sand-50" preserveAspectRatio="none" style={{ height: 40 }}>
         <path fill="currentColor" d="M0,32 C240,60 480,0 720,16 C960,32 1200,60 1440,24 L1440,60 L0,60 Z" />
       </svg>
+    </section>
+  )
+}
+
+export function DestinationsMarqueeBlock() {
+  const { destinations } = useCatalog()
+  if (destinations.length === 0) return null
+  const track = [...destinations, ...destinations]
+
+  return (
+    <section className="overflow-hidden bg-ocean-950 py-4">
+      <div className="flex w-max animate-marquee items-center hover:[animation-play-state:paused]">
+        {track.map((d, i) => (
+          <span key={`${d.id}-${i}`} className="flex shrink-0 items-center">
+            <Link
+              to={`/destinations/${d.id}`}
+              className="px-6 font-display text-xs font-semibold uppercase tracking-[0.2em] text-white/80 transition-colors hover:text-gold-300 sm:text-sm"
+            >
+              {d.name}
+            </Link>
+            <Sparkle size={10} className="shrink-0 text-gold-400" />
+          </span>
+        ))}
+      </div>
     </section>
   )
 }
