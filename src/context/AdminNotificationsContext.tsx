@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react"
 import { useAdminResource } from "../hooks/useAdminResource"
-import { adminUpdate } from "../lib/adminApi"
+import { adminUpdate, adminMarkChatSeen } from "../lib/adminApi"
 
-export type NotificationSource = "bookings" | "quotes" | "messages" | "supplier-applications"
+export type NotificationSource = "bookings" | "quotes" | "messages" | "supplier-applications" | "chat"
 
 export interface NotificationItem {
   id: string
@@ -41,6 +41,12 @@ interface ApplicationRow {
   seen_by_admin: boolean
   created_at: string
 }
+interface ChatSessionRow {
+  id: string
+  visitor_name: string
+  seen_by_admin: boolean
+  last_message_at: string
+}
 
 interface NotificationsContextValue {
   items: NotificationItem[]
@@ -57,6 +63,7 @@ export function AdminNotificationsProvider({ children }: { children: ReactNode }
   const { items: quotes, setItems: setQuotes } = useAdminResource<QuoteRow>("quotes")
   const { items: messages, setItems: setMessages } = useAdminResource<MessageRow>("messages")
   const { items: applications, setItems: setApplications } = useAdminResource<ApplicationRow>("supplier-applications")
+  const { items: chatSessions, setItems: setChatSessions } = useAdminResource<ChatSessionRow>("chat")
 
   const items = useMemo<NotificationItem[]>(() => {
     const list: NotificationItem[] = []
@@ -90,11 +97,22 @@ export function AdminNotificationsProvider({ children }: { children: ReactNode }
         href: "/admin/supplier-applications",
       })
     }
+    for (const c of chatSessions) {
+      if (c.seen_by_admin) continue
+      list.push({
+        id: c.id,
+        source: "chat",
+        title: c.visitor_name || "Anonymous visitor",
+        subtitle: "New live chat message",
+        createdAt: c.last_message_at,
+        href: `/admin/chat?session=${c.id}`,
+      })
+    }
     return list.sort((x, y) => new Date(y.createdAt).getTime() - new Date(x.createdAt).getTime())
-  }, [bookings, quotes, messages, applications])
+  }, [bookings, quotes, messages, applications, chatSessions])
 
   const countBySource = useMemo(() => {
-    const map: Record<NotificationSource, number> = { bookings: 0, quotes: 0, messages: 0, "supplier-applications": 0 }
+    const map: Record<NotificationSource, number> = { bookings: 0, quotes: 0, messages: 0, "supplier-applications": 0, chat: 0 }
     for (const i of items) map[i.source] += 1
     return map
   }, [items])
@@ -105,6 +123,9 @@ export function AdminNotificationsProvider({ children }: { children: ReactNode }
         if (item.source === "messages") {
           await adminUpdate("messages", item.id, { status: "read" })
           setMessages((prev) => prev.map((m) => (m.id === item.id ? { ...m, status: "read" } : m)))
+        } else if (item.source === "chat") {
+          await adminMarkChatSeen(item.id)
+          setChatSessions((prev) => prev.map((c) => (c.id === item.id ? { ...c, seen_by_admin: true } : c)))
         } else {
           await adminUpdate(item.source, item.id, { seen_by_admin: true })
           if (item.source === "bookings") setBookings((prev) => prev.map((b) => (b.id === item.id ? { ...b, seen_by_admin: true } : b)))
@@ -115,7 +136,7 @@ export function AdminNotificationsProvider({ children }: { children: ReactNode }
         // Best-effort — if this fails the item just stays in the list, no need to surface an error for a read-receipt.
       }
     },
-    [setBookings, setQuotes, setMessages, setApplications],
+    [setBookings, setQuotes, setMessages, setApplications, setChatSessions],
   )
 
   const dismissAll = useCallback(() => {

@@ -3,6 +3,7 @@ import { Navbar } from "./Navbar"
 import { Footer } from "./Footer"
 import { MobileBottomNav } from "./MobileBottomNav"
 import { WhatsAppButton } from "./WhatsAppButton"
+import { ChatWidget } from "./ChatWidget"
 import { CompareBar } from "./CompareBar"
 import { SmoothScroll } from "./SmoothScroll"
 
@@ -16,6 +17,7 @@ export function Layout() {
       </main>
       <Footer />
       <WhatsAppButton />
+      <ChatWidget />
       <CompareBar />
       <MobileBottomNav />
     </div>

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { BadgeCheck, Bell, Calendar, Mail, Sparkles, type LucideIcon } from "lucide-react"
+import { BadgeCheck, Bell, Calendar, Mail, MessageSquare, Sparkles, type LucideIcon } from "lucide-react"
 import { useAdminNotifications, type NotificationSource } from "../../context/AdminNotificationsContext"
 import { formatDate } from "../../lib/utils"
 
@@ -9,6 +9,7 @@ const SOURCE_ICON: Record<NotificationSource, LucideIcon> = {
   quotes: Sparkles,
   messages: Mail,
   "supplier-applications": BadgeCheck,
+  chat: MessageSquare,
 }
 
 export function AdminNotificationBell() {
