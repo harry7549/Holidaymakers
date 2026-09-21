@@ -67,6 +67,11 @@
    brand accents (ocean-500/600, sunset-500, gold-400/500) are deliberately
    left alone — they already read fine on a dark surface. */
 [data-theme="dark"] {
+  /* Tells the browser to render native form controls (select dropdown
+     popups, checkboxes, date pickers, scrollbars) with dark chrome instead
+     of assuming a light page — without this, a native <select>'s popup
+     renders with a light background regardless of our custom classes. */
+  color-scheme: dark;
   --color-surface: #141a2b;
   --color-sand-50: #0a0e18;
   --color-sand-100: #1b2236;

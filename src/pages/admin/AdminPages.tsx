@@ -3,6 +3,7 @@ import {
   AlignLeft,
   ArrowLeft,
   BarChart3,
+  Check,
   Columns2,
   Eye,
   EyeOff,
@@ -133,6 +134,9 @@ export default function AdminPages() {
   const [newPageLabel, setNewPageLabel] = useState("")
   const [newPageSlug, setNewPageSlug] = useState("")
   const [newPageError, setNewPageError] = useState<string | null>(null)
+  const [editingSlug, setEditingSlug] = useState(false)
+  const [slugDraft, setSlugDraft] = useState("")
+  const [renamingSlug, setRenamingSlug] = useState(false)
 
   const pages = useMemo(() => {
     const customSlugs = metaRows.map((m) => m.id).filter((slug) => !CORE_SLUGS.has(slug))
@@ -199,6 +203,38 @@ export default function AdminPages() {
       showToast("Page deleted")
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to delete page", "info")
+    }
+  }
+
+  const startRenameSlug = () => {
+    setSlugDraft(activePage)
+    setEditingSlug(true)
+  }
+
+  const renameSlug = async () => {
+    const newSlug = slugify(slugDraft)
+    if (!newSlug || newSlug === activePage) {
+      setEditingSlug(false)
+      return
+    }
+    if (RESERVED_SLUGS.has(newSlug) || pages.some((p) => p.slug === newSlug)) {
+      showToast(`"/${newSlug}" is already in use — pick a different URL`, "info")
+      return
+    }
+    setRenamingSlug(true)
+    try {
+      await adminUpdate("page-meta", activePage, { id: newSlug })
+      const toMove = blocks.filter((b) => b.page === activePage)
+      await Promise.all(toMove.map((b) => adminUpdate("page-blocks", b.id, { page: newSlug })))
+      setMetaRows((prev) => prev.map((m) => (m.id === activePage ? { ...m, id: newSlug } : m)))
+      setBlocks((prev) => prev.map((b) => (b.page === activePage ? { ...b, page: newSlug } : b)))
+      setActivePage(newSlug)
+      setEditingSlug(false)
+      showToast(`Page moved to /${newSlug}`)
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to rename page", "info")
+    } finally {
+      setRenamingSlug(false)
     }
   }
 
@@ -558,7 +594,10 @@ export default function AdminPages() {
                         <span className="cursor-grab text-ocean-950/30">
                           <GripVertical size={16} />
                         </span>
-                        <div className="min-w-0 flex-1">
+                        <div
+                          onClick={() => (isEditing ? setEditingId(null) : startEdit(b))}
+                          className="min-w-0 flex-1 cursor-pointer"
+                        >
                           <p className="flex items-center gap-2 text-sm font-semibold text-ocean-950">
                             <FileText size={14} className="shrink-0 text-ocean-950/40" />
                             {schema?.label ?? b.type}
@@ -571,9 +610,6 @@ export default function AdminPages() {
                           <button onClick={() => toggleVisible(b)} title={b.visible ? "Hide" : "Show"} className="rounded-lg p-2 text-ocean-950/50 hover:bg-sand-100">
                             {b.visible ? <Eye size={15} /> : <EyeOff size={15} />}
                           </button>
-                          <button onClick={() => (isEditing ? setEditingId(null) : startEdit(b))} className="rounded-lg p-2 text-ocean-950/50 hover:bg-sand-100">
-                            <Pencil size={15} />
-                          </button>
                           <select
                             onChange={(e) => {
                               if (e.target.value) duplicateToPage(b, e.target.value)
@@ -581,7 +617,7 @@ export default function AdminPages() {
                             }}
                             defaultValue=""
                             title="Copy to another page"
-                            className="rounded-lg border border-sand-200 p-1.5 text-xs text-ocean-950/50"
+                            className="rounded-lg border border-sand-200 bg-surface p-1.5 text-xs text-ocean-950/50"
                           >
                             <option value="" disabled>
                               Copy to...
@@ -631,7 +667,37 @@ export default function AdminPages() {
           <dl className="space-y-3 text-sm">
             <div>
               <dt className="text-xs text-ocean-950/40">Slug</dt>
-              <dd className="font-mono text-ocean-950/80">{activePage}</dd>
+              {editingSlug ? (
+                <div className="mt-1 flex items-center gap-1">
+                  <input
+                    autoFocus
+                    value={slugDraft}
+                    disabled={renamingSlug}
+                    onChange={(e) => setSlugDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") renameSlug()
+                      if (e.key === "Escape") setEditingSlug(false)
+                    }}
+                    className="w-full rounded-lg border border-ocean-300 px-2 py-1 font-mono text-xs outline-none"
+                  />
+                  <button onClick={renameSlug} disabled={renamingSlug} className="shrink-0 text-ocean-600 hover:text-ocean-700">
+                    <Check size={14} />
+                  </button>
+                  <button onClick={() => setEditingSlug(false)} className="shrink-0 text-ocean-950/40 hover:text-sunset-600">
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <dd className="flex items-center gap-1.5 font-mono text-ocean-950/80">
+                  {activePage}
+                  {!CORE_SLUGS.has(activePage) && (
+                    <button onClick={startRenameSlug} title="Rename slug" className="text-ocean-950/30 hover:text-ocean-700">
+                      <Pencil size={11} />
+                    </button>
+                  )}
+                </dd>
+              )}
+              {CORE_SLUGS.has(activePage) && <p className="mt-0.5 text-[11px] text-ocean-950/35">Core page — URL is fixed</p>}
             </div>
             <div>
               <dt className="text-xs text-ocean-950/40">Blocks</dt>

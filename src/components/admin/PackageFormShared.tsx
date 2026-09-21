@@ -1,8 +1,9 @@
-import type { ReactNode } from "react"
-import { Plus, Trash2 } from "lucide-react"
+import { useState, type ReactNode } from "react"
+import { ChevronDown, Plus, Trash2 } from "lucide-react"
 import { TagListField } from "./TagListField"
 import { ImageUploadField } from "./ImageUploadField"
 import { RichTextEditor } from "./RichTextEditor"
+import { cn } from "../../lib/utils"
 
 export interface PackageRow {
   id: string
@@ -76,21 +77,65 @@ export function Field({ label, children }: { label: string; children: ReactNode 
   )
 }
 
+/** A collapsible card for one item in a repeatable list (itinerary day, review, FAQ) —
+ * click the header to open/close it, so a long list doesn't stay fully expanded at once. */
+export function AccordionCard({
+  summary,
+  subtext,
+  open,
+  onToggle,
+  onRemove,
+  actions,
+  children,
+}: {
+  summary: string
+  subtext?: string
+  open: boolean
+  onToggle: () => void
+  onRemove: () => void
+  actions?: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <div className="rounded-xl border border-sand-200 bg-sand-50">
+      <div className="flex items-center gap-2 p-3">
+        <button type="button" onClick={onToggle} className="flex min-w-0 flex-1 items-center gap-2 text-left">
+          <ChevronDown size={14} className={cn("shrink-0 text-ocean-950/40 transition-transform", !open && "-rotate-90")} />
+          <div className="min-w-0">
+            <p className="truncate text-xs font-bold uppercase tracking-wide text-ocean-950/50">{summary}</p>
+            {subtext && !open && <p className="truncate text-xs text-ocean-950/60">{subtext}</p>}
+          </div>
+        </button>
+        {actions}
+        <button type="button" onClick={onRemove} className="shrink-0 text-ocean-950/40 hover:text-sunset-600">
+          <Trash2 size={14} />
+        </button>
+      </div>
+      {open && <div className="px-3 pb-3">{children}</div>}
+    </div>
+  )
+}
+
 export function ItineraryEditor({ items, onChange }: { items: ItineraryForm[]; onChange: (items: ItineraryForm[]) => void }) {
-  const add = () => onChange([...items, { day: items.length + 1, title: "", description: "", activities: [], image: "" }])
+  const [openIndex, setOpenIndex] = useState<number | null>(items.length > 0 ? 0 : null)
+  const add = () => {
+    onChange([...items, { day: items.length + 1, title: "", description: "", activities: [], image: "" }])
+    setOpenIndex(items.length)
+  }
   const update = (i: number, patch: Partial<ItineraryForm>) => onChange(items.map((d, idx) => (idx === i ? { ...d, ...patch } : d)))
   const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
 
   return (
     <div className="space-y-3">
       {items.map((day, i) => (
-        <div key={i} className="rounded-xl border border-sand-200 bg-sand-50 p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wide text-ocean-950/50">Day {i + 1}</p>
-            <button type="button" onClick={() => remove(i)} className="text-ocean-950/40 hover:text-sunset-600">
-              <Trash2 size={14} />
-            </button>
-          </div>
+        <AccordionCard
+          key={i}
+          summary={`Day ${i + 1}`}
+          subtext={day.title || "Untitled"}
+          open={openIndex === i}
+          onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+          onRemove={() => remove(i)}
+        >
           <div className="grid gap-2 sm:grid-cols-2">
             <Field label="Day number">
               <input type="number" value={day.day} onChange={(e) => update(i, { day: Number(e.target.value) })} className={inputClass} />
@@ -116,7 +161,7 @@ export function ItineraryEditor({ items, onChange }: { items: ItineraryForm[]; o
               </Field>
             </div>
           </div>
-        </div>
+        </AccordionCard>
       ))}
       <button
         type="button"
@@ -130,20 +175,25 @@ export function ItineraryEditor({ items, onChange }: { items: ItineraryForm[]; o
 }
 
 export function ReviewsEditor({ items, onChange }: { items: ReviewForm[]; onChange: (items: ReviewForm[]) => void }) {
-  const add = () => onChange([...items, { name: "", rating: 5, title: "", body: "", tripType: "", date: new Date().toISOString().slice(0, 10) }])
+  const [openIndex, setOpenIndex] = useState<number | null>(items.length > 0 ? 0 : null)
+  const add = () => {
+    onChange([...items, { name: "", rating: 5, title: "", body: "", tripType: "", date: new Date().toISOString().slice(0, 10) }])
+    setOpenIndex(items.length)
+  }
   const update = (i: number, patch: Partial<ReviewForm>) => onChange(items.map((r, idx) => (idx === i ? { ...r, ...patch } : r)))
   const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
 
   return (
     <div className="space-y-3">
       {items.map((r, i) => (
-        <div key={i} className="rounded-xl border border-sand-200 bg-sand-50 p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wide text-ocean-950/50">Review {i + 1}</p>
-            <button type="button" onClick={() => remove(i)} className="text-ocean-950/40 hover:text-sunset-600">
-              <Trash2 size={14} />
-            </button>
-          </div>
+        <AccordionCard
+          key={i}
+          summary={`Review ${i + 1}`}
+          subtext={r.name || "Untitled"}
+          open={openIndex === i}
+          onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+          onRemove={() => remove(i)}
+        >
           <div className="grid gap-2 sm:grid-cols-2">
             <Field label="Traveller name">
               <input value={r.name} onChange={(e) => update(i, { name: e.target.value })} className={inputClass} />
@@ -173,7 +223,7 @@ export function ReviewsEditor({ items, onChange }: { items: ReviewForm[]; onChan
               </Field>
             </div>
           </div>
-        </div>
+        </AccordionCard>
       ))}
       <button
         type="button"
@@ -187,20 +237,25 @@ export function ReviewsEditor({ items, onChange }: { items: ReviewForm[]; onChan
 }
 
 export function FaqsEditor({ items, onChange }: { items: FaqForm[]; onChange: (items: FaqForm[]) => void }) {
-  const add = () => onChange([...items, { q: "", a: "" }])
+  const [openIndex, setOpenIndex] = useState<number | null>(items.length > 0 ? 0 : null)
+  const add = () => {
+    onChange([...items, { q: "", a: "" }])
+    setOpenIndex(items.length)
+  }
   const update = (i: number, patch: Partial<FaqForm>) => onChange(items.map((f, idx) => (idx === i ? { ...f, ...patch } : f)))
   const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
 
   return (
     <div className="space-y-3">
       {items.map((f, i) => (
-        <div key={i} className="rounded-xl border border-sand-200 bg-sand-50 p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wide text-ocean-950/50">FAQ {i + 1}</p>
-            <button type="button" onClick={() => remove(i)} className="text-ocean-950/40 hover:text-sunset-600">
-              <Trash2 size={14} />
-            </button>
-          </div>
+        <AccordionCard
+          key={i}
+          summary={`FAQ ${i + 1}`}
+          subtext={f.q || "Untitled"}
+          open={openIndex === i}
+          onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+          onRemove={() => remove(i)}
+        >
           <div className="space-y-2">
             <Field label="Question">
               <input value={f.q} onChange={(e) => update(i, { q: e.target.value })} className={inputClass} />
@@ -209,7 +264,7 @@ export function FaqsEditor({ items, onChange }: { items: FaqForm[]; onChange: (i
               <textarea rows={2} value={f.a} onChange={(e) => update(i, { a: e.target.value })} className={inputClass} />
             </Field>
           </div>
-        </div>
+        </AccordionCard>
       ))}
       <button
         type="button"

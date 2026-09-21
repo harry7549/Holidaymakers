@@ -1,8 +1,9 @@
 import { useState } from "react"
-import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react"
+import { ChevronDown, ChevronUp, Plus, X } from "lucide-react"
 import { getBlockSchema, type FieldDef } from "../blocks/registry"
 import type { BlockContent } from "../../data/types"
 import { ImageUploadField } from "./ImageUploadField"
+import { AccordionCard } from "./PackageFormShared"
 import { useCatalog } from "../../context/CatalogContext"
 
 interface Props {
@@ -174,6 +175,7 @@ function FieldControl({ field, value, onChange }: { field: FieldDef; value: unkn
 }
 
 export function BlockContentEditor({ type, content, onChange }: Props) {
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
   const schema = getBlockSchema(type)
   if (!schema) return <p className="text-sm text-sunset-600">Unknown block type "{type}"</p>
 
@@ -190,6 +192,7 @@ export function BlockContentEditor({ type, content, onChange }: Props) {
     const blank: Record<string, unknown> = {}
     schema.itemFields?.forEach((f) => (blank[f.key] = f.type === "number" ? 0 : f.type === "boolean" ? false : ""))
     setList([...list, blank])
+    setOpenIndex(list.length)
   }
 
   const updateItem = (i: number, key: string, value: unknown) => {
@@ -227,28 +230,38 @@ export function BlockContentEditor({ type, content, onChange }: Props) {
             </button>
           </div>
           <div className="space-y-3">
-            {list.map((item, i) => (
-              <div key={i} className="rounded-xl border border-sand-200 bg-sand-50 p-3">
-                <div className="mb-2 flex items-center justify-end gap-1">
-                  <button type="button" onClick={() => moveItem(i, -1)} disabled={i === 0} className="rounded p-1 text-ocean-950/50 hover:bg-surface disabled:opacity-30">
-                    <ChevronUp size={14} />
-                  </button>
-                  <button type="button" onClick={() => moveItem(i, 1)} disabled={i === list.length - 1} className="rounded p-1 text-ocean-950/50 hover:bg-surface disabled:opacity-30">
-                    <ChevronDown size={14} />
-                  </button>
-                  <button type="button" onClick={() => removeItem(i)} className="rounded p-1 text-ocean-950/50 hover:bg-surface hover:text-sunset-600">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {schema.itemFields?.map((f) => (
-                    <div key={f.key} className={f.type === "textarea" ? "sm:col-span-2" : undefined}>
-                      <FieldControl field={f} value={item[f.key]} onChange={(v) => updateItem(i, f.key, v)} />
+            {list.map((item, i) => {
+              const firstField = schema.itemFields?.[0]
+              const summaryValue = firstField ? String(item[firstField.key] ?? "") : ""
+              return (
+                <AccordionCard
+                  key={i}
+                  summary={`${schema.listLabel?.replace(/s$/, "") || "Item"} ${i + 1}`}
+                  subtext={summaryValue || "Untitled"}
+                  open={openIndex === i}
+                  onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+                  onRemove={() => removeItem(i)}
+                  actions={
+                    <div className="flex shrink-0 items-center gap-0.5">
+                      <button type="button" onClick={() => moveItem(i, -1)} disabled={i === 0} className="rounded p-1 text-ocean-950/50 hover:bg-surface disabled:opacity-30">
+                        <ChevronUp size={14} />
+                      </button>
+                      <button type="button" onClick={() => moveItem(i, 1)} disabled={i === list.length - 1} className="rounded p-1 text-ocean-950/50 hover:bg-surface disabled:opacity-30">
+                        <ChevronDown size={14} />
+                      </button>
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+                  }
+                >
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {schema.itemFields?.map((f) => (
+                      <div key={f.key} className={f.type === "textarea" ? "sm:col-span-2" : undefined}>
+                        <FieldControl field={f} value={item[f.key]} onChange={(v) => updateItem(i, f.key, v)} />
+                      </div>
+                    ))}
+                  </div>
+                </AccordionCard>
+              )
+            })}
             {list.length === 0 && <p className="text-xs text-ocean-950/40">No items yet — click Add.</p>}
           </div>
         </div>

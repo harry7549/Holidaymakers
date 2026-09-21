@@ -75,15 +75,24 @@ export default function AdminOverview() {
       <AdminPageHeader icon={LayoutDashboard} title="Overview" subtitle="A quick look at what's happening on your site right now." />
 
       <div className="mb-6 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-ocean-700 via-ocean-800 to-ocean-950 p-6 text-white shadow-[0_16px_40px_-16px_rgba(20,40,70,0.5)]">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-ocean-700 via-ocean-800 to-ocean-900 p-6 text-white shadow-[0_16px_40px_-16px_rgba(20,40,70,0.5)]">
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-sunset-400/20 blur-3xl" />
           <div className="absolute -bottom-16 left-10 h-44 w-44 rounded-full bg-gold-400/15 blur-3xl" />
           <div className="relative">
             <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-white/60">
               <TrendingUp size={13} /> Total booking revenue
             </p>
-            <p className="mt-2 font-display text-4xl font-bold sm:text-5xl">{counts ? formatPrice(counts.revenue) : "..."}</p>
-            <p className="mt-2 text-sm text-white/60">Across {counts?.bookings ?? "..."} bookings, all time</p>
+            {counts ? (
+              <>
+                <p className="mt-2 font-display text-4xl font-bold sm:text-5xl">{formatPrice(counts.revenue)}</p>
+                <p className="mt-2 text-sm text-white/60">Across {counts.bookings} bookings, all time</p>
+              </>
+            ) : (
+              <div className="mt-3 animate-pulse space-y-2.5">
+                <div className="h-10 w-40 rounded bg-white/15 sm:h-12" />
+                <div className="h-4 w-48 rounded bg-white/10" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -120,7 +129,11 @@ export default function AdminOverview() {
               </span>
               <ArrowUpRight size={15} className="text-ocean-950/20 transition-colors group-hover:text-ocean-500" />
             </div>
-            <p className="font-display text-2xl font-bold text-ocean-950">{c.value ?? "..."}</p>
+            {c.value === undefined ? (
+              <div className="mb-1 h-8 w-10 animate-pulse rounded bg-sand-100" />
+            ) : (
+              <p className="font-display text-2xl font-bold text-ocean-950">{c.value}</p>
+            )}
             <p className="text-sm text-ocean-950/60">{c.label}</p>
           </Link>
         ))}
