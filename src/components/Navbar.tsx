@@ -32,7 +32,21 @@ export function Navbar() {
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80)
+    // Solid once the page's hero/banner (marked with data-hero-boundary) has
+    // actually scrolled out from behind the navbar — not after some fixed
+    // scroll distance, which flipped the navbar solid while the hero photo
+    // was still the dominant thing on screen. Routes with no hero fall back
+    // to a small threshold (it only matters for shadow/bg, not glass, since
+    // isHeroRoute is false there).
+    const NAVBAR_HEIGHT = 67
+    const onScroll = () => {
+      const hero = document.querySelector<HTMLElement>("[data-hero-boundary]")
+      if (hero) {
+        setScrolled(hero.getBoundingClientRect().bottom <= NAVBAR_HEIGHT)
+      } else {
+        setScrolled(window.scrollY > 80)
+      }
+    }
     onScroll()
     window.addEventListener("scroll", onScroll)
     return () => window.removeEventListener("scroll", onScroll)

@@ -37,7 +37,7 @@ function renderHeading(heading: string, highlight?: string) {
  * an awkward overlap. */
 export function HeroBlock({ content }: BlockProps) {
   return (
-    <div className="relative -mt-[67px] flex h-[90svh] min-h-[620px] w-full items-center justify-center overflow-hidden">
+    <div data-hero-boundary className="relative -mt-[67px] flex h-[90svh] min-h-[620px] w-full items-center justify-center overflow-hidden">
       <SmartImage src={content.image} alt={content.heading} className="absolute inset-0 h-full w-full" imgClassName="animate-hero-zoom" />
       <div className="absolute inset-0 bg-gradient-to-b from-ocean-950/75 via-ocean-950/30 to-ocean-950/85" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_42%,rgba(6,20,32,0.4),transparent_70%)]" />
@@ -78,14 +78,14 @@ export function PageBannerBlock({ content }: BlockProps) {
 
   if (content.image) {
     return (
-      <ParallaxBanner image={content.image} alt={content.heading} className="-mt-[67px] flex h-72 items-center sm:h-96">
+      <ParallaxBanner heroBoundary image={content.image} alt={content.heading} className="-mt-[67px] flex h-72 items-center sm:h-96">
         {inner}
       </ParallaxBanner>
     )
   }
 
   return (
-    <section className="relative -mt-[67px] overflow-hidden bg-ocean-950 py-20">
+    <section data-hero-boundary className="relative -mt-[67px] overflow-hidden bg-ocean-950 py-20">
       <div className="absolute inset-0 bg-gradient-to-br from-ocean-950 via-ocean-900 to-ocean-800" />
       {inner}
     </section>

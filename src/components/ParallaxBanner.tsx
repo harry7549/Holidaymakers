@@ -8,16 +8,19 @@ interface ParallaxBannerProps {
   alt: string
   className?: string
   children?: ReactNode
+  /** Marks this element as the page's hero, so the navbar knows to stay
+   * glass-transparent for exactly as long as it's still behind it. */
+  heroBoundary?: boolean
 }
 
 /** A banner image that drifts slightly slower than the page scrolls. */
-export function ParallaxBanner({ image, alt, className, children }: ParallaxBannerProps) {
+export function ParallaxBanner({ image, alt, className, children, heroBoundary }: ParallaxBannerProps) {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] })
   const y = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"])
 
   return (
-    <div ref={ref} className={cn("relative overflow-hidden", className)}>
+    <div ref={ref} data-hero-boundary={heroBoundary ? "" : undefined} className={cn("relative overflow-hidden", className)}>
       <motion.div style={{ y }} className="absolute inset-x-0 -top-[12%] -bottom-[12%]">
         <SmartImage src={image} alt={alt} className="h-full w-full" />
       </motion.div>
