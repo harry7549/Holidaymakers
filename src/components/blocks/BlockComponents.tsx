@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { BadgeCheck, ChevronDown, ShieldCheck, Sparkle, Users } from "lucide-react"
+import { BadgeCheck, ChevronDown, ShieldCheck, Sparkle, Star, Users } from "lucide-react"
 import type { BlockContent, Category } from "../../data/types"
 import { useCatalog } from "../../context/CatalogContext"
 import { getIcon } from "../../lib/iconMap"
@@ -10,7 +10,6 @@ import { RatingStars } from "../RatingStars"
 import { PackageCard } from "../PackageCard"
 import { SearchWidget } from "../SearchWidget"
 import { CountdownTimer } from "../CountdownTimer"
-import { ParallaxHero } from "../ParallaxHero"
 import { ParallaxBanner } from "../ParallaxBanner"
 import { Reveal, StaggerGroup, StaggerItem } from "../Reveal"
 import { ContactForm } from "../ContactForm"
@@ -24,21 +23,34 @@ function renderHeading(heading: string, highlight?: string) {
   return (
     <>
       {heading.slice(0, idx)}
-      <span className="text-accent-serif text-gold-400">{highlight}</span>
+      <span className="text-accent-serif">{highlight}</span>
       {heading.slice(idx + highlight.length)}
     </>
   )
 }
 
+/** Contained, rounded photo hero — replaces the earlier full-bleed cinematic
+ * hero. Sits in normal page flow below a solid navbar; the search widget
+ * (its own block, right after this one) floats over its bottom edge. */
 export function HeroBlock({ content }: BlockProps) {
   return (
-    <ParallaxHero
-      image={content.image}
-      imageAlt={content.heading}
-      eyebrow={content.eyebrow}
-      heading={renderHeading(content.heading, content.highlight)}
-      subtext={content.subtext}
-    />
+    <Reveal as="section" className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8 lg:pt-6">
+      <div className="relative h-[480px] overflow-hidden rounded-[28px] sm:h-[600px]">
+        <SmartImage src={content.image} alt={content.heading} className="absolute inset-0 h-full w-full" imgClassName="animate-hero-zoom" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ocean-950/80 via-ocean-950/30 to-transparent" />
+        <div className="relative z-10 flex h-full max-w-xl flex-col justify-center gap-5 px-6 sm:px-14">
+          {content.eyebrow && (
+            <span className="flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur">
+              <Star size={12} className="fill-gold-400 text-gold-400" /> {content.eyebrow}
+            </span>
+          )}
+          <h1 className="font-display text-4xl font-extrabold leading-[1.02] text-white text-balance sm:text-6xl">
+            {renderHeading(content.heading, content.highlight)}
+          </h1>
+          {content.subtext && <p className="max-w-md text-sm text-white/85 sm:text-base">{content.subtext}</p>}
+        </div>
+      </div>
+    </Reveal>
   )
 }
 
@@ -86,11 +98,11 @@ export function SectionHeadingBlock({ content }: BlockProps) {
 export function StatsBlock({ content }: BlockProps) {
   const items = content.items ?? []
   return (
-    <Reveal className="mx-auto mt-2 grid max-w-4xl grid-cols-2 gap-4 px-4 py-8 sm:grid-cols-4 sm:px-6 lg:px-8">
-      {items.map((s: { label: string; value: string }) => (
-        <div key={s.label} className="text-center">
-          <div className="font-display text-2xl font-bold text-ocean-950 sm:text-3xl">{s.value}</div>
-          <div className="mt-1 text-xs text-ocean-950/50">{s.label}</div>
+    <Reveal className="mx-auto mt-4 grid max-w-5xl grid-cols-2 gap-y-4 px-4 py-8 sm:grid-cols-4 sm:px-6 lg:px-8">
+      {items.map((s: { label: string; value: string }, i: number) => (
+        <div key={s.label} className={cn("flex flex-col gap-1 px-4", i > 0 && "sm:border-l sm:border-sand-200")}>
+          <div className="font-display text-2xl font-extrabold text-ocean-950 sm:text-3xl">{s.value}</div>
+          <div className="text-xs text-ocean-950/50 sm:text-sm">{s.label}</div>
         </div>
       ))}
     </Reveal>
@@ -389,20 +401,22 @@ export function ContactFormBlock() {
   )
 }
 
+/** Floats over the hero block's bottom edge (negative margin), matching the
+ * finalized design's white search card overlapping the rounded photo. */
 export function SearchWidgetBlock({ content }: BlockProps) {
   const tags = content.popularTags ?? []
   return (
-    <section className="relative -mt-1 bg-ocean-950 pt-4">
-      <Reveal className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <section className="relative z-10 -mt-8 sm:-mt-9">
+      <Reveal delay={0.15} className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <SearchWidget />
         {tags.length > 0 && (
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-            <span className="text-xs font-medium text-white/50">Popular:</span>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            <span className="text-xs font-medium text-ocean-950/45">Popular:</span>
             {tags.map((t: { label: string }) => (
               <Link
                 key={t.label}
                 to={`/explore?q=${encodeURIComponent(t.label)}`}
-                className="rounded-full border border-white/15 px-3 py-1 text-xs font-medium text-white/80 transition-colors hover:border-sunset-400 hover:text-sunset-300"
+                className="rounded-full border border-sand-200 px-3 py-1 text-xs font-medium text-ocean-950/70 transition-colors hover:border-sunset-400 hover:text-sunset-600"
               >
                 {t.label}
               </Link>
@@ -410,9 +424,6 @@ export function SearchWidgetBlock({ content }: BlockProps) {
           </div>
         )}
       </Reveal>
-      <svg viewBox="0 0 1440 60" className="relative mt-14 block w-full text-sand-50" preserveAspectRatio="none" style={{ height: 40 }}>
-        <path fill="currentColor" d="M0,32 C240,60 480,0 720,16 C960,32 1200,60 1440,24 L1440,60 L0,60 Z" />
-      </svg>
     </section>
   )
 }

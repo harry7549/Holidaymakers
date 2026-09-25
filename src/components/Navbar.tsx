@@ -16,9 +16,11 @@ const navLinks = [
 
 // Routes whose first block is always a full-bleed dark hero/banner — safe to
 // float a transparent glass navbar over, since there's guaranteed contrast
-// behind it at the very top of the page.
+// behind it at the very top of the page. The home page's hero is now a
+// contained, rounded photo card below the navbar (not full-bleed), so it
+// keeps the same solid navbar as every other non-banner page.
 function isHeroRoute(pathname: string) {
-  if (pathname === "/" || pathname === "/about" || pathname === "/contact") return true
+  if (pathname === "/about" || pathname === "/contact") return true
   if (pathname.startsWith("/destinations/") && pathname !== "/destinations/") return true
   return false
 }

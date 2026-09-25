@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Fraunces", "Georgia", serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Redesign (2026-09): clean, photo-led — bold grotesk headlines over a
+     humanist sans body. Replaces the earlier editorial-serif direction. */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
 
   /* Ocean / brand primary — deep indigo-navy, editorial rather than "travel teal" */
   --color-ocean-50: #eef1f8;
@@ -17,18 +19,19 @@
   --color-ocean-900: #1b2540;
   --color-ocean-950: #0c1122;
 
-  /* Sunset / accent — warm terracotta & clay, not candy-orange */
-  --color-sunset-50: #fdf3ee;
-  --color-sunset-100: #fae1d2;
-  --color-sunset-200: #f4c1a3;
-  --color-sunset-300: #eb9c6f;
-  --color-sunset-400: #dd7943;
-  --color-sunset-500: #c25f2a;
-  --color-sunset-600: #a24c20;
-  --color-sunset-700: #833d1c;
-  --color-sunset-800: #6a331d;
-  --color-sunset-900: #582c1b;
-  --color-sunset-950: #30150d;
+  /* Sunset / accent — coral red, the one accent colour used for every
+     primary action, deal badge and price highlight across the redesign. */
+  --color-sunset-50: #fdece9;
+  --color-sunset-100: #fad3cc;
+  --color-sunset-200: #f4ac9e;
+  --color-sunset-300: #ea8069;
+  --color-sunset-400: #e15b3e;
+  --color-sunset-500: #d9392b;
+  --color-sunset-600: #b92e22;
+  --color-sunset-700: #a12a1e;
+  --color-sunset-800: #7e2118;
+  --color-sunset-900: #5c1811;
+  --color-sunset-950: #300c08;
 
   /* Gold / premium accent */
   --color-gold-300: #eed49a;
@@ -80,9 +83,9 @@
   --color-ocean-950: #eef1f7;
   --color-ocean-50: #1a2440;
   --color-ocean-700: #9db1e0;
-  --color-sunset-50: #2c1a12;
-  --color-sunset-600: #e2986a;
-  --color-sunset-700: #eab088;
+  --color-sunset-50: #2c1512;
+  --color-sunset-600: #e2624f;
+  --color-sunset-700: #eb8873;
   --color-gold-700: #e3c27f;
   --color-emerald-50: #112a1e;
   --color-emerald-700: #6ee7b7;
@@ -144,8 +147,9 @@
   }
   .text-accent-serif {
     font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 500;
+    font-style: normal;
+    font-weight: 800;
+    color: var(--color-sunset-400);
   }
 }
 
