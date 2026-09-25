@@ -35,19 +35,31 @@ function renderHeading(heading: string, highlight?: string) {
 export function HeroBlock({ content }: BlockProps) {
   return (
     <Reveal as="section" className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8 lg:pt-6">
-      <div className="relative h-[480px] overflow-hidden rounded-[28px] sm:h-[600px]">
+      <div className="relative h-[560px] overflow-hidden rounded-[28px] sm:h-[600px]">
         <SmartImage src={content.image} alt={content.heading} className="absolute inset-0 h-full w-full" imgClassName="animate-hero-zoom" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ocean-950/80 via-ocean-950/30 to-transparent" />
-        <div className="relative z-10 flex h-full max-w-xl flex-col justify-center gap-5 px-6 sm:px-14">
+        {/* Layered for richness on any photo: a flat tint for guaranteed contrast,
+            a left-to-right fade (stronger on mobile, where text spans full width),
+            and a bottom fade grounding the card against the page below it. */}
+        <div className="absolute inset-0 bg-ocean-950/25" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ocean-950/85 via-ocean-950/50 to-ocean-950/15 sm:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ocean-950/70 via-transparent to-transparent" />
+        <div className="relative z-10 flex h-full max-w-xl flex-col justify-center gap-5 px-6 pb-10 sm:px-14 sm:pb-0">
           {content.eyebrow && (
-            <span className="flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur">
+            <span className="flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur">
               <Star size={12} className="fill-gold-400 text-gold-400" /> {content.eyebrow}
             </span>
           )}
-          <h1 className="font-display text-4xl font-extrabold leading-[1.02] text-white text-balance sm:text-6xl">
+          <h1
+            className="font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-white text-balance sm:text-6xl"
+            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.35)" }}
+          >
             {renderHeading(content.heading, content.highlight)}
           </h1>
-          {content.subtext && <p className="max-w-md text-sm text-white/85 sm:text-base">{content.subtext}</p>}
+          {content.subtext && (
+            <p className="max-w-md text-sm text-white/90 sm:text-base" style={{ textShadow: "0 1px 12px rgba(0,0,0,0.4)" }}>
+              {content.subtext}
+            </p>
+          )}
         </div>
       </div>
     </Reveal>

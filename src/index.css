@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  /* Redesign (2026-09): clean, photo-led — bold grotesk headlines over a
-     humanist sans body. Replaces the earlier editorial-serif direction. */
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  /* Redesign (2026-09): clean, photo-led — a crisp, refined grotesk for
+     headlines over a humanist sans body. Replaces the earlier editorial-serif
+     direction. Schibsted Grotesk over Bricolage Grotesque: same modern
+     register, but its letterforms read as more considered at heavy weights
+     and large sizes instead of just "bold and blocky". */
+  --font-display: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
 
   /* Ocean / brand primary — deep indigo-navy, editorial rather than "travel teal" */
