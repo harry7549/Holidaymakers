@@ -44,7 +44,12 @@ export function Navbar() {
     <header
       className={cn(
         "sticky top-0 z-50 w-full transition-colors duration-300",
-        glass ? "border-b border-white/10 bg-white/10 backdrop-blur-xl" : "bg-white/95 shadow-sm backdrop-blur-md",
+        // The glass state used to be a blurred, bordered translucent box —
+        // its backdrop-blur cut off hard against the sharp photo below it,
+        // reading as a pasted-on rectangle rather than glass. A gradient
+        // tint that fades to fully transparent has no edge to see: it just
+        // blends into the hero's own top gradient beneath it.
+        glass ? "bg-gradient-to-b from-ocean-950/60 via-ocean-950/25 to-transparent" : "bg-white/95 shadow-sm backdrop-blur-md",
       )}
     >
       <div className="h-[3px] w-full bg-gradient-to-r from-ocean-600 via-sunset-500 to-gold-400" />
