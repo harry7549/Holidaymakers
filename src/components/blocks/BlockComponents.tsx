@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { BadgeCheck, ChevronDown, ShieldCheck, Sparkle, Users } from "lucide-react"
+import { BadgeCheck, ChevronDown, ShieldCheck, Sparkle, Star, Users } from "lucide-react"
 import type { BlockContent, Category } from "../../data/types"
 import { useCatalog } from "../../context/CatalogContext"
 import { getIcon } from "../../lib/iconMap"
 import { cn, formatPrice } from "../../lib/utils"
 import { SmartImage } from "../SmartImage"
-import { IllustratedHero } from "../IllustratedHero"
 import { RatingStars } from "../RatingStars"
 import { PackageCard } from "../PackageCard"
 import { SearchWidget } from "../SearchWidget"
@@ -17,13 +16,51 @@ import { ContactForm } from "../ContactForm"
 
 type BlockProps = { content: BlockContent }
 
-/** Illustrated, hand-drawn-feeling hero scene (a Kerala backwater at golden
- * hour) with a draggable time-of-day slider, replacing the earlier photo
- * hero. See IllustratedHero.tsx for the "why" — this is an experiment
- * living on its own branch; reverting this file to the photo version undoes
- * it cleanly. */
+function renderHeading(heading: string, highlight?: string) {
+  if (!heading || !highlight) return heading
+  const idx = heading.indexOf(highlight)
+  if (idx === -1) return heading
+  return (
+    <>
+      {heading.slice(0, idx)}
+      <span className="text-accent-serif">{highlight}</span>
+      {heading.slice(idx + highlight.length)}
+    </>
+  )
+}
+
+/** Full-bleed cinematic photo hero, edge to edge under the navbar. A
+ * contained rounded-card version was tried and read as small/empty rather
+ * than premium — at this scale, the same generous negative space reads as
+ * intentional editorial breathing room instead of dead air, and the search
+ * card overlapping its bottom edge reads as a deliberate moment rather than
+ * an awkward overlap. */
 export function HeroBlock({ content }: BlockProps) {
-  return <IllustratedHero eyebrow={content.eyebrow} heading={content.heading} highlight={content.highlight} subtext={content.subtext} />
+  return (
+    <div data-hero-boundary className="relative -mt-[67px] flex h-[90svh] min-h-[620px] w-full items-center justify-center overflow-hidden">
+      <SmartImage src={content.image} alt={content.heading} className="absolute inset-0 h-full w-full" imgClassName="animate-hero-zoom" />
+      <div className="absolute inset-0 bg-gradient-to-b from-ocean-950/75 via-ocean-950/30 to-ocean-950/85" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_42%,rgba(6,20,32,0.4),transparent_70%)]" />
+      <Reveal className="relative z-10 flex flex-col items-center gap-5 px-4 pb-16 text-center sm:px-6">
+        {content.eyebrow && (
+          <span className="flex w-fit items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur">
+            <Star size={12} className="fill-gold-400 text-gold-400" /> {content.eyebrow}
+          </span>
+        )}
+        <h1
+          className="max-w-3xl font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-white text-balance sm:text-6xl lg:text-7xl"
+          style={{ textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}
+        >
+          {renderHeading(content.heading, content.highlight)}
+        </h1>
+        {content.subtext && (
+          <p className="max-w-xl text-sm text-white/90 sm:text-lg" style={{ textShadow: "0 1px 14px rgba(0,0,0,0.45)" }}>
+            {content.subtext}
+          </p>
+        )}
+      </Reveal>
+    </div>
+  )
 }
 
 export function PageBannerBlock({ content }: BlockProps) {
